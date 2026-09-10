@@ -23,7 +23,8 @@ const settlement = Buffer.from(
   JSON.stringify({ success: true, transaction: "0.0.1@1.0", network: "hedera:testnet" }),
 ).toString("base64");
 
-const plain = async () => Response.json(listing);
+const plain = async (input: string | URL) =>
+  String(input).endsWith("/licenses/0.0.77") ? Response.json([listing[0]]) : Response.json(listing);
 const paid = async (input: string | URL) =>
   String(input).endsWith("/prompts/hero-scroll-reveal/unlock")
     ? Response.json(
@@ -34,7 +35,7 @@ const paid = async (input: string | URL) =>
 
 async function connect() {
   const [a, b] = InMemoryTransport.createLinkedPair();
-  await createServer("http://api", paid, plain).connect(a);
+  await createServer("http://api", paid, plain, "0.0.77").connect(a);
   const client = new Client({ name: "test", version: "0" });
   await client.connect(b);
   return client;
@@ -47,7 +48,11 @@ describe("bajigur mcp", () => {
   it("exposes search_prompts and get_prompt", async () => {
     const client = await connect();
     const { tools } = await client.listTools();
-    expect(tools.map((t) => t.name).sort()).toEqual(["get_prompt", "search_prompts"]);
+    expect(tools.map((t) => t.name).sort()).toEqual([
+      "get_prompt",
+      "my_licenses",
+      "search_prompts",
+    ]);
   });
 
   it("filters the catalogue by query", async () => {
@@ -74,5 +79,11 @@ describe("bajigur mcp", () => {
     const result = await client.callTool({ name: "get_prompt", arguments: { id: "nope" } });
     expect(result.isError).toBe(true);
     expect(firstText(result)).toBe("404: not found");
+  });
+
+  it("lists the wallet's licences", async () => {
+    const client = await connect();
+    const result = await client.callTool({ name: "my_licenses", arguments: {} });
+    expect(JSON.parse(firstText(result))).toEqual([listing[0]]);
   });
 });

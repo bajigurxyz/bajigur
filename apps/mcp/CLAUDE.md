@@ -11,9 +11,11 @@ prompts. Owned by Kiel. Design in
   per-payment spend cap.
 - `createServer(api, paidFetch, plainFetch?)` in `src/server.ts` takes both
   fetches so tests run in-memory with no network.
-- Tools: `search_prompts` (free, read-only) and `get_prompt` (pays via x402,
-  returns body + Hedera transaction id). `my_licenses` comes with the
-  `PromptRegistry` contract.
+- Tools: `search_prompts` (free), `get_prompt` (free if the wallet holds a
+  licence, otherwise pays via x402 and returns body + Hedera transaction id),
+  `my_licenses` (what the wallet holds onchain).
+- Every request carries signed identity headers (`identityHeaders` in
+  `src/pay.ts`) so the API can recognise licence holders before the 402.
 - Environment: `BAJIGUR_API_URL`, `HEDERA_NETWORK`, `HEDERA_OPERATOR_ID`,
   `HEDERA_OPERATOR_KEY`, `X402_MAX_SPEND_USD` (cap per payment, default 1),
   `X402_PAY_WITH` (`usdc` default, or `hbar` to prefer the HBAR option).

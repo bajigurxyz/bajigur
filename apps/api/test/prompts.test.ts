@@ -21,8 +21,22 @@ const facilitator: FacilitatorClient = {
 import type { Settlement } from "../src/hcs";
 
 const settled: Settlement[] = [];
-const app = createApp(facilitator, async (s) => {
-  settled.push(s);
+const issued: [number, string, string][] = [];
+const holders = new Set<string>();
+const registry = {
+  issue: async (id: number, payer: string, tx: string) => {
+    issued.push([id, payer, tx]);
+  },
+  hasLicence: async (account: string, id: number) => holders.has(`${account}:${id}`),
+};
+const identity = async (headers: Headers) => headers.get("x-hedera-account") ?? undefined;
+const app = createApp({
+  facilitator,
+  registry,
+  identity,
+  onSettled: async (s) => {
+    settled.push(s);
+  },
 });
 const decode = (header: string) => JSON.parse(Buffer.from(header, "base64").toString());
 const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64");
@@ -109,6 +123,29 @@ describe("GET /prompts/:id/unlock", () => {
       network,
       transaction: "0.0.1234@1.0",
     });
+    expect(issued).toEqual([[prompt.registryId as number, "0.0.1234", "0.0.1234@1.0"]]);
+  });
+
+  it("lets a licence holder in without paying", async () => {
+    holders.add(`0.0.5555:${prompt.registryId}`);
+    const res = await app.request(`/prompts/${prompt.id}/unlock`, {
+      headers: { "x-hedera-account": "0.0.5555" },
+    });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ id: prompt.id, body: prompt.body });
+    expect(res.headers.get("PAYMENT-RESPONSE")).toBeNull();
+
+    const other = await app.request(`/prompts/${prompts[1]?.id}/unlock`, {
+      headers: { "x-hedera-account": "0.0.5555" },
+    });
+    expect(other.status).toBe(402);
+  });
+
+  it("lists the prompts an account holds a licence for", async () => {
+    holders.add(`0.0.5555:${prompt.registryId}`);
+    const res = await app.request("/licenses/0.0.5555");
+    const list = (await res.json()) as { id: string }[];
+    expect(list.map((p) => p.id)).toEqual([prompt.id]);
   });
 });
 

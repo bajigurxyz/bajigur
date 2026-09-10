@@ -6,8 +6,11 @@ prompt catalogue and buy a prompt over x402 on Hedera.
 Tools:
 
 - `search_prompts` — free; returns id, title, tags, preview and USD price.
-- `get_prompt` — pays the listed price in USDC through the Blocky402
-  facilitator and returns the full prompt plus the Hedera transaction id.
+- `get_prompt` — free if the wallet already holds a licence; otherwise pays
+  the listed price (USDC or HBAR) through the Blocky402 facilitator, receives
+  an ERC-1155 licence from `PromptRegistry`, and returns the full prompt plus
+  the Hedera transaction id.
+- `my_licenses` — prompts this wallet holds a licence for.
 
 ## Run
 

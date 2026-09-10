@@ -77,6 +77,11 @@ the paid request.
 
 ## Build order
 
+Status 2026-09-10: steps 1 to 4 shipped and verified on testnet, including
+the HCS trail, discovery, HBAR, the deployed and verified `PromptRegistry`
+(`0x59de4C018968E0357EeF77042dD2Fc2ff33e1418`), licence minting after
+settlement, and free re-access for licence holders.
+
 1. `apps/api`: x402 v2 middleware, prompt endpoints, Blocky402 settlement.
 2. `apps/mcp`: MCP server with an x402 client so Claude Desktop can pay.
 3. API extras: HCS audit topic, discovery endpoint, USDC + HBAR.

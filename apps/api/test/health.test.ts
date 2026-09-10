@@ -4,9 +4,11 @@ import { createApp } from "../src/app";
 process.env.X402_PAY_TO_ADDRESS = "0.0.4242";
 
 const app = createApp({
-  getSupported: async () => ({ kinds: [], extensions: [], signers: {} }),
-  verify: async () => ({ isValid: false }),
-  settle: async () => ({ success: false, transaction: "", network: "hedera:testnet" }),
+  facilitator: {
+    getSupported: async () => ({ kinds: [], extensions: [], signers: {} }),
+    verify: async () => ({ isValid: false }),
+    settle: async () => ({ success: false, transaction: "", network: "hedera:testnet" }),
+  },
 });
 
 describe("GET /health", () => {

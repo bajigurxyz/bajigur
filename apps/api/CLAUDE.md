@@ -36,7 +36,20 @@
 - Every prompt is priced twice: `priceUsd` (settled in USDC via the scheme's
   default asset) and a fixed `priceHbar` set by the creator (asset `0.0.0`,
   converted with `tinybars()`); both appear in `accepts` and the client picks.
-- Still to come: licence check on `onProtectedRequest`, Privy calls.
+- Licences: `src/registry.ts` talks to `PromptRegistry` (`PROMPT_REGISTRY_ADDRESS`)
+  with the platform key. `onAfterSettle` calls `issue(registryId, payer, txId)`
+  (payer's EVM address resolved from the mirror node); `onProtectedRequest`
+  grants access without payment when the caller proves a wallet that holds the
+  licence (`balanceOf` via the mirror node's free `contracts/call`).
+  `GET /licenses/:account` lists what an account holds.
+- Wallet proof is three headers signed with the Hedera ECDSA key:
+  `x-hedera-account`, `x-hedera-timestamp` (ms, 5 min window),
+  `x-hedera-signature` (hex of `sign("bajigur:<account>:<timestamp>")`),
+  verified against the account key from the mirror node. Swap for the x402
+  SIWx extension once it supports Hedera.
+- Seed prompts carry `registryId`; `bun run hedera:register` registers any
+  seed without one (creator = platform account, contentHash = sha256(body)).
+- Still to come: Privy calls, creator publishing from the web app.
 
 ## Layout
 
@@ -45,6 +58,7 @@ src/
   app.ts      Hono app and routes; createApp(facilitator?)
   prompts.ts  in-memory catalogue
   hcs.ts      HCS audit publisher
+  registry.ts PromptRegistry client + signed wallet identity
   x402.ts     x402 middleware
   index.ts    Bun server entry (port binding only)
 test/

@@ -15,8 +15,23 @@ type Listing = {
 const text = (value: string) => ({ content: [{ type: "text" as const, text: value }] });
 const fail = (value: string) => ({ isError: true, ...text(value) });
 
-export function createServer(api: string, paid: Fetch, plain: Fetch = fetch) {
+export function createServer(api: string, paid: Fetch, plain: Fetch = fetch, accountId?: string) {
   const server = new McpServer({ name: "bajigur", version: "0.1.0" });
+
+  server.registerTool(
+    "my_licenses",
+    {
+      description:
+        "List the prompts this wallet already holds a licence for. Those can be fetched with get_prompt again for free, from any client.",
+      annotations: { readOnlyHint: true },
+    },
+    async () => {
+      if (!accountId) return fail("no wallet configured");
+      const res = await plain(`${api}/licenses/${accountId}`);
+      if (!res.ok) return fail(`licences unavailable: ${res.status}`);
+      return text(await res.text());
+    },
+  );
 
   server.registerTool(
     "search_prompts",
@@ -46,7 +61,7 @@ export function createServer(api: string, paid: Fetch, plain: Fetch = fetch) {
     "get_prompt",
     {
       description:
-        "Buy and return the full text of a prompt by id. Pays the listed USD price in USDC on Hedera through x402 from the configured wallet, then returns the prompt body and the Hedera transaction id.",
+        "Return the full text of a prompt by id. Free if this wallet already holds a licence for it; otherwise pays the listed price on Hedera through x402 from the configured wallet, receives an onchain licence, and returns the prompt body with the Hedera transaction id.",
       inputSchema: { id: z.string().describe("Prompt id from search_prompts") },
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     },
@@ -63,7 +78,7 @@ export function createServer(api: string, paid: Fetch, plain: Fetch = fetch) {
       const settlement = header ? decodePaymentResponseHeader(header) : undefined;
       const receipt = settlement?.transaction
         ? `\n\nPaid. Hedera transaction ${settlement.transaction}`
-        : "";
+        : "\n\nAlready licensed, no payment needed.";
       return text(`${body}${receipt}`);
     },
   );
