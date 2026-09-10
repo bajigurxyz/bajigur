@@ -1,6 +1,6 @@
 # Reference for the Bazantic listing. The CLI (0.8.0) has no manifest apply yet;
 # the live gateway was created with `baz gateway add` and is configured in the
-# dashboard: slug icehwk34yrgbfb2s4ssjw3a43y, upstream auth api-key in header
+# dashboard: slug tuguge4rzbcsvgrevhkkjf43em, upstream auth api-key in header
 # x-bajigur-gateway-key (= GATEWAY_KEY on the API).
 version: 1
 
