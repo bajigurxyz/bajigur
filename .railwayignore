@@ -1,0 +1,15 @@
+**/node_modules
+**/.turbo
+**/dist
+**/.next
+contracts
+apps/web
+apps/landingpage
+apps/ai
+apps/indexer
+apps/mcp
+skills
+docs
+.env
+.env.*
+!.env.example

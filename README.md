@@ -33,6 +33,16 @@ targeting the **Hedera**, **Bazantic**, and **Privy** tracks. Design:
 `apps/ai`, `apps/indexer`, and `skills/` currently contain only a README
 describing what they are for.
 
+## Live
+
+| What | Where |
+| --- | --- |
+| API (x402 on Hedera testnet) | https://api-production-fe21.up.railway.app |
+| Catalogue | https://api-production-fe21.up.railway.app/prompts |
+| Discovery | https://api-production-fe21.up.railway.app/discovery/resources |
+| PromptRegistry | [0x59de4C018968E0357EeF77042dD2Fc2ff33e1418](https://hashscan.io/testnet/contract/0x59de4C018968E0357EeF77042dD2Fc2ff33e1418) |
+| HCS audit topic | [0.0.10462113](https://hashscan.io/testnet/topic/0.0.10462113) |
+
 ## Getting started
 
 ```bash

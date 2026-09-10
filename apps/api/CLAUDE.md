@@ -6,6 +6,13 @@
   server object; the routes live in `src/app.ts` so tests can call
   `app.request(...)` without binding a port.
 - Dev server runs on port 3002 (`PORT`): `bun run dev --filter=@bajigur/api`.
+- Production runs on Railway (project `bajigur`, service `api`) from
+  `apps/api/Dockerfile` with the repo as build context; public URL
+  `https://api-production-fe21.up.railway.app`. Deploy with
+  `railway up --service api --detach` from the repo root; variables live in
+  Railway (same names as `.env`), plus `RAILWAY_DOCKERFILE_PATH`.
+  `src/index.ts` rewrites the request scheme from `x-forwarded-proto` so 402
+  and discovery URLs are `https`.
 - Tests use `bun:test` and go in `test/`. Prefer `app.request()` over real HTTP.
 - This is the only workspace that may hold secrets. Add every new variable to
   the root `.env.example` with an empty value.
