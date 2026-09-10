@@ -5,7 +5,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import type { OnSettled } from "./hcs";
 import { findPrompt, payToOf, prompts, publicPrompt } from "./prompts";
-import { x402 } from "./x402";
+import { requirementsFor, service, x402 } from "./x402";
 
 export function createApp(facilitator?: FacilitatorClient, onSettled?: OnSettled) {
   for (const prompt of prompts) payToOf(prompt);
@@ -20,6 +20,28 @@ export function createApp(facilitator?: FacilitatorClient, onSettled?: OnSettled
   app.get("/prompts/:id", (c) => {
     const prompt = findPrompt(c.req.param("id"));
     return prompt ? c.json(publicPrompt(prompt)) : c.notFound();
+  });
+
+  app.get("/discovery/resources", async (c) => {
+    const origin = new URL(c.req.url).origin;
+    const items = await Promise.all(
+      prompts.map(async (p) => ({
+        resource: `${origin}/prompts/${p.id}/unlock`,
+        type: "http",
+        x402Version: 2,
+        accepts: [await requirementsFor(p)],
+        lastUpdated: new Date().toISOString(),
+        description: `${p.title}: ${p.preview}`,
+        mimeType: "application/json",
+        ...service,
+        tags: [...service.tags, ...p.tags],
+      })),
+    );
+    return c.json({
+      x402Version: 2,
+      items,
+      pagination: { limit: items.length, offset: 0, total: items.length },
+    });
   });
 
   app.use("/prompts/:id/unlock", async (c, next) =>

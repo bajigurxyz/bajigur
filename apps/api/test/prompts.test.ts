@@ -36,6 +36,23 @@ describe("catalogue", () => {
     expect(list[0]).not.toHaveProperty("body");
   });
 
+  it("publishes a discovery directory in the x402 bazaar shape", async () => {
+    const res = await app.request("http://api.test/discovery/resources");
+    const body = (await res.json()) as {
+      items: Record<string, unknown>[];
+      pagination: { total: number };
+    };
+    expect(body.pagination.total).toBe(prompts.length);
+    expect(body.items[0]).toMatchObject({
+      resource: "http://api.test/prompts/hero-scroll-reveal/unlock",
+      type: "http",
+      serviceName: "Bajigur",
+      accepts: [
+        { scheme: "exact", network, asset: "0.0.429274", amount: "100000", payTo: "0.0.4242" },
+      ],
+    });
+  });
+
   it("404s unknown prompts, paid or not", async () => {
     expect((await app.request("/prompts/nope")).status).toBe(404);
     expect((await app.request("/prompts/nope/unlock")).status).toBe(404);
@@ -57,6 +74,11 @@ describe("GET /prompts/:id/unlock", () => {
       asset: "0.0.429274",
       amount: "100000",
       extra: { feePayer: "0.0.999" },
+    });
+    expect(required.extensions.bazaar.info.input).toMatchObject({
+      type: "http",
+      method: "GET",
+      pathParams: { id: "hero-scroll-reveal" },
     });
   });
 

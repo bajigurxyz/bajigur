@@ -3,21 +3,39 @@ import {
   HTTPFacilitatorClient,
   x402ResourceServer,
 } from "@x402/core/server";
+import { bazaarResourceServerExtension, declareDiscoveryExtension } from "@x402/extensions/bazaar";
 import { ExactHederaScheme } from "@x402/hedera/exact/server";
 import { paymentMiddleware } from "@x402/hono";
 import type { OnSettled } from "./hcs";
-import { findPrompt, payToOf } from "./prompts";
+import { findPrompt, type Prompt, payToOf } from "./prompts";
 
 const network = `hedera:${process.env.HEDERA_NETWORK ?? "testnet"}` as `hedera:${string}`;
 const facilitatorUrl = process.env.X402_FACILITATOR_URL ?? "https://api.testnet.blocky402.com";
 
 const promptFromPath = (path: string) => findPrompt(path.split("/")[2] ?? "");
+const scheme = new ExactHederaScheme();
+
+export const service = { serviceName: "Bajigur", tags: ["design", "motion", "prompts"] };
+
+export async function requirementsFor(prompt: Prompt) {
+  const { asset, amount } = await scheme.parsePrice(`$${prompt.priceUsd}`, network);
+  return {
+    scheme: "exact",
+    network,
+    asset,
+    amount,
+    payTo: payToOf(prompt),
+    maxTimeoutSeconds: 300,
+  };
+}
 
 export function x402(
   facilitator: FacilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl }),
   onSettled?: OnSettled,
 ) {
-  const server = new x402ResourceServer(facilitator).register("hedera:*", new ExactHederaScheme());
+  const server = new x402ResourceServer(facilitator)
+    .register("hedera:*", scheme)
+    .registerExtension(bazaarResourceServerExtension);
   if (onSettled) {
     server.onAfterSettle(async ({ paymentPayload, requirements, result }) => {
       if (!result.success) return;
@@ -51,6 +69,16 @@ export function x402(
         },
         description: "Full prompt body from the Bajigur design prompt marketplace",
         mimeType: "application/json",
+        ...service,
+        extensions: declareDiscoveryExtension({
+          pathParams: { id: "hero-scroll-reveal" },
+          pathParamsSchema: {
+            type: "object",
+            properties: { id: { type: "string", description: "Prompt id from GET /prompts" } },
+            required: ["id"],
+          },
+          output: { example: { id: "hero-scroll-reveal", body: "Build a pinned hero section..." } },
+        }),
       },
     },
     server,

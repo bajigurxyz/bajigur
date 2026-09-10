@@ -28,8 +28,13 @@
   Wired through `createApp(facilitator?, onSettled?)` and the resource
   server's `onAfterSettle`; fire-and-forget so the paid response never waits.
   `@hiero-ledger/sdk` is pinned to the exact version `@x402/hedera` uses.
-- Still to come: licence check on `onProtectedRequest`, discovery endpoint,
-  HBAR in `accepts`, Privy calls.
+- Discovery: the paid route declares the x402 bazaar extension
+  (`@x402/extensions/bazaar`) so facilitators can index it, and
+  `GET /discovery/resources` serves the same catalogue in the bazaar
+  `DiscoveryResourcesResponse` shape for agents and Bazantic. Prices come from
+  `requirementsFor(prompt)`, which reuses the Hedera scheme's `parsePrice`.
+- Still to come: licence check on `onProtectedRequest`, HBAR in `accepts`,
+  Privy calls.
 
 ## Layout
 
