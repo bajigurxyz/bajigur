@@ -1,9 +1,7 @@
 import { APP_NAME } from "@bajigur/core";
-import type { FacilitatorClient } from "@x402/core/server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import type { OnSettled } from "./hcs";
 import { findPrompt, payToOf, prompts, publicPrompt } from "./prompts";
 import { requirementsFor, service, type X402Options, x402 } from "./x402";
 
