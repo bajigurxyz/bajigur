@@ -17,7 +17,8 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "contracts:build": "forge build --root contracts",
     "contracts:test": "forge test --root contracts",
-    "hedera:associate": "bun apps/api/scripts/associate-usdc.ts"
+    "hedera:associate": "bun apps/api/scripts/associate-usdc.ts",
+    "hedera:topic": "bun apps/api/scripts/create-topic.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.12",

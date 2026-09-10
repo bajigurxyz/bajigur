@@ -18,7 +18,12 @@ const facilitator: FacilitatorClient = {
   settle: async () => ({ success: true, transaction: "0.0.1234@1.0", network, payer: "0.0.1234" }),
 };
 
-const app = createApp(facilitator);
+import type { Settlement } from "../src/hcs";
+
+const settled: Settlement[] = [];
+const app = createApp(facilitator, async (s) => {
+  settled.push(s);
+});
 const decode = (header: string) => JSON.parse(Buffer.from(header, "base64").toString());
 const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64");
 
@@ -70,5 +75,15 @@ describe("GET /prompts/:id/unlock", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ id: prompt.id, body: prompt.body });
     expect(decode(res.headers.get("PAYMENT-RESPONSE") ?? "")).toMatchObject({ success: true });
+    expect(settled).toHaveLength(1);
+    expect(settled[0]).toMatchObject({
+      promptId: prompt.id,
+      payer: "0.0.1234",
+      payTo: "0.0.4242",
+      asset: "0.0.429274",
+      amount: "100000",
+      network,
+      transaction: "0.0.1234@1.0",
+    });
   });
 });

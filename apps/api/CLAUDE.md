@@ -22,8 +22,14 @@
   private key, only needed by `bun run hedera:associate`).
 - `bun run hedera:associate` (from the repo root, so `.env` loads) associates
   the payer and payTo accounts with testnet USDC `0.0.429274`.
-- Still to come: HCS audit trail on `onAfterSettle`, licence check on
-  `onProtectedRequest`, discovery endpoint, HBAR in `accepts`, Privy calls.
+- HCS audit trail: `src/hcs.ts` publishes one JSON message per successful
+  settlement to `HCS_TOPIC_ID` (create it once with `bun run hedera:topic`),
+  signed by the platform account (`X402_PAY_TO_ADDRESS` / `X402_PAY_TO_KEY`).
+  Wired through `createApp(facilitator?, onSettled?)` and the resource
+  server's `onAfterSettle`; fire-and-forget so the paid response never waits.
+  `@hiero-ledger/sdk` is pinned to the exact version `@x402/hedera` uses.
+- Still to come: licence check on `onProtectedRequest`, discovery endpoint,
+  HBAR in `accepts`, Privy calls.
 
 ## Layout
 
@@ -31,6 +37,7 @@
 src/
   app.ts      Hono app and routes; createApp(facilitator?)
   prompts.ts  in-memory catalogue
+  hcs.ts      HCS audit publisher
   x402.ts     x402 middleware
   index.ts    Bun server entry (port binding only)
 test/

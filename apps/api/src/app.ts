@@ -3,10 +3,11 @@ import type { FacilitatorClient } from "@x402/core/server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import type { OnSettled } from "./hcs";
 import { findPrompt, payToOf, prompts, publicPrompt } from "./prompts";
 import { x402 } from "./x402";
 
-export function createApp(facilitator?: FacilitatorClient) {
+export function createApp(facilitator?: FacilitatorClient, onSettled?: OnSettled) {
   for (const prompt of prompts) payToOf(prompt);
   const app = new Hono();
 
@@ -24,7 +25,7 @@ export function createApp(facilitator?: FacilitatorClient) {
   app.use("/prompts/:id/unlock", async (c, next) =>
     findPrompt(c.req.param("id")) ? await next() : c.notFound(),
   );
-  app.use(x402(facilitator));
+  app.use(x402(facilitator, onSettled));
   app.get("/prompts/:id/unlock", (c) => {
     const prompt = findPrompt(c.req.param("id"));
     return prompt ? c.json({ id: prompt.id, body: prompt.body }) : c.notFound();
