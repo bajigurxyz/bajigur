@@ -1,6 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import type { FacilitatorClient } from "@x402/core/server";
 import { createApp } from "../src/app";
+
+process.env.X402_PAY_TO_ADDRESS = "0.0.4242";
+
 import { prompts } from "../src/prompts";
 
 const network = "hedera:testnet";
@@ -45,7 +48,7 @@ describe("GET /prompts/:id/unlock", () => {
     expect(accept).toMatchObject({
       scheme: "exact",
       network,
-      payTo: prompt.payTo,
+      payTo: "0.0.4242",
       asset: "0.0.429274",
       amount: "100000",
       extra: { feePayer: "0.0.999" },

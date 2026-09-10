@@ -5,9 +5,9 @@
   "type": "module",
   "description": "Bajigur HTTP API (Bun + Hono)",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
+    "dev": "bun --env-file=../../.env --watch src/index.ts",
     "build": "bun build src/index.ts --target=bun --outdir=dist",
-    "start": "bun run src/index.ts",
+    "start": "bun --env-file=../../.env run src/index.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist .turbo tsconfig.tsbuildinfo"

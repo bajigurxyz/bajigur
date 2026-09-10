@@ -3,10 +3,11 @@ import type { FacilitatorClient } from "@x402/core/server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { findPrompt, prompts, publicPrompt } from "./prompts";
+import { findPrompt, payToOf, prompts, publicPrompt } from "./prompts";
 import { x402 } from "./x402";
 
 export function createApp(facilitator?: FacilitatorClient) {
+  for (const prompt of prompts) payToOf(prompt);
   const app = new Hono();
 
   app.use("*", logger());
