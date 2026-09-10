@@ -3,5 +3,24 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "MCP server exposing the platform to Claude Desktop (placeholder — not implemented yet)"
+  "description": "MCP server that lets Claude Desktop discover and pay for Bajigur prompts over x402",
+  "scripts": {
+    "dev": "echo 'stdio server: add it to Claude Desktop, see README.md'",
+    "start": "bun run src/index.ts",
+    "build": "bun build src/index.ts --target=bun --outdir=dist",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "@x402/core": "2.25.0",
+    "@x402/fetch": "2.25.0",
+    "@x402/hedera": "2.25.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@bajigur/tsconfig": "workspace:*",
+    "typescript": "^5.9.3"
+  }
 }

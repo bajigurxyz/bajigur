@@ -10,7 +10,7 @@ Every directory here is a deployable unit and a bun workspace named
 | `api` | Bun + Hono, x402 v2 on Hedera | 3002 | Kiel | active |
 | `ai` | undecided | — | unassigned | placeholder |
 | `indexer` | undecided | — | unassigned | placeholder |
-| `mcp` | undecided | — | Kiel | planned, after `api` |
+| `mcp` | Bun, MCP SDK, x402 client (stdio) | — | Kiel | active |
 
 Rules:
 

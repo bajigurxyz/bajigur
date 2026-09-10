@@ -1,12 +1,41 @@
 # @bajigur/mcp
 
-Not implemented yet; built after `apps/api`. This is the Model Context Protocol server that exposes the platform to
-Claude Desktop and other MCP clients: browsing the prompt library, paying for a
-prompt over x402, and returning the unlocked content to the agent.
+MCP server that lets Claude Desktop (or any MCP client) search the Bajigur
+prompt catalogue and buy a prompt over x402 on Hedera.
 
-Related work lives in `../../skills/`, which holds the Claude Agent Skills that
-sit on top of this server. The Bazantic track also expects an x402/MPP Gateway
-and Recipes created at bazantic.com — those are configured on Bazantic, not
-here, but they point at the same upstream API.
+Tools:
+
+- `search_prompts` — free; returns id, title, tags, preview and USD price.
+- `get_prompt` — pays the listed price in USDC through the Blocky402
+  facilitator and returns the full prompt plus the Hedera transaction id.
+
+## Run
+
+Needs a funded Hedera testnet account that is associated with USDC
+(`bun run hedera:associate` from the repo root) and the API running
+(`bun run dev --filter=@bajigur/api`).
+
+Add to Claude Desktop (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "bajigur": {
+      "command": "bun",
+      "args": ["run", "/absolute/path/to/bajigur/apps/mcp/src/index.ts"],
+      "env": {
+        "BAJIGUR_API_URL": "http://localhost:3002",
+        "HEDERA_NETWORK": "testnet",
+        "HEDERA_OPERATOR_ID": "0.0.xxxxxxx",
+        "HEDERA_OPERATOR_KEY": "<hex ecdsa private key>",
+        "X402_MAX_SPEND_USD": "1"
+      }
+    }
+  }
+}
+```
+
+The Claude Agent Skills in `../../skills/` sit on top of this server. Bazantic
+Gateway and Recipes point at the same API, not at this server.
 
 Owner: Kiel.
