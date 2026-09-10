@@ -20,7 +20,8 @@
     "hedera:associate": "bun apps/api/scripts/associate-usdc.ts",
     "hedera:topic": "bun apps/api/scripts/create-topic.ts",
     "hedera:register": "bun --env-file=.env apps/api/scripts/register-prompts.ts",
-    "buy": "bun --env-file=.env apps/mcp/scripts/buy.ts"
+    "buy": "bun --env-file=.env apps/mcp/scripts/buy.ts",
+    "privy:spike": "bun --env-file=.env apps/mcp/scripts/privy-spike.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.12",

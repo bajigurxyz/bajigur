@@ -61,6 +61,7 @@
       "name": "@bajigur/mcp",
       "version": "0.0.0",
       "dependencies": {
+        "@hiero-ledger/sdk": "2.85.0",
         "@modelcontextprotocol/sdk": "1.30.0",
         "@x402/core": "2.25.0",
         "@x402/fetch": "2.25.0",
