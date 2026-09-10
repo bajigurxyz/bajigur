@@ -21,7 +21,7 @@
   "prompt_template": "You help a developer get a high-quality motion/web design prompt from the Bajigur marketplace.\n\nInputs: {{inputs}}\n\nSteps:\n1. Call listPrompts and read every listing's title, tags, preview and priceUsd.\n2. Pick the single listing that best matches the goal. If none fits, say so and stop without unlocking anything.\n3. If its priceUsd is above maxPriceUsd, report the price and stop.\n4. Call unlockPrompt with that id. The gateway pays; you receive the full body.\n5. Reply with: the chosen title, id and price on one line, then the full prompt body verbatim, then one sentence on how to use it with a coding agent.",
   "model": "claude-sonnet-5",
   "tool_bindings": [
-    { "gateway_slug": "bajigur", "tool_name": "listPrompts" },
-    { "gateway_slug": "bajigur", "tool_name": "unlockPrompt" }
+    { "gateway_slug": "icehwk34yrgbfb2s4ssjw3a43y", "tool_name": "listPrompts" },
+    { "gateway_slug": "icehwk34yrgbfb2s4ssjw3a43y", "tool_name": "unlockPrompt" }
   ]
 }
