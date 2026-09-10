@@ -18,7 +18,10 @@
   at import time.
 - Environment: `HEDERA_NETWORK` (`testnet`), `X402_FACILITATOR_URL`
   (defaults to `https://api.testnet.blocky402.com`), `X402_PAY_TO_ADDRESS`
-  (platform Hedera account used as fallback `payTo`).
+  (platform Hedera account used as fallback `payTo`), `X402_PAY_TO_KEY` (its
+  private key, only needed by `bun run hedera:associate`).
+- `bun run hedera:associate` (from the repo root, so `.env` loads) associates
+  the payer and payTo accounts with testnet USDC `0.0.429274`.
 - Still to come: HCS audit trail on `onAfterSettle`, licence check on
   `onProtectedRequest`, discovery endpoint, HBAR in `accepts`, Privy calls.
 

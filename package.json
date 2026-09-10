@@ -16,7 +16,8 @@
     "format": "biome check --write .",
     "clean": "turbo run clean && rm -rf node_modules",
     "contracts:build": "forge build --root contracts",
-    "contracts:test": "forge test --root contracts"
+    "contracts:test": "forge test --root contracts",
+    "hedera:associate": "bun apps/api/scripts/associate-usdc.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.12",
