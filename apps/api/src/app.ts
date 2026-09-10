@@ -29,7 +29,7 @@ export function createApp(facilitator?: FacilitatorClient, onSettled?: OnSettled
         resource: `${origin}/prompts/${p.id}/unlock`,
         type: "http",
         x402Version: 2,
-        accepts: [await requirementsFor(p)],
+        accepts: await requirementsFor(p),
         lastUpdated: new Date().toISOString(),
         description: `${p.title}: ${p.preview}`,
         mimeType: "application/json",

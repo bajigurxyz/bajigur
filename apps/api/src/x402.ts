@@ -7,26 +7,39 @@ import { bazaarResourceServerExtension, declareDiscoveryExtension } from "@x402/
 import { ExactHederaScheme } from "@x402/hedera/exact/server";
 import { paymentMiddleware } from "@x402/hono";
 import type { OnSettled } from "./hcs";
-import { findPrompt, type Prompt, payToOf } from "./prompts";
+import { findPrompt, type Prompt, payToOf, tinybars } from "./prompts";
 
 const network = `hedera:${process.env.HEDERA_NETWORK ?? "testnet"}` as `hedera:${string}`;
 const facilitatorUrl = process.env.X402_FACILITATOR_URL ?? "https://api.testnet.blocky402.com";
 
 const promptFromPath = (path: string) => findPrompt(path.split("/")[2] ?? "");
+function required(path: string) {
+  const prompt = promptFromPath(path);
+  if (!prompt) throw new Error(`unknown prompt in ${path}`);
+  return prompt;
+}
 const scheme = new ExactHederaScheme();
 
 export const service = { serviceName: "Bajigur", tags: ["design", "motion", "prompts"] };
 
+const HBAR = "0.0.0";
+const hbarPrice = (prompt: Prompt) => ({ asset: HBAR, amount: tinybars(prompt.priceHbar) });
+
 export async function requirementsFor(prompt: Prompt) {
-  const { asset, amount } = await scheme.parsePrice(`$${prompt.priceUsd}`, network);
-  return {
-    scheme: "exact",
-    network,
-    asset,
-    amount,
-    payTo: payToOf(prompt),
-    maxTimeoutSeconds: 300,
-  };
+  const prices = [`$${prompt.priceUsd}`, hbarPrice(prompt)];
+  return Promise.all(
+    prices.map(async (price) => {
+      const { asset, amount } = await scheme.parsePrice(price, network);
+      return {
+        scheme: "exact",
+        network,
+        asset,
+        amount,
+        payTo: payToOf(prompt),
+        maxTimeoutSeconds: 300,
+      };
+    }),
+  );
 }
 
 export function x402(
@@ -57,16 +70,20 @@ export function x402(
   return paymentMiddleware(
     {
       "GET /prompts/:id/unlock": {
-        accepts: {
-          scheme: "exact",
-          network,
-          price: ({ path }) => `$${promptFromPath(path)?.priceUsd ?? "0"}`,
-          payTo: ({ path }) => {
-            const prompt = promptFromPath(path);
-            if (!prompt) throw new Error(`unknown prompt in ${path}`);
-            return payToOf(prompt);
+        accepts: [
+          {
+            scheme: "exact",
+            network,
+            price: ({ path }) => `$${promptFromPath(path)?.priceUsd ?? "0"}`,
+            payTo: ({ path }) => payToOf(required(path)),
           },
-        },
+          {
+            scheme: "exact",
+            network,
+            price: ({ path }) => hbarPrice(required(path)),
+            payTo: ({ path }) => payToOf(required(path)),
+          },
+        ],
         description: "Full prompt body from the Bajigur design prompt marketplace",
         mimeType: "application/json",
         ...service,

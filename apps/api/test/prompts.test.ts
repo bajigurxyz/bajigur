@@ -49,6 +49,7 @@ describe("catalogue", () => {
       serviceName: "Bajigur",
       accepts: [
         { scheme: "exact", network, asset: "0.0.429274", amount: "100000", payTo: "0.0.4242" },
+        { scheme: "exact", network, asset: "0.0.0", amount: "100000000", payTo: "0.0.4242" },
       ],
     });
   });
@@ -62,11 +63,12 @@ describe("catalogue", () => {
 describe("GET /prompts/:id/unlock", () => {
   const prompt = prompts[0] as (typeof prompts)[number];
 
-  it("answers 402 with the creator as payTo and the prompt price in USDC", async () => {
+  it("answers 402 with the creator as payTo, priced in USDC and HBAR", async () => {
     const res = await app.request(`/prompts/${prompt.id}/unlock`);
     expect(res.status).toBe(402);
     const required = decode(res.headers.get("PAYMENT-REQUIRED") ?? "");
-    const [accept] = required.accepts;
+    const [accept, hbar] = required.accepts;
+    expect(hbar).toMatchObject({ asset: "0.0.0", amount: "100000000", payTo: "0.0.4242" });
     expect(accept).toMatchObject({
       scheme: "exact",
       network,
@@ -107,5 +109,15 @@ describe("GET /prompts/:id/unlock", () => {
       network,
       transaction: "0.0.1234@1.0",
     });
+  });
+});
+
+describe("tinybars", () => {
+  it("converts decimal HBAR to tinybars without floats", async () => {
+    const { tinybars } = await import("../src/prompts");
+    expect(tinybars("1")).toBe("100000000");
+    expect(tinybars("0.2")).toBe("20000000");
+    expect(tinybars("0.00000001")).toBe("1");
+    expect(tinybars("12.5")).toBe("1250000000");
   });
 });

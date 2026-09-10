@@ -28,11 +28,19 @@ Add to Claude Desktop (`claude_desktop_config.json`):
         "HEDERA_NETWORK": "testnet",
         "HEDERA_OPERATOR_ID": "0.0.xxxxxxx",
         "HEDERA_OPERATOR_KEY": "<hex ecdsa private key>",
-        "X402_MAX_SPEND_USD": "1"
+        "X402_MAX_SPEND_USD": "1",
+        "X402_PAY_WITH": "usdc"
       }
     }
   }
 }
+```
+
+Buy from the terminal instead (reads the root `.env`):
+
+```bash
+bun run buy marquee-logos
+X402_PAY_WITH=hbar bun run buy marquee-logos
 ```
 
 The Claude Agent Skills in `../../skills/` sit on top of this server. Bazantic

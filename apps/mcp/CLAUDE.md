@@ -15,7 +15,10 @@ prompts. Owned by Kiel. Design in
   returns body + Hedera transaction id). `my_licenses` comes with the
   `PromptRegistry` contract.
 - Environment: `BAJIGUR_API_URL`, `HEDERA_NETWORK`, `HEDERA_OPERATOR_ID`,
-  `HEDERA_OPERATOR_KEY`, `X402_MAX_SPEND_USD` (cap per payment, default 1).
+  `HEDERA_OPERATOR_KEY`, `X402_MAX_SPEND_USD` (cap per payment, default 1),
+  `X402_PAY_WITH` (`usdc` default, or `hbar` to prefer the HBAR option).
+- `bun run buy <prompt-id>` from the repo root buys a prompt from the terminal
+  through the same tools; use it for demos and smoke tests.
 
 ## Layout
 
@@ -24,5 +27,7 @@ src/
   index.ts    stdio entry
   pay.ts      x402 client -> fetch with payment
   server.ts   createServer(): MCP tools
+scripts/
+  buy.ts      terminal purchase via the MCP tools
 test/
 ```

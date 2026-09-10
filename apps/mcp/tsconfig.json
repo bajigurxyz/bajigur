@@ -1,4 +1,4 @@
 {
   "extends": "@bajigur/tsconfig/base.json",
-  "include": ["src/**/*", "test/**/*"]
+  "include": ["src/**/*", "test/**/*", "scripts/**/*"]
 }

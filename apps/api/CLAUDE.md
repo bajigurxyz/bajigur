@@ -33,8 +33,10 @@
   `GET /discovery/resources` serves the same catalogue in the bazaar
   `DiscoveryResourcesResponse` shape for agents and Bazantic. Prices come from
   `requirementsFor(prompt)`, which reuses the Hedera scheme's `parsePrice`.
-- Still to come: licence check on `onProtectedRequest`, HBAR in `accepts`,
-  Privy calls.
+- Every prompt is priced twice: `priceUsd` (settled in USDC via the scheme's
+  default asset) and a fixed `priceHbar` set by the creator (asset `0.0.0`,
+  converted with `tinybars()`); both appear in `accepts` and the client picks.
+- Still to come: licence check on `onProtectedRequest`, Privy calls.
 
 ## Layout
 
