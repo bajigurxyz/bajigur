@@ -1,0 +1,23 @@
+{
+  "name": "@bajigur/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Bajigur HTTP API (Bun + Hono)",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --target=bun --outdir=dist",
+    "start": "bun run src/index.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@bajigur/core": "workspace:*",
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@bajigur/tsconfig": "workspace:*",
+    "typescript": "^5.9.3"
+  }
+}
