@@ -24,7 +24,9 @@ The Foundry project. Owned by Kiel.
   5.7 needs `mcopy`, and Hedera has supported Cancun since mainnet 0.50.
 - Deploy with `script/Deploy.s.sol`: reads `DEPLOYER_PRIVATE_KEY` and optional
   `PROMPT_MINTER` (defaults to the deployer), RPC from `HEDERA_TESTNET_RPC_URL`
-  via the `hedera_testnet` alias.
+  via the `hedera_testnet` alias. Verify with `forge verify-contract` against
+  `--verifier sourcify --verifier-url https://sourcify.dev/server` (see README);
+  HashScan shows the source once Sourcify has an exact match.
 - Never hardcode a private key or an RPC URL. Read them from the environment and
   document each new variable in the root `.env.example`.
 - Run `forge test` before finishing any change here.
