@@ -19,7 +19,8 @@
     "@x402/extensions": "2.25.0",
     "@x402/hedera": "2.25.0",
     "@x402/hono": "2.25.0",
-    "hono": "^4.6.14"
+    "hono": "^4.6.14",
+    "viem": "2.56.3"
   },
   "devDependencies": {
     "@bajigur/tsconfig": "workspace:*",

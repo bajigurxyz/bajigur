@@ -74,7 +74,8 @@ export const openapi = (origin: string) => ({
     "/licenses/{account}": {
       get: {
         operationId: "listLicenses",
-        summary: "Prompts a Hedera account holds an onchain licence for. Free.",
+        summary:
+          "Prompts a Hedera account (0.0.x) or ENS name (bajigur.hedera record) holds an onchain licence for. Free.",
         parameters: [
           {
             name: "account",
@@ -130,6 +131,9 @@ export const agentCard = (origin: string) => ({
     { name: "web", endpoint: `${origin}/` },
     { name: "openapi", endpoint: `${origin}/openapi.json`, version: "3.0.3" },
     { name: "x402-discovery", endpoint: `${origin}/discovery/resources`, version: "2" },
+    ...(process.env.ENS_NAME
+      ? [{ name: "ENS", endpoint: `agent.${process.env.ENS_NAME}`, version: "v1" }]
+      : []),
   ],
   x402Support: true,
   active: true,

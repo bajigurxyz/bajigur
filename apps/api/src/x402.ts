@@ -8,6 +8,7 @@ import {
 import { bazaarResourceServerExtension, declareDiscoveryExtension } from "@x402/extensions/bazaar";
 import { ExactHederaScheme } from "@x402/hedera/exact/server";
 import { paymentMiddlewareFromHTTPServer } from "@x402/hono";
+import type { Ens } from "./ens";
 import type { OnSettled } from "./hcs";
 import { findPrompt, type Prompt, payToOf, tinybars } from "./prompts";
 import type { Identity, Registry } from "./registry";
@@ -28,7 +29,8 @@ export const service = { serviceName: "Bajigur", tags: ["design", "motion", "pro
 const HBAR = "0.0.0";
 const hbarPrice = (prompt: Prompt) => ({ asset: HBAR, amount: tinybars(prompt.priceHbar) });
 
-export async function requirementsFor(prompt: Prompt) {
+export async function requirementsFor(prompt: Prompt, ens?: Ens) {
+  const payTo = await payToOf(prompt, ens);
   const prices = [`$${prompt.priceUsd}`, hbarPrice(prompt)];
   return Promise.all(
     prices.map(async (price) => {
@@ -38,7 +40,7 @@ export async function requirementsFor(prompt: Prompt) {
         network,
         asset,
         amount,
-        payTo: payToOf(prompt),
+        payTo,
         maxTimeoutSeconds: 300,
       };
     }),
@@ -50,9 +52,10 @@ export type X402Options = {
   onSettled?: OnSettled;
   registry?: Registry;
   identity?: Identity;
+  ens?: Ens;
 };
 
-export function x402({ facilitator, onSettled, registry, identity }: X402Options) {
+export function x402({ facilitator, onSettled, registry, identity, ens }: X402Options) {
   const server = new x402ResourceServer(
     facilitator ?? new HTTPFacilitatorClient({ url: facilitatorUrl }),
   )
@@ -89,13 +92,13 @@ export function x402({ facilitator, onSettled, registry, identity }: X402Options
           scheme: "exact",
           network,
           price: ({ path }) => `$${promptFromPath(path)?.priceUsd ?? "0"}`,
-          payTo: ({ path }) => payToOf(required(path)),
+          payTo: ({ path }) => payToOf(required(path), ens),
         },
         {
           scheme: "exact",
           network,
           price: ({ path }) => hbarPrice(required(path)),
-          payTo: ({ path }) => payToOf(required(path)),
+          payTo: ({ path }) => payToOf(required(path), ens),
         },
       ],
       description: "Full prompt body from the Bajigur design prompt marketplace",

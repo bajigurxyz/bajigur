@@ -1,4 +1,5 @@
 import { createApp } from "./app";
+import { ensClient } from "./ens";
 import { hcsPublisher } from "./hcs";
 import { contractRegistry, signedIdentity } from "./registry";
 
@@ -8,6 +9,7 @@ const app = createApp({
   onSettled: hcsPublisher(),
   registry: contractRegistry(),
   identity: signedIdentity,
+  ens: process.env.ENS_NAME ? ensClient() : undefined,
 });
 
 // Behind Railway's proxy the request URL is http://; x402 and discovery echo it, so restore the public scheme.

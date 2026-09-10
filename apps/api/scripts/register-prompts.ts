@@ -37,7 +37,7 @@ for (const p of prompts) {
       "register",
       new ContractFunctionParameters()
         .addBytes32(sha256(p.body))
-        .addString(payToOf(p))
+        .addString(await payToOf(p))
         .addUint64(usdc(p.priceUsd))
         .addUint64(Number(tinybars(p.priceHbar)))
         .addString(`bajigur:${p.id}`),

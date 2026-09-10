@@ -3,6 +3,7 @@ import type { FacilitatorClient } from "@x402/core/server";
 import { createApp } from "../src/app";
 
 process.env.X402_PAY_TO_ADDRESS = "0.0.4242";
+process.env.ENS_NAME = "bajigur.eth";
 
 import { prompts } from "../src/prompts";
 
@@ -30,10 +31,16 @@ const registry = {
   hasLicence: async (account: string, id: number) => holders.has(`${account}:${id}`),
 };
 const identity = async (headers: Headers) => headers.get("x-hedera-account") ?? undefined;
+const records: Record<string, string> = {
+  "kiel.bajigur.eth:bajigur.hedera": "0.0.4242",
+  "buyer.bajigur.eth:bajigur.hedera": "0.0.5555",
+};
+const ens = { text: async (name: string, key: string) => records[`${name}:${key}`] ?? null };
 const app = createApp({
   facilitator,
   registry,
   identity,
+  ens,
   onSettled: async (s) => {
     settled.push(s);
   },
@@ -174,11 +181,18 @@ describe("GET /prompts/:id/unlock", () => {
     process.env.GATEWAY_KEY = undefined;
   });
 
-  it("lists the prompts an account holds a licence for", async () => {
+  it("lists the prompts an account holds a licence for, by account or ENS name", async () => {
     holders.add(`0.0.5555:${prompt.registryId}`);
-    const res = await app.request("/licenses/0.0.5555");
-    const list = (await res.json()) as { id: string }[];
-    expect(list.map((p) => p.id)).toEqual([prompt.id]);
+    for (const who of ["0.0.5555", "buyer.bajigur.eth"]) {
+      const res = await app.request(`/licenses/${who}`);
+      const list = (await res.json()) as { id: string }[];
+      expect(list.map((p) => p.id)).toEqual([prompt.id]);
+    }
+  });
+
+  it("exposes the creator's ENS name and resolves payTo from its record", async () => {
+    const res = await app.request(`/prompts/${prompt.id}`);
+    expect(await res.json()).toMatchObject({ creator: "kiel.bajigur.eth", payTo: "0.0.4242" });
   });
 });
 

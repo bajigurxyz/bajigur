@@ -1,3 +1,5 @@
+import { type Ens, hederaAccountOf } from "./ens";
+
 export type Prompt = {
   id: string;
   title: string;
@@ -7,6 +9,7 @@ export type Prompt = {
   priceHbar: string;
   registryId?: number;
   payTo?: string;
+  creator?: string;
   body: string;
 };
 
@@ -47,16 +50,26 @@ export const prompts: Prompt[] = [
 
 export const findPrompt = (id: string) => prompts.find((p) => p.id === id);
 
-export function payToOf(prompt: Pick<Prompt, "payTo">) {
-  const account = prompt.payTo ?? process.env.X402_PAY_TO_ADDRESS;
+export function platformAccount() {
+  const account = process.env.X402_PAY_TO_ADDRESS;
   if (!account) throw new Error("X402_PAY_TO_ADDRESS is not set");
   return account;
 }
 
-export const publicPrompt = ({ body: _body, ...rest }: Prompt) => ({
-  ...rest,
-  payTo: payToOf(rest),
-});
+// Seeds belong to the platform's creator name once ENS is configured.
+export const creatorOf = (prompt: Pick<Prompt, "creator">) =>
+  prompt.creator ?? (process.env.ENS_NAME ? `kiel.${process.env.ENS_NAME}` : undefined);
+
+// Creator payout: the creator's ENS `bajigur.hedera` record when set, else the prompt's payTo, else the platform.
+export async function payToOf(prompt: Pick<Prompt, "payTo" | "creator">, ens?: Ens) {
+  const creator = creatorOf(prompt);
+  if (creator && ens) return hederaAccountOf(creator, ens);
+  return prompt.payTo ?? platformAccount();
+}
+
+export async function publicPrompt({ body: _body, ...rest }: Prompt, ens?: Ens) {
+  return { ...rest, creator: creatorOf(rest), payTo: await payToOf(rest, ens) };
+}
 
 export function tinybars(hbar: string) {
   const [whole = "0", fraction = ""] = hbar.split(".");
