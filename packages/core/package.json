@@ -1,0 +1,19 @@
+{
+  "name": "@bajigur/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared types and utilities used across apps/*",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo tsconfig.tsbuildinfo"
+  },
+  "devDependencies": {
+    "@bajigur/tsconfig": "workspace:*",
+    "typescript": "^5.9.3"
+  }
+}
