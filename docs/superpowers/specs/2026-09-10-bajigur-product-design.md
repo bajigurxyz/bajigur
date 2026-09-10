@@ -86,7 +86,8 @@ discovery, HBAR, verified `PromptRegistry`
 `0x59de4C018968E0357EeF77042dD2Fc2ff33e1418`, licence minting, free
 re-access). API live at https://api-production-fe21.up.railway.app. Privy
 server wallet paid over x402. ERC-8004 agent 111 registered. Bazantic
-manifest and Recipe prepared; `baz login` + `baz apply` pending. Web/Privy UI
+gateway `tuguge4rzbcsvgrevhkkjf43em` active and Recipe `design-prompt-finder`
+published; a paid call through the gateway still needs USDC on Base. Web/Privy UI
 pending (Axel).
 
 1. `apps/api`: x402 v2 middleware, prompt endpoints, Blocky402 settlement.

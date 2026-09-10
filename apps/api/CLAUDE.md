@@ -63,8 +63,8 @@
   configured in the dashboard). Bazantic
   charges agents on Base; when it calls us with the `x-bajigur-gateway-key`
   header (`GATEWAY_KEY`), `onProtectedRequest` grants access instead of asking
-  for a Hedera payment. `bazantic.yaml` documents the listing; the Recipe is in
-  `docs/bazantic/recipe.json`.
+  for a Hedera payment. `bazantic.yaml` documents the listing; the published Recipe is
+  `design-prompt-finder` (source `docs/bazantic/recipe.json`).
 - Still to come: Privy calls, creator publishing from the web app.
 
 ## Layout

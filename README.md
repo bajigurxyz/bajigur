@@ -24,6 +24,7 @@ targeting the **Hedera**, **Bazantic**, and **Privy** tracks. Design notes:
 | Discovery directory (x402 bazaar shape) | https://api-production-fe21.up.railway.app/discovery/resources |
 | OpenAPI | https://api-production-fe21.up.railway.app/openapi.json |
 | Bazantic gateway (x402/MPP on Base, MCP) | https://tuguge4rzbcsvgrevhkkjf43em.bazgateway.com |
+| Bazantic Recipe | `design-prompt-finder` |
 | ERC-8004 agent card | https://api-production-fe21.up.railway.app/.well-known/agent.json (agent **111** on Hedera testnet) |
 | `PromptRegistry` (verified source) | [0x59de4C018968E0357EeF77042dD2Fc2ff33e1418](https://hashscan.io/testnet/contract/0x59de4C018968E0357EeF77042dD2Fc2ff33e1418) |
 | HCS settlement audit topic | [0.0.10462113](https://hashscan.io/testnet/topic/0.0.10462113) |
@@ -109,7 +110,7 @@ Requires [Bun](https://bun.sh) >= 1.3 and, for the contracts,
 | Track | What ships |
 | --- | --- |
 | Hedera — AI & Agentic Payments | Live x402 service settled by Blocky402; MCP client completes real paid requests. Extras: per-prompt pricing, USDC (HTS) and HBAR in the settlement path, HCS audit trail, discovery directory, ERC-8004 agent 111. |
-| Bazantic — Recipes | Live gateway `tuguge4rzbcsvgrevhkkjf43em` (https://tuguge4rzbcsvgrevhkkjf43em.bazgateway.com, MCP at `/mcp`) over this API's OpenAPI; catalogue free, unlock $0.10; Recipe [`docs/bazantic/recipe.json`](docs/bazantic/recipe.json). |
+| Bazantic — Recipes | Live gateway `tuguge4rzbcsvgrevhkkjf43em` (https://tuguge4rzbcsvgrevhkkjf43em.bazgateway.com, MCP at `/mcp`) over this API's OpenAPI; catalogue free, unlock $0.10; published Recipe **`design-prompt-finder`** (source: [`docs/bazantic/recipe.json`](docs/bazantic/recipe.json)). |
 | Privy — Financial Flow, B2B | A Privy wallet funds, pays over x402 and receives the licence (proof above); organisation wallet with a spending policy in the web app. |
 
 ## Layout
