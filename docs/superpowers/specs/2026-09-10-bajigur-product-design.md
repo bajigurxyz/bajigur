@@ -51,8 +51,12 @@ designed for.
 - Assets: HBAR (`0.0.0`) or HTS tokens. Testnet USDC is `0.0.429274`.
 - Accounts auto-created from an EVM address (Privy wallets) have unlimited
   auto-association (HIP-904), so they can receive HTS tokens without setup.
-- Privy can sign Hedera transactions: `secp256k1_sign` on the client,
-  `raw_sign` on the server. Needs a spike in `apps/api` before relying on it.
+- Privy can sign Hedera transactions. Verified 2026-09-10: a Privy ethereum
+  server wallet paid 0.02 USDC over x402 (`0.0.9185802@1789059182.997299836`)
+  through `secp256k1_sign` on `/rpc` with a locally computed
+  keccak256(bodyBytes). `/raw_sign` rejects ethereum wallets. The wallet's
+  Hedera account is auto-created by sending HBAR to its EVM address and
+  completed by its first signed transaction (`bun run privy:associate`).
 
 ## What we maximise from x402 v2
 

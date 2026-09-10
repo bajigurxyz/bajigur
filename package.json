@@ -21,7 +21,8 @@
     "hedera:topic": "bun apps/api/scripts/create-topic.ts",
     "hedera:register": "bun --env-file=.env apps/api/scripts/register-prompts.ts",
     "buy": "bun --env-file=.env apps/mcp/scripts/buy.ts",
-    "privy:spike": "bun --env-file=.env apps/mcp/scripts/privy-spike.ts"
+    "privy:spike": "bun --env-file=.env apps/mcp/scripts/privy-spike.ts",
+    "privy:associate": "bun --env-file=.env apps/mcp/scripts/privy-associate.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.12",

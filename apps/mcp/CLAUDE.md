@@ -23,14 +23,15 @@ prompts. Owned by Kiel. Design in
   through the same tools; use it for demos and smoke tests.
 - Privy: `src/externalSigner.ts` builds the x402 transfer and signs it with
   `tx.signWith(publicKey, rawSign)`, where `rawSign(bodyBytes)` returns the
-  64-byte r||s over keccak256(bodyBytes). `privyRawSign` implements it with
-  Privy's `POST /v1/wallets/{id}/raw_sign` (`bytes` + `hash_function:
-  keccak256`, `v` byte dropped). `bun run privy:spike [prompt-id]` pays with
-  the local key when `PRIVY_*` is unset, and with the Privy wallet when
-  `PRIVY_APP_SECRET`, `PRIVY_WALLET_ID`, `PRIVY_WALLET_ADDRESS` and
-  `NEXT_PUBLIC_PRIVY_APP_ID` are set. The Privy wallet's Hedera account is
-  resolved from its EVM address on the mirror node, so it must have received
-  HBAR once (auto-create) before paying.
+  64-byte r||s over keccak256(bodyBytes). For Privy ethereum wallets use the
+  `secp256k1_sign` RPC (`POST /v1/wallets/{id}/rpc`, `params.hash`); the
+  `/raw_sign` endpoint rejects ethereum wallets, and the wallet object carries
+  no `public_key`, so `privyWallet` recovers it from a signature over a fixed
+  hash and checks it against the wallet address. The wallet's Hedera account
+  is auto-created (hollow) by sending it HBAR; `bun run privy:associate`
+  associates USDC with a Privy-signed transaction, which also completes the
+  account key. `bun run privy:spike [prompt-id]` then pays through Privy
+  (falls back to the local key when `PRIVY_*` is unset).
 
 ## Layout
 
@@ -42,6 +43,7 @@ src/
   externalSigner.ts  x402 Hedera signer over a rawSign callback (Privy, KMS)
 scripts/
   buy.ts      terminal purchase via the MCP tools
-  privy-spike.ts  pays through externalHederaSigner (local key or Privy raw_sign)
+  privy-associate.ts  Privy-signed USDC association (completes the hollow account)
+  privy-spike.ts  pays through externalHederaSigner (local key or Privy)
 test/
 ```

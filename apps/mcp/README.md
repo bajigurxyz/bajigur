@@ -39,6 +39,10 @@ Add to Claude Desktop (`claude_desktop_config.json`):
 }
 ```
 
+Pay with a Privy server wallet instead of a raw key: set `NEXT_PUBLIC_PRIVY_APP_ID`,
+`PRIVY_APP_SECRET` and `PRIVY_WALLET_ID`, send the wallet some HBAR, then run
+`bun run privy:associate` once and `bun run privy:spike <prompt-id>`.
+
 Buy from the terminal instead (reads the root `.env`):
 
 ```bash
