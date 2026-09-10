@@ -1,0 +1,43 @@
+version: 1
+
+gateways:
+  - handle: bajigur
+    listing:
+      name: "Bajigur design prompts"
+      category: AI
+      tagline: "Pay-per-use motion/web design prompts for coding agents"
+      description: >-
+        A marketplace of motion and web design prompts. Search the catalogue for
+        free, then unlock the full prompt text per call. Unlocking is gated by
+        x402 v2 on Hedera (USDC or HBAR), paid straight to the prompt's creator,
+        and every purchase mints an onchain licence so the same wallet re-reads
+        the prompt for free from any client.
+      tags: ["design", "motion", "prompts", "frontend", "x402", "hedera"]
+      product_website: https://api-production-fe21.up.railway.app
+      docs_url: https://github.com/bajigurxyz/bajigur
+
+    upstream:
+      url: https://api-production-fe21.up.railway.app
+      spec:
+        type: openapi
+        url: https://api-production-fe21.up.railway.app/openapi.json
+      auth:
+        type: none
+      protocol: rest
+
+    default_price: 0
+
+    methods:
+      - verb: GET
+        path: /prompts
+      - verb: GET
+        path: /prompts/{id}
+      - verb: GET
+        path: /prompts/{id}/unlock
+        price: $0.10
+      - verb: GET
+        path: /discovery/resources
+      - verb: GET
+        path: /licenses/{account}
+
+    status: active

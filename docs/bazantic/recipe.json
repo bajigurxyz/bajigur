@@ -1,0 +1,27 @@
+{
+  "name": "Pick a motion design prompt",
+  "description": "Given what a developer is building (a hero section, a button interaction, a logo strip), search the Bajigur catalogue, choose the best matching design prompt, unlock it, and return the full prompt text ready to paste into a coding agent.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "goal": {
+        "type": "string",
+        "description": "What the developer wants to build or improve, e.g. 'a landing page hero that reveals on scroll'"
+      },
+      "maxPriceUsd": {
+        "type": "number",
+        "description": "Do not unlock prompts priced above this amount",
+        "default": 0.1
+      }
+    },
+    "required": ["goal"]
+  },
+  "input_example": { "goal": "an infinite row of partner logos in pure CSS", "maxPriceUsd": 0.1 },
+  "output_example": "Chosen: Infinite logo marquee (marquee-logos, $0.02). Prompt: Create a logo marquee with pure CSS. Duplicate the logo track once so the loop is seamless, animate translateX from 0 to -50% over 30s linear infinite, and pause the animation on hover...",
+  "prompt_template": "You help a developer get a high-quality motion/web design prompt from the Bajigur marketplace.\n\nInputs: {{inputs}}\n\nSteps:\n1. Call listPrompts and read every listing's title, tags, preview and priceUsd.\n2. Pick the single listing that best matches the goal. If none fits, say so and stop without unlocking anything.\n3. If its priceUsd is above maxPriceUsd, report the price and stop.\n4. Call unlockPrompt with that id. The gateway pays; you receive the full body.\n5. Reply with: the chosen title, id and price on one line, then the full prompt body verbatim, then one sentence on how to use it with a coding agent.",
+  "model": "claude-sonnet-5",
+  "tool_bindings": [
+    { "gateway_slug": "bajigur", "tool_name": "listPrompts" },
+    { "gateway_slug": "bajigur", "tool_name": "unlockPrompt" }
+  ]
+}

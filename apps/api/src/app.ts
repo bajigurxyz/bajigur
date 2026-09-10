@@ -2,6 +2,7 @@ import { APP_NAME } from "@bajigur/core";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { agentCard, openapi } from "./meta";
 import { findPrompt, payToOf, prompts, publicPrompt } from "./prompts";
 import { requirementsFor, service, type X402Options, x402 } from "./x402";
 
@@ -13,6 +14,9 @@ export function createApp(options: X402Options = {}) {
   app.use("*", cors());
 
   app.get("/health", (c) => c.json({ ok: true, service: `${APP_NAME}-api` }));
+
+  app.get("/openapi.json", (c) => c.json(openapi(new URL(c.req.url).origin)));
+  app.get("/.well-known/agent.json", (c) => c.json(agentCard(new URL(c.req.url).origin)));
 
   app.get("/prompts", (c) => c.json(prompts.map(publicPrompt)));
   app.get("/prompts/:id", (c) => {

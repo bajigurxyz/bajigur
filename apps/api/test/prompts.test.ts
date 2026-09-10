@@ -50,6 +50,26 @@ describe("catalogue", () => {
     expect(list[0]).not.toHaveProperty("body");
   });
 
+  it("serves an openapi spec and an erc-8004 agent card", async () => {
+    const spec = (await (await app.request("http://api.test/openapi.json")).json()) as {
+      openapi: string;
+      servers: { url: string }[];
+      paths: Record<string, unknown>;
+    };
+    expect(spec.openapi).toBe("3.0.3");
+    expect(spec.servers[0]?.url).toBe("http://api.test");
+    expect(Object.keys(spec.paths)).toContain("/prompts/{id}/unlock");
+
+    const card = (await (await app.request("http://api.test/.well-known/agent.json")).json()) as {
+      type: string;
+      x402Support: boolean;
+      services: { name: string; endpoint: string }[];
+    };
+    expect(card.type).toContain("eip-8004");
+    expect(card.x402Support).toBe(true);
+    expect(card.services.map((s) => s.name)).toContain("x402-discovery");
+  });
+
   it("publishes a discovery directory in the x402 bazaar shape", async () => {
     const res = await app.request("http://api.test/discovery/resources");
     const body = (await res.json()) as {

@@ -56,6 +56,11 @@
   SIWx extension once it supports Hedera.
 - Seed prompts carry `registryId`; `bun run hedera:register` registers any
   seed without one (creator = platform account, contentHash = sha256(body)).
+- `GET /openapi.json` (for the Bazantic gateway) and
+  `GET /.well-known/agent.json` (ERC-8004 registration file, agent 111 on
+  Hedera testnet via `ERC8004_AGENT_ID`) come from `src/meta.ts`.
+- Bazantic: `bazantic.yaml` at the repo root is the gateway manifest
+  (`baz apply`), `docs/bazantic/recipe.json` the Recipe (`baz recipe create`).
 - Still to come: Privy calls, creator publishing from the web app.
 
 ## Layout
@@ -66,6 +71,7 @@ src/
   prompts.ts  in-memory catalogue
   hcs.ts      HCS audit publisher
   registry.ts PromptRegistry client + signed wallet identity
+  meta.ts     openapi.json and the ERC-8004 agent card
   x402.ts     x402 middleware
   index.ts    Bun server entry (port binding only)
 test/
