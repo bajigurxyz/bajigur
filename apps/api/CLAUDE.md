@@ -65,6 +65,14 @@
   header (`GATEWAY_KEY`), `onProtectedRequest` grants access instead of asking
   for a Hedera payment. `bazantic.yaml` documents the listing; the published Recipe is
   `design-prompt-finder` (source `docs/bazantic/recipe.json`).
+- ENS (ENSv2 beta, Sepolia): `src/ens.ts` resolves text records through
+  `UniversalResolverV2` (viem, 60s cache). Creators are ENS names under
+  `bajigur.eth` (our own subregistry); the 402 `payTo` comes from the
+  creator's `bajigur.hedera` record, `/licenses/:x` accepts a name, and the
+  agent card lists `agent.bajigur.eth`. Enabled by `ENS_NAME`; without it the
+  API falls back to `X402_PAY_TO_ADDRESS`. `scripts/ens-setup.sh` did the
+  onchain setup (name, OwnedResolver, UserRegistry subregistry, subnames,
+  records) with the platform key via `ens-cli` + `cast`.
 - Still to come: Privy calls, creator publishing from the web app.
 
 ## Layout
@@ -76,6 +84,7 @@ src/
   hcs.ts      HCS audit publisher
   registry.ts PromptRegistry client + signed wallet identity
   meta.ts     openapi.json and the ERC-8004 agent card
+  ens.ts      ENSv2 text-record resolver (Sepolia)
   x402.ts     x402 middleware
   index.ts    Bun server entry (port binding only)
 test/

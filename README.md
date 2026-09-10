@@ -10,9 +10,13 @@ can discover, pay for, and use a prompt on its own.
 - Every purchase mints an **ERC-1155 licence** to the buyer's wallet, so a
   prompt is paid once and re-read for free from any client. **Privy** wallets
   can pay directly.
+- Creators and agents are **ENSv2 names** under `bajigur.eth` (our own
+  subregistry on Sepolia); the creator's Hedera payout account is read live
+  from its `bajigur.hedera` text record.
 
 Built for [ETHGlobal ETHOnline 2026](https://ethglobal.com/events/ethonline2026),
-targeting the **Hedera**, **Bazantic**, and **Privy** tracks. Design notes:
+targeting the **Hedera**, **Privy**, and **ENS** tracks (plus a Bazantic
+gateway). Design notes:
 [`docs/superpowers/specs/2026-09-10-bajigur-product-design.md`](docs/superpowers/specs/2026-09-10-bajigur-product-design.md).
 
 ## Live
@@ -28,6 +32,8 @@ targeting the **Hedera**, **Bazantic**, and **Privy** tracks. Design notes:
 | ERC-8004 agent card | https://api-production-fe21.up.railway.app/.well-known/agent.json (agent **111** on Hedera testnet) |
 | `PromptRegistry` (verified source) | [0x59de4C018968E0357EeF77042dD2Fc2ff33e1418](https://hashscan.io/testnet/contract/0x59de4C018968E0357EeF77042dD2Fc2ff33e1418) |
 | HCS settlement audit topic | [0.0.10462113](https://hashscan.io/testnet/topic/0.0.10462113) |
+| ENSv2 name (Sepolia) | `bajigur.eth`, owner `0xE610…2bAa`, resolver [`0x7f38…87f6`](https://sepolia.etherscan.io/address/0x7f381419050525025bBB6811CF5821E0615487f6), subregistry [`0x9673…461c`](https://sepolia.etherscan.io/address/0x9673702a3C850fa1c41d94C908083Fc85F59461c) |
+| ENS subnames | `kiel.bajigur.eth` (creator, `bajigur.hedera=0.0.7275085`), `agent.bajigur.eth` (agent, `bajigur.hedera=0.0.8291460`) |
 
 Proof transactions on Hedera testnet:
 
@@ -74,6 +80,9 @@ Contracts never sit in the payment path: on Hedera, x402 `payTo` must be a
 6. Next time, the client sends `x-hedera-account/-timestamp/-signature`; the API
    checks `balanceOf` on chain and returns the prompt without a 402.
 
+Step 2's `payTo` is not stored anywhere in the API: it is the `bajigur.hedera`
+text record of the prompt's creator name (`kiel.bajigur.eth`) on ENSv2 Sepolia.
+
 ## Run it
 
 ```bash
@@ -112,6 +121,7 @@ Requires [Bun](https://bun.sh) >= 1.3 and, for the contracts,
 | Hedera — AI & Agentic Payments | Live x402 service settled by Blocky402; MCP client completes real paid requests. Extras: per-prompt pricing, USDC (HTS) and HBAR in the settlement path, HCS audit trail, discovery directory, ERC-8004 agent 111. |
 | Bazantic — Recipes | Live gateway `tuguge4rzbcsvgrevhkkjf43em` (https://tuguge4rzbcsvgrevhkkjf43em.bazgateway.com, MCP at `/mcp`) over this API's OpenAPI; catalogue free, unlock $0.10; published Recipe **`design-prompt-finder`** (source: [`docs/bazantic/recipe.json`](docs/bazantic/recipe.json)). |
 | Privy — Financial Flow, B2B | A Privy wallet funds, pays over x402 and receives the licence (proof above); organisation wallet with a spending policy in the web app. |
+| ENS — Best Use of ENSv2 | `bajigur.eth` with its own ENSv2 subregistry on Sepolia. Creators (`kiel.bajigur.eth`) and agents (`agent.bajigur.eth`) are subnames; the API resolves the creator's Hedera payout from the `bajigur.hedera` text record at 402 time and accepts names in `/licenses/:name`. Nothing hardcoded: change the record, the payout changes. |
 
 ## Layout
 
@@ -133,6 +143,7 @@ docs/                        design spec, Bazantic recipe
 | `bun run contracts:build`, `bun run contracts:test` | Foundry |
 | `bun run hedera:associate`, `bun run hedera:topic`, `bun run hedera:register` | Testnet setup |
 | `bun run buy <id>`, `bun run privy:associate`, `bun run privy:spike` | Paid requests from the terminal |
+| `bash apps/api/scripts/ens-setup.sh` | Register the ENS name, subregistry, subnames, records |
 | `railway up --service api --detach` | Deploy the API |
 
 ## Team
