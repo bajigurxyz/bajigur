@@ -88,7 +88,8 @@ re-access). API live at https://api-production-fe21.up.railway.app. Privy
 server wallet paid over x402. ERC-8004 agent 111 registered. Bazantic
 gateway `tuguge4rzbcsvgrevhkkjf43em` active and Recipe `design-prompt-finder`
 published (track dropped in favour of ENS). ENS: `bajigur.eth` on ENSv2 Sepolia
-with our own subregistry; creators and agents are subnames, the 402 payTo is
+with our own subregistry and `BajigurRegistrar` (0x1eb7…9756, one free name per
+wallet); `kiel.`, `axel.` (self-claimed) and `agent.` subnames; the 402 payTo is
 read from the creator's `bajigur.hedera` record. Web/Privy UI
 pending (Axel).
 

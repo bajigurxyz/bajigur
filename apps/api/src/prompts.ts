@@ -37,6 +37,18 @@ export const prompts: Prompt[] = [
     body: "Add a magnetic effect to primary buttons. Track pointer position within an 80px radius of each button; translate the button toward the pointer by 30% of the offset, max 12px. On leave, return with a spring: stiffness 300, damping 20. Move the label an extra 10% for depth. Disable on touch devices and under prefers-reduced-motion.",
   },
   {
+    id: "glass-nav",
+    title: "Glass navigation bar",
+    tags: ["nav", "glassmorphism", "scroll"],
+    preview: "Sticky translucent nav that gains blur and a hairline border once the page scrolls.",
+    priceUsd: "0.05",
+    priceHbar: "0.5",
+    registryId: 4,
+    creator: process.env.ENS_NAME ? `axel.${process.env.ENS_NAME}` : undefined,
+    payTo: process.env.HEDERA_OPERATOR_ID,
+    body: "Build a sticky top navigation. At scrollY 0 it is fully transparent with white text. Past 24px of scroll, transition over 300ms ease-out to background rgba(255,255,255,0.72), backdrop-filter blur(16px) saturate(160%), a 1px bottom border at rgba(0,0,0,0.08), and dark text. Keep the logo 24px tall and links 14px with 24px gaps. Under prefers-reduced-motion switch states instantly.",
+  },
+  {
     id: "marquee-logos",
     title: "Infinite logo marquee",
     tags: ["marquee", "logos", "css"],
