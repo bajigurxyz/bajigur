@@ -59,8 +59,12 @@
 - `GET /openapi.json` (for the Bazantic gateway) and
   `GET /.well-known/agent.json` (ERC-8004 registration file, agent 111 on
   Hedera testnet via `ERC8004_AGENT_ID`) come from `src/meta.ts`.
-- Bazantic: `bazantic.yaml` at the repo root is the gateway manifest
-  (`baz apply`), `docs/bazantic/recipe.json` the Recipe (`baz recipe create`).
+- Bazantic: gateway slug `7ybmky7gzjgtpkb2dzcfvo4a3a`
+  (`https://7ybmky7gzjgtpkb2dzcfvo4a3a.bazgateway.com`, MCP at `/mcp`). Bazantic
+  charges agents on Base; when it calls us with the `x-bajigur-gateway-key`
+  header (`GATEWAY_KEY`), `onProtectedRequest` grants access instead of asking
+  for a Hedera payment. `bazantic.yaml` documents the listing; the Recipe is in
+  `docs/bazantic/recipe.json`.
 - Still to come: Privy calls, creator publishing from the web app.
 
 ## Layout

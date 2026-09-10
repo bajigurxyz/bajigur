@@ -161,6 +161,19 @@ describe("GET /prompts/:id/unlock", () => {
     expect(other.status).toBe(402);
   });
 
+  it("lets the Bazantic gateway unlock with the shared key", async () => {
+    process.env.GATEWAY_KEY = "gw-secret";
+    const res = await app.request(`/prompts/${prompt.id}/unlock`, {
+      headers: { "x-bajigur-gateway-key": "gw-secret" },
+    });
+    expect(res.status).toBe(200);
+    const wrong = await app.request(`/prompts/${prompt.id}/unlock`, {
+      headers: { "x-bajigur-gateway-key": "nope" },
+    });
+    expect(wrong.status).toBe(402);
+    process.env.GATEWAY_KEY = undefined;
+  });
+
   it("lists the prompts an account holds a licence for", async () => {
     holders.add(`0.0.5555:${prompt.registryId}`);
     const res = await app.request("/licenses/0.0.5555");
