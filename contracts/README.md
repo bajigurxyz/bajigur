@@ -28,5 +28,8 @@ script/    deployment scripts
 lib/       git submodules (forge-std, OpenZeppelin)
 ```
 
-`src/Counter.sol` and its test are `forge init` scaffolding and should be
-removed once real contracts exist.
+`src/PromptRegistry.sol` is the creator registry plus ERC-1155 licence. Deploy:
+
+```bash
+forge script script/Deploy.s.sol --rpc-url hedera_testnet --broadcast
+```

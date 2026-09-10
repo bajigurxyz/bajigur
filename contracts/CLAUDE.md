@@ -15,11 +15,16 @@ The Foundry project. Owned by Kiel.
 - Target chain is Hedera testnet (EVM compatible), so Solidity and Foundry work
   as they do on any EVM chain.
 - Contracts never sit in the x402 payment path (`payTo` must be a `0.0.x`
-  account). The only planned contract is `PromptRegistry`: OpenZeppelin
-  ERC-1155 licence + creator registry. Keep comments minimal.
+  account). The only contract is `src/PromptRegistry.sol`: OpenZeppelin
+  ERC-1155 + AccessControl. Creators `register` / `update` their prompt
+  (content hash, Hedera `payTo`, USDC and tinybar prices, uri); `MINTER_ROLE`
+  (the API) calls `issue` after an x402 settlement to mint one licence per
+  buyer, with the Hedera transaction id in the event. Keep comments minimal.
+- `foundry.toml` pins solc 0.8.28 and `evm_version = "cancun"`; OpenZeppelin
+  5.7 needs `mcopy`, and Hedera has supported Cancun since mainnet 0.50.
+- Deploy with `script/Deploy.s.sol`: reads `DEPLOYER_PRIVATE_KEY` and optional
+  `PROMPT_MINTER` (defaults to the deployer), RPC from `HEDERA_TESTNET_RPC_URL`
+  via the `hedera_testnet` alias.
 - Never hardcode a private key or an RPC URL. Read them from the environment and
   document each new variable in the root `.env.example`.
 - Run `forge test` before finishing any change here.
-
-The default `Counter` contract is scaffolding from `forge init`; delete it once
-real contracts land.
