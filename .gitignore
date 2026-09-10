@@ -16,8 +16,7 @@ next-env.d.ts
 #   git submodule update --init --recursive
 contracts/out/
 contracts/cache/
-contracts/broadcast/
-!contracts/broadcast/**/dry-run/
+contracts/broadcast/**/dry-run/
 
 # ---------- coverage ----------
 coverage/
