@@ -1,0 +1,57 @@
+# ---------- dependencies ----------
+node_modules/
+.pnp.*
+
+# ---------- build output ----------
+dist/
+build/
+.next/
+.turbo/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# contracts/lib/ is intentionally NOT ignored: it holds git submodules
+# (forge-std, openzeppelin). Restore with:
+#   git submodule update --init --recursive
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+!contracts/broadcast/**/dry-run/
+
+# ---------- coverage ----------
+coverage/
+lcov.info
+*.lcov
+
+# ---------- secrets & environment ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.keystore
+secrets.json
+
+# ---------- logs ----------
+*.log
+npm-debug.log*
+bun-debug.log*
+
+# ---------- editors & os ----------
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+desktop.ini
+.idea/
+*.swp
+*.swo
+.vscode/*
+!.vscode/extensions.json
+
+# ---------- misc ----------
+.cache/
+tmp/
+*.tgz
+.vercel
