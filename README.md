@@ -1,11 +1,14 @@
 # Bajigur
 
-A pay-per-use library of motion/web design prompts, gated by **x402** and usable
-straight from Claude Desktop through an **MCP server** and **Claude Agent
-Skills**.
+A pay-per-use marketplace of motion/web design prompts, built so an AI agent
+can discover, pay for, and use a prompt on its own. Payments are **x402 v2** on
+**Hedera** through the **Blocky402** facilitator, paid straight to each
+prompt's creator. Agents reach it through an **MCP server** and **Bazantic**;
+buyers keep an onchain licence in their **Privy** wallet.
 
 Built for [ETHGlobal ETHOnline 2026](https://ethglobal.com/events/ethonline2026)
-targeting the **Hedera**, **Bazantic**, and **Privy** tracks.
+targeting the **Hedera**, **Bazantic**, and **Privy** tracks. Design:
+[`docs/superpowers/specs/2026-09-10-bajigur-product-design.md`](docs/superpowers/specs/2026-09-10-bajigur-product-design.md).
 
 ## Layout
 
@@ -17,7 +20,7 @@ targeting the **Hedera**, **Bazantic**, and **Privy** tracks.
 │   ├── api/           # Bun + Hono — HTTP API, x402 gateway (:3002)
 │   ├── ai/            # placeholder — AI generation / agent service
 │   ├── indexer/       # placeholder — onchain indexer
-│   └── mcp/           # placeholder — MCP server for Claude Desktop
+│   └── mcp/           # MCP server for Claude Desktop, x402 client
 ├── packages/
 │   ├── core/          # @bajigur/core — shared types and utilities
 │   └── tsconfig/      # @bajigur/tsconfig — base / app / library TS configs
@@ -27,8 +30,8 @@ targeting the **Hedera**, **Bazantic**, and **Privy** tracks.
 └── turbo.json         # build / dev / test / typecheck pipeline
 ```
 
-`apps/ai`, `apps/indexer`, `apps/mcp`, and `skills/` currently contain only a
-README describing what they are for.
+`apps/ai`, `apps/indexer`, and `skills/` currently contain only a README
+describing what they are for.
 
 ## Getting started
 
@@ -61,7 +64,7 @@ Requires [Bun](https://bun.sh) >= 1.3 and, for the contracts,
 | Person | Owns |
 | --- | --- |
 | Axel | Frontend — `apps/web`, `apps/landingpage` |
-| Kiel | Smart contracts and backend — `contracts/`, `apps/api` |
+| Kiel | Smart contracts and backend — `contracts/`, `apps/api`, `apps/mcp` |
 
 ## Contributing
 

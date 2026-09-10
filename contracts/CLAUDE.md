@@ -14,6 +14,9 @@ The Foundry project. Owned by Kiel.
   deployment scripts. `out/` and `cache/` are generated and gitignored.
 - Target chain is Hedera testnet (EVM compatible), so Solidity and Foundry work
   as they do on any EVM chain.
+- Contracts never sit in the x402 payment path (`payTo` must be a `0.0.x`
+  account). The only planned contract is `PromptRegistry`: OpenZeppelin
+  ERC-1155 licence + creator registry. Keep comments minimal.
 - Never hardcode a private key or an RPC URL. Read them from the environment and
   document each new variable in the root `.env.example`.
 - Run `forge test` before finishing any change here.

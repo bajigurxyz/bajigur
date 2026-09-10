@@ -6,34 +6,44 @@ local one before touching files there.
 
 ## Project
 
-Bajigur is a pay-per-use library of motion/web design prompts (in the spirit of
-[motionsites.ai](https://motionsites.ai)) gated by **x402**, and exposed to AI
-agents through an **MCP server** plus **Claude Agent Skills** so a developer can
-discover, pay for, and use a prompt directly from Claude Desktop.
+Bajigur is a pay-per-use marketplace of motion/web design prompts, built so an
+AI agent can discover, pay for, and use a prompt on its own. Payment is
+**x402 v2** on **Hedera** settled through the **Blocky402** facilitator, with
+each prompt's `payTo` set to its creator's own Hedera account. Agents reach it
+through an **MCP server** (Claude Desktop) and through **Bazantic**. Buyers
+hold an ERC-1155 licence in their **Privy** wallet, so a prompt is paid once
+and re-used from any client.
+
+The full design, including payment-rail facts, sponsor mapping, and build
+order, is in `docs/superpowers/specs/2026-09-10-bajigur-product-design.md`.
+Read it before proposing scope.
 
 Built for **ETHGlobal ETHOnline 2026**. Targeted prize tracks:
 
 | Track | What has to ship |
 | --- | --- |
-| **Hedera** — AI & Agentic Payments ($6,000) | A live x402-gated service on Hedera testnet/mainnet settled through the Blocky402 facilitator, plus a platform or agent that completes at least one real paid request end to end. |
-| **Bazantic** — Recipes ($3,000) | An x402/MPP Gateway on bazantic.com for our API, plus Recipes describing when, why, and how an agent should use it. |
-| **Privy** ($5,000) | Privy wallets as the auth and funding layer behind at least one complete financial flow. |
+| **Hedera** — AI & Agentic Payments ($6,000) | A live x402-gated service on Hedera testnet settled through Blocky402, plus an MCP client that completes at least one real paid request end to end. Extras: HCS audit trail, discovery directory, per-prompt pricing, USDC + HBAR. |
+| **Bazantic** — Recipes ($3,000) | An x402 Gateway on bazantic.com for our API, plus a Recipe describing when, why, and how an agent should use it. |
+| **Privy** ($5,000, two tracks) | Privy wallets fund and pay for prompts (Financial Flow); an organisation wallet with a spending policy (B2B Financial Product). |
 
-Every track needs a public repo, a README, and a demo video. Hedera and Bazantic
-also require the paid request to be demonstrated on camera.
+Every track needs a public repo, a README, and a demo video (five minutes or
+less) showing the paid request on camera.
 
-> The product statement above is the current working direction, not a frozen
-> spec. Confirm with the team before treating any of it as a hard requirement.
+Contracts never sit in the payment path: on Hedera, x402 `payTo` must be a
+`0.0.x` account, not a contract. `contracts/` holds the `PromptRegistry`
+(creator registry + licence) only.
 
 ## Team
 
 | Person | Owns |
 | --- | --- |
 | Axel (`Lexirieru`) | Frontend — `apps/web`, `apps/landingpage` |
-| Kiel | Smart contracts and backend — `contracts/`, `apps/api` |
+| Kiel | Smart contracts and backend — `contracts/`, `apps/api`, `apps/mcp` |
 
-`apps/ai`, `apps/indexer`, `apps/mcp`, and `skills/` are placeholders. They hold
-a README describing intent and nothing else. Do not build them out unless asked.
+`apps/ai`, `apps/indexer`, and `skills/` are placeholders. They hold a README
+describing intent and nothing else. Do not build them out unless asked.
+`apps/mcp` is real work: the MCP server with the x402 client, built after
+`apps/api`.
 
 ## Layout
 
@@ -44,7 +54,7 @@ apps/
   api/           Bun + Hono — HTTP API, x402 gateway      (:3002)
   ai/            placeholder — AI generation / agent service
   indexer/       placeholder — onchain indexer
-  mcp/           placeholder — MCP server for Claude Desktop
+  mcp/           MCP server for Claude Desktop, x402 client
 packages/
   core/          @bajigur/core — shared types and utilities
   tsconfig/      @bajigur/tsconfig — base / app / library TS configs

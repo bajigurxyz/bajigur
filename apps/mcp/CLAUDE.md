@@ -1,13 +1,13 @@
 # CLAUDE.md — apps/mcp
 
-`@bajigur/mcp` is a **placeholder**. It contains a `package.json`, a
-`README.md`, and this file, and nothing else.
+`@bajigur/mcp`, the MCP server that lets Claude Desktop discover and pay for
+prompts. Owned by Kiel. Built after `apps/api`; see the product design in
+`../../docs/superpowers/specs/2026-09-10-bajigur-product-design.md`.
 
-Do not scaffold it, add dependencies, or write code here unless a task asks for
-it explicitly. When it is picked up, follow the workspace rules in
-`../CLAUDE.md`.
-
-An MCP server is a transport wrapper, not a place for business logic: it should
-call `apps/api` rather than reimplement payment or catalogue behaviour.
+- An MCP server is a transport wrapper, not a place for business logic: it
+  calls `apps/api` and never reimplements payment or catalogue behaviour.
+- It holds the x402 client (`@x402/hedera`) that signs the payment when the API
+  answers `402`. The signing key comes from the environment; never hardcode it.
+- Tools: `search_prompts`, `get_prompt` (pays if needed), `my_licenses`.
 
 See `README.md` for the intended purpose.
