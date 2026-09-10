@@ -81,10 +81,13 @@ the paid request.
 
 ## Build order
 
-Status 2026-09-10: steps 1 to 4 shipped and verified on testnet, including
-the HCS trail, discovery, HBAR, the deployed and verified `PromptRegistry`
-(`0x59de4C018968E0357EeF77042dD2Fc2ff33e1418`), licence minting after
-settlement, and free re-access for licence holders.
+Status 2026-09-11: steps 1 to 4 shipped and verified on testnet (HCS trail,
+discovery, HBAR, verified `PromptRegistry`
+`0x59de4C018968E0357EeF77042dD2Fc2ff33e1418`, licence minting, free
+re-access). API live at https://api-production-fe21.up.railway.app. Privy
+server wallet paid over x402. ERC-8004 agent 111 registered. Bazantic
+manifest and Recipe prepared; `baz login` + `baz apply` pending. Web/Privy UI
+pending (Axel).
 
 1. `apps/api`: x402 v2 middleware, prompt endpoints, Blocky402 settlement.
 2. `apps/mcp`: MCP server with an x402 client so Claude Desktop can pay.
