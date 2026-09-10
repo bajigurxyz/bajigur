@@ -1,5 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { app } from "../src/app";
+import { createApp } from "../src/app";
+
+const app = createApp({
+  getSupported: async () => ({ kinds: [], extensions: [], signers: {} }),
+  verify: async () => ({ isValid: false }),
+  settle: async () => ({ success: false, transaction: "", network: "hedera:testnet" }),
+});
 
 describe("GET /health", () => {
   it("reports the service as healthy", async () => {

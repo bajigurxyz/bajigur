@@ -7,10 +7,10 @@ Every directory here is a deployable unit and a bun workspace named
 | --- | --- | --- | --- | --- |
 | `web` | Next.js 16, React 19, Tailwind v4 | 3000 | Axel | active |
 | `landingpage` | Next.js 16, React 19, Tailwind v4 | 3001 | Axel | active |
-| `api` | Bun + Hono | 3002 | Kiel | scaffolded |
+| `api` | Bun + Hono, x402 v2 on Hedera | 3002 | Kiel | active |
 | `ai` | undecided | — | unassigned | placeholder |
 | `indexer` | undecided | — | unassigned | placeholder |
-| `mcp` | undecided | — | unassigned | placeholder |
+| `mcp` | undecided | — | Kiel | planned, after `api` |
 
 Rules:
 
