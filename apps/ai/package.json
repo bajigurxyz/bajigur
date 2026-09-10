@@ -1,0 +1,7 @@
+{
+  "name": "@bajigur/ai",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AI generation and agent service (placeholder — not implemented yet)"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "@bajigur/indexer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Onchain indexer (placeholder — not implemented yet)"
+}

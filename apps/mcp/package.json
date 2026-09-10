@@ -1,0 +1,7 @@
+{
+  "name": "@bajigur/mcp",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server exposing the platform to Claude Desktop (placeholder — not implemented yet)"
+}
