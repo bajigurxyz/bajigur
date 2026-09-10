@@ -22,7 +22,7 @@ export function createServer(api: string, paid: Fetch, plain: Fetch = fetch, acc
     "my_licenses",
     {
       description:
-        "List the prompts this wallet already holds a licence for. Those can be fetched with get_prompt again for free, from any client.",
+        "List the prompts this wallet (Hedera account or ENS name such as agent.bajigur.eth) already holds a licence for. Those can be fetched with get_prompt again for free, from any client.",
       annotations: { readOnlyHint: true },
     },
     async () => {

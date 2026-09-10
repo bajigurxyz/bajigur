@@ -32,7 +32,8 @@ Add to Claude Desktop (`claude_desktop_config.json`):
         "HEDERA_OPERATOR_ID": "0.0.xxxxxxx",
         "HEDERA_OPERATOR_KEY": "<hex ecdsa private key>",
         "X402_MAX_SPEND_USD": "1",
-        "X402_PAY_WITH": "usdc"
+        "X402_PAY_WITH": "usdc",
+        "ENS_AGENT_NAME": "agent.bajigur.eth"
       }
     }
   }

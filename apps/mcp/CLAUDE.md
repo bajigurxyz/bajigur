@@ -18,7 +18,8 @@ prompts. Owned by Kiel. Design in
   `src/pay.ts`) so the API can recognise licence holders before the 402.
 - Environment: `BAJIGUR_API_URL`, `HEDERA_NETWORK`, `HEDERA_OPERATOR_ID`,
   `HEDERA_OPERATOR_KEY`, `X402_MAX_SPEND_USD` (cap per payment, default 1),
-  `X402_PAY_WITH` (`usdc` default, or `hbar` to prefer the HBAR option).
+  `X402_PAY_WITH` (`usdc` default, or `hbar` to prefer the HBAR option),
+  `ENS_AGENT_NAME` (optional, e.g. `agent.bajigur.eth`; used for `my_licenses`).
 - `bun run buy <prompt-id>` from the repo root buys a prompt from the terminal
   through the same tools; use it for demos and smoke tests.
 - Privy: `src/externalSigner.ts` builds the x402 transfer and signs it with
