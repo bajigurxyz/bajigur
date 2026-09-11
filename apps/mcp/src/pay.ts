@@ -1,7 +1,9 @@
+import { PublicKey } from "@hiero-ledger/sdk";
 import { x402Client } from "@x402/core/client";
 import { wrapFetchWithPayment } from "@x402/fetch";
 import { createClientHederaSigner, PrivateKey } from "@x402/hedera";
 import { ExactHederaScheme } from "@x402/hedera/exact/client";
+import { externalHederaSigner } from "./externalSigner";
 
 export function wallet() {
   const accountId = process.env.HEDERA_OPERATOR_ID;
@@ -52,4 +54,34 @@ export function paidFetch() {
       ...init,
       headers: { ...init?.headers, ...identityHeaders({ accountId, key }) },
     });
+}
+
+/// Agent-token mode: the API signs with the user's delegated Privy wallet; no key on this machine.
+export async function agentWallet(api: string, token: string) {
+  const headers = { authorization: `Bearer ${token}` };
+  const res = await fetch(`${api}/agent/me`, { headers });
+  if (!res.ok) throw new Error(`agent token rejected: ${res.status} ${await res.text()}`);
+  const me = (await res.json()) as { account: string; publicKey: string };
+  const signer = externalHederaSigner(
+    me.account,
+    PublicKey.fromStringECDSA(me.publicKey),
+    async (bodyBytes) => {
+      const r = await fetch(`${api}/agent/sign`, {
+        method: "POST",
+        headers: { ...headers, "content-type": "application/json" },
+        body: JSON.stringify({ bodyBytes: Buffer.from(bodyBytes).toString("base64") }),
+      });
+      if (!r.ok) throw new Error(`api refused to sign: ${r.status} ${await r.text()}`);
+      const { signature } = (await r.json()) as { signature: string };
+      return Buffer.from(signature, "hex");
+    },
+  );
+  const client = x402Client.fromConfig({
+    schemes: [{ network: "hedera:*", client: new ExactHederaScheme(signer) }],
+    spendControls: { maxAmountPerPayment: `$${process.env.X402_MAX_SPEND_USD ?? "1"}` },
+  });
+  const paying = wrapFetchWithPayment(fetch, client);
+  const paid = (input: string | URL, init?: RequestInit) =>
+    paying(input, { ...init, headers: { ...init?.headers, ...headers } });
+  return { account: me.account, paid };
 }

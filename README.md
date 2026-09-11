@@ -43,6 +43,7 @@ Proof transactions on Hedera testnet:
 | Agent pays 0.02 USDC over x402 | [0.0.9185802@1789055565.700887673](https://hashscan.io/testnet/transaction/0.0.9185802-1789055565-700887673) |
 | Agent pays 0.2 HBAR over x402 | [0.0.9185802@1789056622.039948026](https://hashscan.io/testnet/transaction/0.0.9185802-1789056622-039948026) |
 | Privy wallet pays over x402 | [0.0.9185802@1789059182.997299836](https://hashscan.io/testnet/transaction/0.0.9185802-1789059182-997299836) |
+| Agent token only (API signs via Privy) | [0.0.9185802@1789131132.231709809](https://hashscan.io/testnet/transaction/0.0.9185802-1789131132-231709809) |
 
 ## Architecture
 
@@ -59,7 +60,7 @@ Proof transactions on Hedera testnet:
 | Piece | Role |
 | --- | --- |
 | `apps/api` | Bun + Hono. Free catalogue and discovery; `GET /prompts/:id/unlock` is x402-gated with the prompt's own price and the creator's Hedera account as `payTo`. After settlement it writes to HCS and mints the licence. Licence holders skip the 402 by proving their wallet with a signed header. |
-| `apps/mcp` | Local stdio MCP server with an x402 client. Tools: `search_prompts`, `get_prompt` (pays if needed), `my_licenses`. Also the Privy signer (`externalHederaSigner`). |
+| `apps/mcp` | Local stdio MCP server with an x402 client. Tools: `search_prompts`, `get_prompt` (pays if needed), `my_licenses`. Pays either with a local Hedera key or, with `BAJIGUR_AGENT_TOKEN`, through the API and the user's delegated Privy wallet. |
 | `contracts/` | Foundry. `PromptRegistry` (Hedera): OpenZeppelin ERC-1155 + AccessControl; creators register and price their prompts, the API's `MINTER_ROLE` issues licences. `BajigurRegistrar` (Sepolia): ENSv2 subname registrar for `bajigur.eth`. `RegisterAgent` registers the service on ERC-8004. |
 | `apps/web`, `apps/landingpage` | Next.js. Privy sign-in, catalogue, purchases, licences. |
 
@@ -110,7 +111,9 @@ bun run privy:spike            # pay with a Privy server wallet (needs PRIVY_* v
 
 Claude Desktop: copy the block in [`apps/mcp/README.md`](apps/mcp/README.md)
 into `claude_desktop_config.json`, restart, then ask
-"find a marquee prompt on Bajigur and buy it".
+"find a marquee prompt on Bajigur and buy it". New users need no Hedera key:
+sign in on the web app, delegate the Privy wallet, and paste the agent token
+as `BAJIGUR_AGENT_TOKEN`.
 
 Requires [Bun](https://bun.sh) >= 1.3 and, for the contracts,
 [Foundry](https://getfoundry.sh).
@@ -121,7 +124,7 @@ Requires [Bun](https://bun.sh) >= 1.3 and, for the contracts,
 | --- | --- |
 | Hedera — AI & Agentic Payments | Live x402 service settled by Blocky402; MCP client completes real paid requests. Extras: per-prompt pricing, USDC (HTS) and HBAR in the settlement path, HCS audit trail, discovery directory, ERC-8004 agent 111. |
 | Bazantic — Recipes | Live gateway `tuguge4rzbcsvgrevhkkjf43em` (https://tuguge4rzbcsvgrevhkkjf43em.bazgateway.com, MCP at `/mcp`) over this API's OpenAPI; catalogue free, unlock $0.10; published Recipe **`design-prompt-finder`** (source: [`docs/bazantic/recipe.json`](docs/bazantic/recipe.json)). |
-| Privy — Financial Flow, B2B | A Privy wallet funds, pays over x402 and receives the licence (proof above); organisation wallet with a spending policy in the web app. |
+| Privy — Financial Flow, B2B | Users delegate their Privy embedded wallet to Bajigur's signer (a Privy key quorum); the API onboards it on Hedera, funds it, and signs x402 payments through Privy `secp256k1_sign` only for transfers that pass per-token caps (proof: `0.0.9185802@1789131132.231709809`, paid with an agent token and no local key). One wallet, many capped agent tokens is the B2B story. |
 | ENS — Best Use of ENSv2 | `bajigur.eth` with its own ENSv2 subregistry on Sepolia and a `BajigurRegistrar` with our rules (one free name per wallet, own resolver, 10 years). Creators (`kiel.`, `axel.`) and agents (`agent.`) are subnames they own; the API resolves each creator's Hedera payout from its `bajigur.hedera` text record at 402 time and accepts names in `/licenses/:name`. Nothing hardcoded: change the record, the payout changes. |
 
 ## Layout

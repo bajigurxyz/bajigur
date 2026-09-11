@@ -2,14 +2,28 @@ import { APP_NAME } from "@bajigur/core";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { type AgentOptions, agentRoutes } from "./agent";
 import { hederaAccountOf } from "./ens";
 import { agentCard, openapi } from "./meta";
-import { findPrompt, platformAccount, prompts, publicPrompt } from "./prompts";
+import { findPrompt, payToOf, platformAccount, prompts, publicPrompt } from "./prompts";
 import { requirementsFor, service, type X402Options, x402 } from "./x402";
 
-export function createApp(options: X402Options = {}) {
+export type AppOptions = X402Options & { agent?: Omit<AgentOptions, "allowedPayTo"> };
+
+export function createApp({ agent, ...options }: AppOptions = {}) {
   platformAccount();
   const app = new Hono();
+
+  let identity = options.identity;
+  if (agent) {
+    const allowedPayTo = async () =>
+      new Set(await Promise.all(prompts.map((p) => payToOf(p, options.ens))));
+    const routes = agentRoutes({ ...agent, allowedPayTo });
+    app.route("/agent", routes.app);
+    const fallback = options.identity;
+    identity = async (headers) =>
+      (await routes.identity(headers)) ?? (fallback ? fallback(headers) : undefined);
+  }
 
   app.use("*", logger());
   app.use("*", cors());
@@ -69,7 +83,7 @@ export function createApp(options: X402Options = {}) {
   app.use("/prompts/:id/unlock", async (c, next) =>
     findPrompt(c.req.param("id")) ? await next() : c.notFound(),
   );
-  app.use(x402(options));
+  app.use(x402({ ...options, identity }));
   app.get("/prompts/:id/unlock", (c) => {
     const prompt = findPrompt(c.req.param("id"));
     return prompt ? c.json({ id: prompt.id, body: prompt.body }) : c.notFound();

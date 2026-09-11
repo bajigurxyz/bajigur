@@ -73,7 +73,22 @@
   API falls back to `X402_PAY_TO_ADDRESS`. `scripts/ens-setup.sh` did the
   onchain setup (name, OwnedResolver, UserRegistry subregistry, subnames,
   records) with the platform key via `ens-cli` + `cast`.
-- Still to come: Privy calls, creator publishing from the web app.
+- Agent wallets (Privy delegated signing), `src/agent.ts`: a user delegates their
+  Privy embedded wallet to Bajigur's signer (key quorum `PRIVY_SIGNER_ID`,
+  private half `PRIVY_AUTHORIZATION_KEY`); `POST /agent/link` verifies the Privy
+  access token (`PRIVY_VERIFICATION_KEY`), recovers the wallet's public key from
+  a `secp256k1_sign`, creates/completes its Hedera account (platform sends
+  `AGENT_FUND_HBAR`, associates USDC with a Privy-signed tx, tops up
+  `AGENT_FUND_USDC` best-effort) and issues an HS256 agent token
+  (`AGENT_TOKEN_SECRET`) carrying wallet id, account, public key and
+  `AGENT_CAP_USD`. `POST /agent/sign` decodes the Hedera transaction body and
+  signs it through Privy only if it debits the agent's own account, credits a
+  known creator payTo, and stays under the caps (`AGENT_CAP_USD`,
+  `AGENT_CAP_HBAR`). A bearer agent token also serves as identity for licence
+  holders. `x-bajigur-admin: ADMIN_KEY` lets `/agent/link` take a raw
+  `{walletId, address}` for app-owned wallets (tests, demos). Privy policies
+  cannot gate `secp256k1_sign`, so caps live here, not in Privy.
+- Still to come: creator publishing from the web app.
 
 ## Layout
 
@@ -85,6 +100,7 @@ src/
   registry.ts PromptRegistry client + signed wallet identity
   meta.ts     openapi.json and the ERC-8004 agent card
   ens.ts      ENSv2 text-record resolver (Sepolia)
+  agent.ts    agent tokens, Privy delegated signing, transfer checks
   x402.ts     x402 middleware
   index.ts    Bun server entry (port binding only)
 test/

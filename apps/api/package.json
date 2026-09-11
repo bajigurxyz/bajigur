@@ -14,7 +14,11 @@
   },
   "dependencies": {
     "@bajigur/core": "workspace:*",
+    "@hiero-ledger/proto": "2.31.0",
     "@hiero-ledger/sdk": "2.85.0",
+    "@noble/curves": "1.8.1",
+    "@noble/hashes": "1.7.1",
+    "@privy-io/node": "0.34.0",
     "@x402/core": "2.25.0",
     "@x402/extensions": "2.25.0",
     "@x402/hedera": "2.25.0",

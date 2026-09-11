@@ -1,6 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { paidFetch } from "../src/pay";
+import { agentWallet, paidFetch } from "../src/pay";
 import { createServer } from "../src/server";
 
 const id = process.argv[2];
@@ -9,8 +9,11 @@ if (!id) {
   process.exit(1);
 }
 
+const api = process.env.BAJIGUR_API_URL ?? "http://localhost:3002";
+const token = process.env.BAJIGUR_AGENT_TOKEN;
+const paid = token ? (await agentWallet(api, token)).paid : paidFetch();
 const [a, b] = InMemoryTransport.createLinkedPair();
-await createServer(process.env.BAJIGUR_API_URL ?? "http://localhost:3002", paidFetch()).connect(a);
+await createServer(api, paid).connect(a);
 const client = new Client({ name: "bajigur-cli", version: "0" });
 await client.connect(b);
 

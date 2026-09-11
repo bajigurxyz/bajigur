@@ -40,7 +40,12 @@ Add to Claude Desktop (`claude_desktop_config.json`):
 }
 ```
 
-Pay with a Privy server wallet instead of a raw key: set `NEXT_PUBLIC_PRIVY_APP_ID`,
+Recommended for users: no key at all. Sign in on the web app, delegate your
+Privy wallet to Bajigur, and put the agent token it gives you in the config as
+`BAJIGUR_AGENT_TOKEN` (drop `HEDERA_OPERATOR_*`). The API then signs every
+payment through Privy, capped per payment.
+
+Pay with a Privy server wallet from a script instead: set `NEXT_PUBLIC_PRIVY_APP_ID`,
 `PRIVY_APP_SECRET` and `PRIVY_WALLET_ID`, send the wallet some HBAR, then run
 `bun run privy:associate` once and `bun run privy:spike <prompt-id>`.
 

@@ -126,7 +126,12 @@ export function x402({ facilitator, onSettled, registry, identity, ens }: X402Op
       const prompt = promptFromPath(path);
       if (!registry || !identity || !prompt?.registryId) return;
       const headers = new Headers();
-      for (const name of ["x-hedera-account", "x-hedera-timestamp", "x-hedera-signature"]) {
+      for (const name of [
+        "authorization",
+        "x-hedera-account",
+        "x-hedera-timestamp",
+        "x-hedera-signature",
+      ]) {
         const value = adapter.getHeader(name);
         if (value) headers.set(name, value);
       }

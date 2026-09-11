@@ -90,8 +90,11 @@ gateway `tuguge4rzbcsvgrevhkkjf43em` active and Recipe `design-prompt-finder`
 published (track dropped in favour of ENS). ENS: `bajigur.eth` on ENSv2 Sepolia
 with our own subregistry and `BajigurRegistrar` (0x1eb7…9756, one free name per
 wallet); `kiel.`, `axel.` (self-claimed) and `agent.` subnames; the 402 payTo is
-read from the creator's `bajigur.hedera` record. Web/Privy UI
-pending (Axel).
+read from the creator's `bajigur.hedera` record. Agent wallets: Privy delegated signing
+through the API (`/agent/link`, `/agent/sign`, HS256 agent token, per-token
+caps) verified end to end with an app-owned Privy wallet. Web/Privy UI pending
+(Axel): login, `addSigners` with `PRIVY_SIGNER_ID`, call `/agent/link`, show
+the agent token.
 
 1. `apps/api`: x402 v2 middleware, prompt endpoints, Blocky402 settlement.
 2. `apps/mcp`: MCP server with an x402 client so Claude Desktop can pay.

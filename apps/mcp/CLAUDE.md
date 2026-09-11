@@ -16,6 +16,10 @@ prompts. Owned by Kiel. Design in
   `my_licenses` (what the wallet holds onchain).
 - Every request carries signed identity headers (`identityHeaders` in
   `src/pay.ts`) so the API can recognise licence holders before the 402.
+- Agent-token mode: with `BAJIGUR_AGENT_TOKEN` set, `agentWallet()` in
+  `src/pay.ts` fetches `/agent/me`, builds the x402 transfer locally and sends
+  its body to `/agent/sign`, where the API signs with the user's delegated
+  Privy wallet. No Hedera key on this machine; `HEDERA_OPERATOR_*` unused.
 - Environment: `BAJIGUR_API_URL`, `HEDERA_NETWORK`, `HEDERA_OPERATOR_ID`,
   `HEDERA_OPERATOR_KEY`, `X402_MAX_SPEND_USD` (cap per payment, default 1),
   `X402_PAY_WITH` (`usdc` default, or `hbar` to prefer the HBAR option),
