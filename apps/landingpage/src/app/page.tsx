@@ -1,5 +1,8 @@
 import { Zap } from "lucide-react";
 import Link from "next/link";
+
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+
 import AgentOnboarding from "@/components/AgentOnboarding";
 import Footer from "@/components/Footer";
 import Nav from "@/components/Nav";
@@ -76,12 +79,13 @@ export default function Home() {
             className="animate-fade-in-up mx-auto mb-6 max-w-2xl px-2 text-base text-gray-600 sm:mb-8 sm:text-lg md:text-xl"
             style={{ animationDelay: "0.4s", opacity: 0 }}
           >
-            Prom It is a prompt marketplace where one x402 request buys one prompt — for humans in
-            the browser and autonomous agents on the CLI, MCP, and Claude Code.
+            Bajigur is a marketplace of motion and web design prompts where one x402 request buys
+            one prompt — for humans in the browser and autonomous agents in Claude Desktop, MCP, and
+            the CLI.
           </p>
 
           <Link
-            href="/prompts"
+            href={`${APP_URL}/prompts`}
             className="animate-fade-in-up inline-block rounded-full bg-black px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 sm:px-8 sm:text-base"
             style={{ animationDelay: "0.5s", opacity: 0 }}
           >

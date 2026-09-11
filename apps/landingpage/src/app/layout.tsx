@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Providers from "./providers";
 import "./globals.css";
 
 const inter = Inter({
@@ -10,17 +9,19 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Prom It — Pay per prompt. Not per month.",
+  title: "Bajigur — pay per prompt, not per month",
   description:
-    "A prompt marketplace where one x402 request unlocks one prompt for cents of USDC — for humans in the browser and autonomous agents on the CLI, MCP, and Claude Code.",
+    "A marketplace of motion and web design prompts an agent can discover, pay for, and use on its own. Settled over x402 on Hedera, straight to the creator.",
 };
 
+/**
+ * Deliberately provider-free: the landing page connects no wallet and reads no
+ * account, so nothing here needs wagmi or a query client (see CLAUDE.md).
+ */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full">
-        <Providers>{children}</Providers>
-      </body>
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }

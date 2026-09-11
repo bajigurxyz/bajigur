@@ -13,7 +13,7 @@ manager.
   `src/components/Footer.tsx`. Nav owns the mobile-menu state; its overlay is
   rendered as a sibling of `<nav>` so it positions against the page's
   `relative` root, not the nav bar.
-- Nav pakai logo `public/promit-logo.png` (128×128 transparan, di-resize
+- Nav pakai logo `public/logo.png` (128×128 transparan, di-resize
   dari aset 500px milik owner; varian 733 KB berlatar putih sudah dihapus)
   via next/image dengan width/height eksplisit dan alt "Promit" — logonya
   adalah LINK ke beranda, jadi alt kosong dilarang (link tanpa nama bagi

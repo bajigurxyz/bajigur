@@ -6,22 +6,18 @@ import Link from "next/link";
 import { useState } from "react";
 
 /**
- * Every nav item points at a surface that actually exists. Do not add an item
- * here before its page does — a control that does nothing is an empty promise.
- *
- * The gallery, creator and earnings surfaces live in apps/web, which is a
- * separate origin in development and deployment, so these are absolute URLs
- * built from NEXT_PUBLIC_APP_URL rather than Next routes.
+ * Setiap item nav MENUNJUK ke permukaan yang benar-benar ada. Versi lama
+ * membawa sisa template SaaS — "Log in" (Prom It tidak punya login;
+ * identitas adalah wallet), "For Agents"/"Docs" sebagai tombol mati dengan
+ * dropdown palsu, dan "Start selling" yang tidak menunjuk ke mana-mana.
+ * Tombol yang tidak melakukan apa-apa adalah janji kosong; jangan
+ * menambahkan item di sini sebelum halamannya ada.
  */
-const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
-
 const NAV_LINKS: { label: string; href: string }[] = [
-  { label: "Gallery", href: `${APP_URL}/prompts` },
-  { label: "For Creators", href: `${APP_URL}/list` },
-  { label: "Earnings", href: `${APP_URL}/earnings` },
+  { label: "Gallery", href: "/prompts" },
+  { label: "For Creators", href: "/list" },
+  { label: "Earnings", href: "/earnings" },
 ];
-
-const SELL_URL = `${APP_URL}/list`;
 
 export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -60,7 +56,7 @@ export default function Nav() {
 
         <div className="hidden items-center gap-4 sm:flex">
           <Link
-            href={SELL_URL}
+            href="/list"
             className="rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-800"
           >
             Start selling
@@ -93,7 +89,7 @@ export default function Nav() {
             ))}
             <div className="flex flex-col gap-4 border-t border-gray-200 pt-4">
               <Link
-                href={SELL_URL}
+                href="/list"
                 onClick={() => setMenuOpen(false)}
                 className="w-full rounded-full bg-black px-5 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800"
               >
