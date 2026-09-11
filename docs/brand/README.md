@@ -1,10 +1,10 @@
 # Bajigur brand
 
-Generated with Higgsfield (Recraft V4.1 for the mark, GPT Image 2 for the wordmark).
+Generated with Higgsfield (Recraft V4.1 vector for the mark, GPT Image 2 for the wordmark).
 
 | File | Use |
 | --- | --- |
-| `mark.svg` / `mark.png` | Brand mark: a cup whose steam curls into a B. Favicon, app icon, MCP icon. |
-| `wordmark.png` | Wordmark: lowercase `bajigur`, high-contrast serif, steam replaces the dot of the j. Headers, landing page, video title card. |
+| `mark.svg` / `mark.png` | Brand mark: a heavy geometric B sliced by one diagonal cut. Favicon, app icon, MCP icon, avatar. |
+| `wordmark.png` | Wordmark: `BAJIGUR` in a wide heavy grotesk. Headers, landing page, video title card. |
 
-Palette: gold `#C9A227` (rendered as `#D4B27A`) on black `#0B0B0B`. Keep generous empty space around both.
+Palette: gold `#D4B46A` on black `#000000`. Bold, modern, no illustration. Keep generous empty space around both; never stretch, outline, or add gradients.
