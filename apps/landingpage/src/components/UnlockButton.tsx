@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useAccount, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
-import { baseSepolia } from "wagmi/chains";
+import { PaymentRefusedError } from "@bajigur/x402-client";
 import {
   AlertTriangle,
   Check,
@@ -13,16 +11,18 @@ import {
   ShieldCheck,
   Unlock,
 } from "lucide-react";
-import { PaymentRefusedError } from "@promit/x402-client";
+import { useEffect, useRef, useState } from "react";
+import { useAccount, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
+import { baseSepolia } from "wagmi/chains";
 import WalletButton from "@/components/WalletButton";
 import { fetchOwnedUnlocks, formatUsdc, type PublicCatalogEntry } from "@/lib/api";
 import { fetchOwnedPrompt } from "@/lib/entitlement";
 import {
   SignatureRejectedError,
+  type UnlockedPrompt,
   UnlockFailedError,
   unlockPrompt,
   wagmiClientSigner,
-  type UnlockedPrompt,
 } from "@/lib/unlock";
 
 /**
@@ -206,10 +206,7 @@ export default function UnlockButton({ entry }: { entry: PublicCatalogEntry }) {
   return (
     <div className="flex flex-col gap-2">
       {alreadyOwned && (
-        <p
-          role="status"
-          className="flex items-center gap-1.5 text-sm font-medium text-green-700"
-        >
+        <p role="status" className="flex items-center gap-1.5 text-sm font-medium text-green-700">
           <Check aria-hidden className="h-4 w-4" />
           You already own this prompt — you will not be charged again.
         </p>
@@ -221,14 +218,13 @@ export default function UnlockButton({ entry }: { entry: PublicCatalogEntry }) {
         <PenLine aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         {alreadyOwned ? (
           <span>
-            Viewing asks your wallet for a free <strong>signature</strong> that
-            proves ownership — it is not a transaction, it needs no gas, and
-            nothing is paid again.
+            Viewing asks your wallet for a free <strong>signature</strong> that proves ownership —
+            it is not a transaction, it needs no gas, and nothing is paid again.
           </span>
         ) : (
           <span>
-            Unlocking asks your wallet for a <strong>signature</strong> on a USDC
-            payment message — it is not a transaction, and it needs no gas.
+            Unlocking asks your wallet for a <strong>signature</strong> on a USDC payment message —
+            it is not a transaction, and it needs no gas.
           </span>
         )}
       </p>
@@ -263,8 +259,7 @@ export default function UnlockButton({ entry }: { entry: PublicCatalogEntry }) {
       {!alreadyOwned && wrongChain && (
         <div className="flex flex-col gap-2">
           <p className="text-sm text-gray-600">
-            Your wallet is on the wrong network — Promit pays on Base Sepolia
-            only.
+            Your wallet is on the wrong network — Promit pays on Base Sepolia only.
           </p>
           <button
             type="button"
@@ -307,14 +302,13 @@ export default function UnlockButton({ entry }: { entry: PublicCatalogEntry }) {
         )}
         {phase.name === "settling" && (
           <p className="text-xs text-gray-600">
-            Signature received. The facilitator is verifying and settling your
-            USDC payment on Base Sepolia…
+            Signature received. The facilitator is verifying and settling your USDC payment on Base
+            Sepolia…
           </p>
         )}
         {phase.name === "settling" && phase.slow && (
           <p className="text-xs text-gray-600">
-            Still settling — this round trip can take a few more seconds. Keep
-            this page open.
+            Still settling — this round trip can take a few more seconds. Keep this page open.
           </p>
         )}
       </div>
@@ -335,13 +329,7 @@ export default function UnlockButton({ entry }: { entry: PublicCatalogEntry }) {
   );
 }
 
-function UnlockedView({
-  entry,
-  result,
-}: {
-  entry: PublicCatalogEntry;
-  result: UnlockedPrompt;
-}) {
+function UnlockedView({ entry, result }: { entry: PublicCatalogEntry; result: UnlockedPrompt }) {
   const hashOk =
     result.hashCheck.ok &&
     (result.responseContentHash === "" || result.responseContentHash === entry.contentHash);
@@ -359,8 +347,7 @@ function UnlockedView({
         <p className="flex items-start gap-1.5 text-xs text-gray-600">
           <ShieldCheck aria-hidden className="mt-0.5 h-3.5 w-3.5 shrink-0 text-green-700" />
           <span>
-            Content hash verified: the delivered text matches the published
-            hash{" "}
+            Content hash verified: the delivered text matches the published hash{" "}
             <span className="font-mono break-all">{result.hashCheck.expectedHash}</span>.
           </span>
         </p>
@@ -374,8 +361,8 @@ function UnlockedView({
             Content hash MISMATCH
           </p>
           <p className="text-xs">
-            The delivered text does not hash to the value published in the
-            catalog. Treat this prompt as tampered with and do not rely on it.
+            The delivered text does not hash to the value published in the catalog. Treat this
+            prompt as tampered with and do not rely on it.
           </p>
           <dl className="text-xs">
             <div className="flex gap-1">

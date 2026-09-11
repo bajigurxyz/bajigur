@@ -1,13 +1,13 @@
 import {
-  createPromitFetch,
-  verifyContentHash,
-  SessionCapExceededError,
-  SpendLedgerCorruptError,
   type ClientEvmSigner,
   type ContentHashCheck,
+  createPromitFetch,
   type FetchLike,
+  SessionCapExceededError,
   type SpendLedger,
-} from "@promit/x402-client";
+  SpendLedgerCorruptError,
+  verifyContentHash,
+} from "@bajigur/x402-client";
 
 import { promptUrl } from "./api";
 
@@ -15,7 +15,7 @@ import { promptUrl } from "./api";
  * The browser side of the shared payment client (U6, KTD19). Everything
  * safety-critical — the policy filter, the cap comparison, the
  * charge-before-signature ordering, the content-hash rule — is imported from
- * `@promit/x402-client`; this module only supplies what a browser cannot get
+ * `@bajigur/x402-client`; this module only supplies what a browser cannot get
  * from the package: a Storage-backed spend ledger (the package's file ledger
  * needs node:fs) and a signer bridged from wagmi.
  */
@@ -52,7 +52,10 @@ export function createBrowserSpendLedger(storage?: Storage): SpendLedger {
     }
     if (raw === null) return 0n;
     if (!/^\d+$/.test(raw)) {
-      throw new SpendLedgerCorruptError(SPEND_KEY, "spentAtomic is not a non-negative integer string");
+      throw new SpendLedgerCorruptError(
+        SPEND_KEY,
+        "spentAtomic is not a non-negative integer string",
+      );
     }
     return BigInt(raw);
   };
@@ -131,7 +134,9 @@ export function wagmiClientSigner(
 /** The user declined the wallet's signature request. Not a failure — idle. */
 export class SignatureRejectedError extends Error {
   constructor() {
-    super("The signature request was declined in the wallet. Nothing was signed and nothing was spent.");
+    super(
+      "The signature request was declined in the wallet. Nothing was signed and nothing was spent.",
+    );
     this.name = "SignatureRejectedError";
   }
 }

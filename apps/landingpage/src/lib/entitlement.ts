@@ -1,11 +1,11 @@
-import { verifyContentHash } from "@promit/x402-client";
+import { verifyContentHash } from "@bajigur/x402-client";
 
 import { promptUrl } from "./api";
 import {
-  SignatureRejectedError,
-  UnlockFailedError,
   isUserRejection,
+  SignatureRejectedError,
   type UnlockedPrompt,
+  UnlockFailedError,
 } from "./unlock";
 
 /**

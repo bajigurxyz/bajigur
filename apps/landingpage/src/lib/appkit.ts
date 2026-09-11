@@ -16,8 +16,7 @@ import { networks, projectId, wagmiAdapter } from "@/lib/wagmi";
 // Wallets show this metadata in their connect prompt and verify `url`
 // against the requesting origin — a hardcoded domain would mismatch
 // localhost and every preview deploy.
-const origin =
-  typeof window === "undefined" ? "http://localhost:3000" : window.location.origin;
+const origin = typeof window === "undefined" ? "http://localhost:3000" : window.location.origin;
 
 createAppKit({
   adapters: [wagmiAdapter],

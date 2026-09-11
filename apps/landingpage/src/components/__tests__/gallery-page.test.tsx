@@ -39,9 +39,7 @@ describe("gallery grid", () => {
       // Every mirrored entry shows its preview media; videos are labelled
       // via aria-label, images via alt text.
       const preview =
-        entry.mediaType === "video"
-          ? card.querySelector("video")
-          : card.querySelector("img");
+        entry.mediaType === "video" ? card.querySelector("video") : card.querySelector("img");
       expect(preview, `${entry.id} preview`).not.toBeNull();
     }
   });
@@ -77,9 +75,7 @@ describe("category filter", () => {
     fireEvent.click(screen.getByRole("button", { name: "Hero" }));
     expect(screen.getAllByRole("article")).toHaveLength(1);
     expect(screen.getByText("Test Prompt")).toBeTruthy();
-    expect(
-      screen.getByRole("button", { name: "Hero" }).getAttribute("aria-pressed"),
-    ).toBe("true");
+    expect(screen.getByRole("button", { name: "Hero" }).getAttribute("aria-pressed")).toBe("true");
 
     fireEvent.click(screen.getByRole("button", { name: "All" }));
     expect(screen.getAllByRole("article")).toHaveLength(entries.length);

@@ -1,7 +1,7 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { useAccount, useDisconnect } from "wagmi";
 import { useAppKit } from "@reown/appkit/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { useAccount, useDisconnect } from "wagmi";
 
 import WalletButton, { truncateAddress } from "@/components/WalletButton";
 
@@ -21,10 +21,7 @@ const ADDRESS = "0x1111111111111111111111111111111111112222" as const;
 const open = vi.fn();
 const disconnect = vi.fn();
 
-function mockConnection(overrides: {
-  isConnected?: boolean;
-  address?: typeof ADDRESS;
-} = {}) {
+function mockConnection(overrides: { isConnected?: boolean; address?: typeof ADDRESS } = {}) {
   vi.mocked(useAppKit).mockReturnValue({
     open,
   } as unknown as ReturnType<typeof useAppKit>);

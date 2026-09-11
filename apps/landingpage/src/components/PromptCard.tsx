@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { Sparkles, Unlock } from "lucide-react";
-import MediaPreview from "@/components/MediaPreview";
+import Link from "next/link";
 import CopyPromptButton from "@/components/CopyPromptButton";
+import MediaPreview from "@/components/MediaPreview";
 import { formatUsdc, type PublicCatalogEntry } from "@/lib/api";
 
 /**

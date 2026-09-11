@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { RotateCcw } from "lucide-react";
-import Nav from "@/components/Nav";
+import { useEffect, useState } from "react";
 import CategoryFilter from "@/components/CategoryFilter";
-import TierFilter from "@/components/TierFilter";
+import Nav from "@/components/Nav";
 import PromptCard from "@/components/PromptCard";
-import { fetchCatalog, type Category, type PublicCatalogEntry, type Tier } from "@/lib/api";
+import TierFilter from "@/components/TierFilter";
+import { type Category, fetchCatalog, type PublicCatalogEntry, type Tier } from "@/lib/api";
 
 /**
  * The gallery. Fetches the full public catalog once and filters
@@ -59,8 +59,7 @@ export default function PromptsPage() {
     load.phase === "ready"
       ? load.entries.filter(
           (e) =>
-            (category === null || e.category === category) &&
-            (tier === null || e.tier === tier),
+            (category === null || e.category === category) && (tier === null || e.tier === tier),
         )
       : [];
 
@@ -77,23 +76,15 @@ export default function PromptsPage() {
       <Nav />
 
       <main className="mx-auto max-w-7xl px-4 pt-8 pb-24 sm:px-6">
-        <header
-          className="animate-fade-in-up mb-8"
-          style={{ animationDelay: "0.1s", opacity: 0 }}
-        >
-          <h1 className="mb-2 text-3xl font-normal tracking-tight sm:text-4xl">
-            Prompt gallery
-          </h1>
+        <header className="animate-fade-in-up mb-8" style={{ animationDelay: "0.1s", opacity: 0 }}>
+          <h1 className="mb-2 text-3xl font-normal tracking-tight sm:text-4xl">Prompt gallery</h1>
           <p className="max-w-2xl text-sm text-gray-600 sm:text-base">
-            Every preview below is real output. Free prompts copy straight to
-            your clipboard; paid prompts unlock for cents of USDC over x402.
+            Every preview below is real output. Free prompts copy straight to your clipboard; paid
+            prompts unlock for cents of USDC over x402.
           </p>
         </header>
 
-        <div
-          className="animate-fade-in-up mb-8"
-          style={{ animationDelay: "0.2s", opacity: 0 }}
-        >
+        <div className="animate-fade-in-up mb-8" style={{ animationDelay: "0.2s", opacity: 0 }}>
           <CategoryFilter selected={category} onSelect={setCategory} />
           <div className="mt-3">
             <TierFilter selected={tier} onSelect={setTier} />
@@ -101,7 +92,11 @@ export default function PromptsPage() {
         </div>
 
         {load.phase === "pending" && (
-          <div role="status" aria-label="Loading prompts" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            role="status"
+            aria-label="Loading prompts"
+            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          >
             {Array.from({ length: 6 }, (_, i) => (
               <div
                 key={i}
@@ -115,12 +110,10 @@ export default function PromptsPage() {
 
         {load.phase === "error" && (
           <div role="alert" className="rounded-2xl border border-gray-200 px-6 py-16 text-center">
-            <p className="mb-1 text-sm font-medium text-black">
-              The catalog didn&apos;t load
-            </p>
+            <p className="mb-1 text-sm font-medium text-black">The catalog didn&apos;t load</p>
             <p className="mb-5 text-sm text-gray-600">
-              The Prom It API isn&apos;t reachable right now. Check that the
-              backend is running, then try again.
+              The Prom It API isn&apos;t reachable right now. Check that the backend is running,
+              then try again.
             </p>
             <button
               type="button"
@@ -136,9 +129,7 @@ export default function PromptsPage() {
         {load.phase === "ready" && visible.length === 0 && (
           <div className="rounded-2xl border border-gray-200 px-6 py-16 text-center">
             <p className="mb-1 text-sm font-medium text-black">
-              {activeFilters === ""
-                ? "The catalog is empty"
-                : `No prompts match ${activeFilters}`}
+              {activeFilters === "" ? "The catalog is empty" : `No prompts match ${activeFilters}`}
             </p>
             <p className="mb-5 text-sm text-gray-600">
               {activeFilters === ""

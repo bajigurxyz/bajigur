@@ -54,9 +54,7 @@ describe("prompt detail", () => {
     stubCatalogFetch([freeVideoEntry]);
     renderPage();
 
-    expect(
-      await screen.findByRole("heading", { name: "Prompt not found" }),
-    ).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Prompt not found" })).toBeTruthy();
     // The dead end offers a way back to the gallery.
     expect(screen.getByRole("link", { name: "Browse the gallery" })).toBeTruthy();
   });
@@ -66,9 +64,7 @@ describe("prompt detail", () => {
     stubCatalogFetch([freeVideoEntry]);
     renderPage();
 
-    expect(
-      await screen.findByRole("heading", { name: freeVideoEntry.title }),
-    ).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: freeVideoEntry.title })).toBeTruthy();
     expect(screen.getByText(freeVideoEntry.attribution.note)).toBeTruthy();
     expect(
       screen.getByRole("button", {

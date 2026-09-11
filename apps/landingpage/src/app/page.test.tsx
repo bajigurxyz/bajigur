@@ -36,9 +36,7 @@ describe("landing page branding", () => {
 describe("landing page media", () => {
   it("loads no media from a host outside the app's own origin", () => {
     const { container } = render(<Home />);
-    const urls = Array.from(
-      container.querySelectorAll("video, source, img, audio"),
-    )
+    const urls = Array.from(container.querySelectorAll("video, source, img, audio"))
       .flatMap((el) => [el.getAttribute("src"), el.getAttribute("poster")])
       .filter((url): url is string => Boolean(url));
     expect(urls.length).toBeGreaterThan(0);

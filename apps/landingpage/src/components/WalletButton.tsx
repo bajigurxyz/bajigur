@@ -1,8 +1,8 @@
 "use client";
 
 import { useAppKit } from "@reown/appkit/react";
-import { useAccount, useDisconnect } from "wagmi";
 import { Wallet } from "lucide-react";
+import { useAccount, useDisconnect } from "wagmi";
 
 /** `0x1234…abcd` — enough to recognize, short enough for a button. */
 export function truncateAddress(address: string): string {

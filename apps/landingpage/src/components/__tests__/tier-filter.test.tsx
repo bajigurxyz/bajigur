@@ -32,8 +32,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const clickPill = (name: string | RegExp) =>
-  fireEvent.click(screen.getByRole("button", { name }));
+const clickPill = (name: string | RegExp) => fireEvent.click(screen.getByRole("button", { name }));
 
 const titles = () =>
   screen.queryAllByRole("article").map((card) => card.getAttribute("aria-label") ?? "");
@@ -44,9 +43,9 @@ describe("tier filter", () => {
     render(<PromptsPage />);
 
     expect(await screen.findAllByRole("article")).toHaveLength(2);
-    expect(
-      screen.getByRole("button", { name: "All prices" }).getAttribute("aria-pressed"),
-    ).toBe("true");
+    expect(screen.getByRole("button", { name: "All prices" }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
   });
 
   it("narrows to free entries", async () => {
@@ -87,7 +86,11 @@ describe("tier filter", () => {
     // Two free entries in different categories plus one paid entry. Picking
     // the paid entry's category AND Premium must leave exactly it standing.
     const paid = paidEntry;
-    const sameCategoryFree = makeEntry({ ...freeVideoEntry, id: "free-twin", category: paid.category });
+    const sameCategoryFree = makeEntry({
+      ...freeVideoEntry,
+      id: "free-twin",
+      category: paid.category,
+    });
     stubCatalogFetch([freeImageEntry, sameCategoryFree, paid]);
     render(<PromptsPage />);
     await screen.findAllByRole("article");

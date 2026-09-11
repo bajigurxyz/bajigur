@@ -1,17 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import { useAccount } from "wagmi";
+import ClaimButton from "@/components/ClaimButton";
 import Nav from "@/components/Nav";
 import WalletButton from "@/components/WalletButton";
-import ClaimButton from "@/components/ClaimButton";
-import {
-  fetchCreatorDashboard,
-  formatUsdc,
-  type CreatorDashboard,
-} from "@/lib/api";
+import { type CreatorDashboard, fetchCreatorDashboard, formatUsdc } from "@/lib/api";
 
 /**
  * The creator's side of the marketplace: what they listed, who bought it, and
@@ -43,10 +39,19 @@ export default function EarningsPage() {
     [],
   );
 
+  // React's documented "adjust state during render" pattern: switching wallets
+  // has to show the spinner again, and doing that from inside the effect makes
+  // every refetch cascade an extra render (react-hooks/set-state-in-effect).
+  const fetchKey = `${address ?? ""}:${attempt}`;
+  const [loadedFor, setLoadedFor] = useState(fetchKey);
+  if (loadedFor !== fetchKey) {
+    setLoadedFor(fetchKey);
+    setLoad({ phase: "pending" });
+  }
+
   useEffect(() => {
     if (!address) return;
     let cancelled = false;
-    setLoad({ phase: "pending" });
     fetchCreatorDashboard(address)
       .then((data) => {
         if (!cancelled) setLoad({ phase: "ready", data });
@@ -67,12 +72,10 @@ export default function EarningsPage() {
 
       <main className="mx-auto max-w-5xl px-4 pt-8 pb-24 sm:px-6">
         <header className="mb-8">
-          <h1 className="mb-2 text-3xl font-normal tracking-tight sm:text-4xl">
-            Your earnings
-          </h1>
+          <h1 className="mb-2 text-3xl font-normal tracking-tight sm:text-4xl">Your earnings</h1>
           <p className="max-w-2xl text-sm text-gray-600 sm:text-base">
-            Every prompt you have listed, how many people bought it, and what it
-            earned. Amounts settle in USDC on Base Sepolia.
+            Every prompt you have listed, how many people bought it, and what it earned. Amounts
+            settle in USDC on Base Sepolia.
           </p>
         </header>
 
@@ -82,9 +85,8 @@ export default function EarningsPage() {
               Connect a wallet to see your listings
             </p>
             <p className="mb-5 text-sm text-gray-600">
-              Your wallet address is the creator identity, so there is nothing
-              to log into. Nothing here is private, it just needs to know whose
-              earnings to show.
+              Your wallet address is the creator identity, so there is nothing to log into. Nothing
+              here is private, it just needs to know whose earnings to show.
             </p>
             <div className="flex justify-center">
               <WalletButton />
@@ -103,12 +105,10 @@ export default function EarningsPage() {
 
         {isConnected && load.phase === "error" && (
           <div role="alert" className="rounded-2xl border border-gray-200 px-6 py-16 text-center">
-            <p className="mb-1 text-sm font-medium text-black">
-              Your earnings didn&apos;t load
-            </p>
+            <p className="mb-1 text-sm font-medium text-black">Your earnings didn&apos;t load</p>
             <p className="mb-5 text-sm text-gray-600">
-              The Prom It API isn&apos;t reachable right now. Nothing is lost —
-              try again in a moment.
+              The Prom It API isn&apos;t reachable right now. Nothing is lost — try again in a
+              moment.
             </p>
             <button
               type="button"
@@ -141,10 +141,7 @@ export default function EarningsPage() {
         {isConnected && load.phase === "ready" && load.data.listings.length > 0 && (
           <>
             {/* dl, because dt/dd are only valid inside one. */}
-            <dl
-              aria-label="Totals"
-              className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4"
-            >
+            <dl aria-label="Totals" className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
               <Stat label="Purchases" value={String(load.data.totals.sales)} />
               <Stat label="Earned" value={formatUsdc(load.data.totals.netAtomic)} />
               <Stat label="Claimed" value={formatUsdc((chain?.claimed ?? 0n).toString())} />
@@ -158,21 +155,33 @@ export default function EarningsPage() {
             </dl>
 
             <p className="mb-4 text-xs text-gray-500">
-              Earned is what buyers paid minus the {load.data.feeLabel} protocol
-              fee, counted by Prom It. Claimed and unclaimed are read from the
-              contract, which is what actually holds and releases the money.
+              Earned is what buyers paid minus the {load.data.feeLabel} protocol fee, counted by
+              Prom It. Claimed and unclaimed are read from the contract, which is what actually
+              holds and releases the money.
             </p>
 
             <div className="overflow-x-auto rounded-2xl border border-gray-200">
               <table className="w-full min-w-[40rem] text-left text-sm">
                 <thead className="border-b border-gray-200 bg-gray-50 text-xs text-gray-600">
                   <tr>
-                    <th scope="col" className="px-4 py-3 font-medium">Prompt</th>
-                    <th scope="col" className="px-4 py-3 font-medium">Price</th>
-                    <th scope="col" className="px-4 py-3 font-medium">Buyers</th>
-                    <th scope="col" className="px-4 py-3 font-medium">Purchases</th>
-                    <th scope="col" className="px-4 py-3 font-medium">Earned</th>
-                    <th scope="col" className="px-4 py-3 font-medium">Unclaimed</th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Prompt
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Price
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Buyers
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Purchases
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Earned
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      Unclaimed
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -183,14 +192,10 @@ export default function EarningsPage() {
                           {listing.title}
                         </Link>
                       </th>
-                      <td className="px-4 py-3 text-gray-600">
-                        {formatUsdc(listing.priceAtomic)}
-                      </td>
+                      <td className="px-4 py-3 text-gray-600">{formatUsdc(listing.priceAtomic)}</td>
                       <td className="px-4 py-3 text-gray-600">{listing.buyers}</td>
                       <td className="px-4 py-3 text-gray-600">{listing.sales}</td>
-                      <td className="px-4 py-3 text-gray-600">
-                        {formatUsdc(listing.netAtomic)}
-                      </td>
+                      <td className="px-4 py-3 text-gray-600">{formatUsdc(listing.netAtomic)}</td>
                       <td className="px-4 py-3 font-medium text-black">
                         {formatUsdc(listing.claimableAtomic)}
                       </td>
@@ -223,7 +228,9 @@ function Stat({
   emphasis?: boolean;
 }) {
   return (
-    <div className={`rounded-2xl border px-4 py-4 ${emphasis ? "border-black" : "border-gray-200"}`}>
+    <div
+      className={`rounded-2xl border px-4 py-4 ${emphasis ? "border-black" : "border-gray-200"}`}
+    >
       <dt className="mb-1 text-xs text-gray-600">{label}</dt>
       <dd className="text-xl font-medium tracking-tight text-black">{value}</dd>
     </div>

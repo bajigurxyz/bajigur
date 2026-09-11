@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { fetchPromptText } from "@/lib/api";
 
 /**
@@ -17,13 +17,7 @@ type CopyState = "idle" | "copying" | "copied" | "error";
 
 const RESET_MS = 2500;
 
-export default function CopyPromptButton({
-  promptId,
-  title,
-}: {
-  promptId: string;
-  title: string;
-}) {
+export default function CopyPromptButton({ promptId, title }: { promptId: string; title: string }) {
   const [state, setState] = useState<CopyState>("idle");
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 

@@ -51,10 +51,7 @@ export const paidEntry = makeEntry({
  */
 export function realCatalogEntries(): PublicCatalogEntry[] {
   const raw = readFileSync(
-    join(
-      dirname(fileURLToPath(import.meta.url)),
-      "../../../../backend/data/catalog.json",
-    ),
+    join(dirname(fileURLToPath(import.meta.url)), "fixtures/catalog.json"),
     "utf8",
   );
   const file = JSON.parse(raw) as { entries: (PublicCatalogEntry & { body?: string })[] };
@@ -76,7 +73,8 @@ export function stubCatalogFetch(
     if (promptMatch) {
       const id = decodeURIComponent(promptMatch[1]);
       const body = bodies[id];
-      if (body === undefined) return jsonResponse(404, { error: "not_found", message: "no such prompt" });
+      if (body === undefined)
+        return jsonResponse(404, { error: "not_found", message: "no such prompt" });
       return jsonResponse(200, { id, body });
     }
     const detailMatch = url.match(/\/v1\/catalog\/([^/?]+)/);

@@ -1,21 +1,15 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
-import {
-  useAccount,
-  useDisconnect,
-  useSignMessage,
-  useSignTypedData,
-  useSwitchChain,
-} from "wagmi";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { useAccount, useDisconnect, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 
 import UnlockButton from "@/components/UnlockButton";
 import {
   SignatureRejectedError,
-  UnlockFailedError,
-  unlockPrompt,
-  type UnlockRequest,
   type UnlockedPrompt,
+  UnlockFailedError,
+  type UnlockRequest,
+  unlockPrompt,
 } from "@/lib/unlock";
 import { paidEntry } from "./helpers";
 
@@ -80,7 +74,9 @@ const mismatchResult: UnlockedPrompt = {
 
 const switchChain = vi.fn();
 
-function mockWallet(overrides: { address?: typeof ADDRESS; isConnected?: boolean; chainId?: number } = {}) {
+function mockWallet(
+  overrides: { address?: typeof ADDRESS; isConnected?: boolean; chainId?: number } = {},
+) {
   vi.mocked(useAccount).mockReturnValue({
     address: ADDRESS,
     isConnected: true,

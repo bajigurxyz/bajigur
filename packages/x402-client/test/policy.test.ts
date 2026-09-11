@@ -7,8 +7,8 @@ import {
   PerPromptCapExceededError,
   PolicyRefusalError,
   SessionCapExceededError,
-  selectPaymentRequirement,
   type SpendPolicy,
+  selectPaymentRequirement,
 } from "../src";
 
 const PAY_TO = "0x2222222222222222222222222222222222222222";
@@ -31,7 +31,9 @@ const policy: SpendPolicy = { perPromptCapAtomic: 100_000n, sessionCapAtomic: 50
 
 describe("denomination pin before amount comparison (KTD14)", () => {
   test("AE11: a different asset is refused even when its amount is below the cap", () => {
-    const accepts = [requirement({ asset: "0xdEAD00000000000000000000000000000000dEaD", amount: "50000" })];
+    const accepts = [
+      requirement({ asset: "0xdEAD00000000000000000000000000000000dEaD", amount: "50000" }),
+    ];
     const error = (() => {
       try {
         selectPaymentRequirement(accepts, policy, 0n);
@@ -82,7 +84,12 @@ describe("denomination pin before amount comparison (KTD14)", () => {
   test("denomination violations win over amount violations: wrong asset above cap is a policy refusal, not a cap refusal", () => {
     // A tiny-looking amount in an 18-decimal token would sign away far more
     // value than the USDC cap implies; the asset pin must fire first.
-    const accepts = [requirement({ asset: "0xdEAD00000000000000000000000000000000dEaD", amount: "999000000000000000000" })];
+    const accepts = [
+      requirement({
+        asset: "0xdEAD00000000000000000000000000000000dEaD",
+        amount: "999000000000000000000",
+      }),
+    ];
     expect(() => selectPaymentRequirement(accepts, policy, 0n)).toThrow(PolicyRefusalError);
   });
 

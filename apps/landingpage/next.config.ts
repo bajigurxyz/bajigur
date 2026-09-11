@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   // if an SVM payment is ever signed, which this EVM-only app never does.
   serverExternalPackages: ["@coinbase/cdp-sdk"],
   turbopack: {
-    // @promit/x402-client's file spend ledger imports Node builtins at module
+    // @bajigur/x402-client's file spend ledger imports Node builtins at module
     // top level; Turbopack refuses those in browser chunks. The browser never
     // runs that ledger (lib/unlock.ts injects a Storage-backed one), so the
     // browser condition resolves the builtins to a throwing stub instead.

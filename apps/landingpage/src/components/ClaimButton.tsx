@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { Wallet } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { formatUsdc } from "@/lib/api";
 
@@ -87,7 +87,10 @@ export default function ClaimButton({ onChainState }: ClaimButtonProps = {}) {
         fromBlock: head > 1500n ? head - 1500n : 0n,
         toBlock: head,
       });
-      claimed = logs.reduce((sum, log) => sum + ((log.args as { amount?: bigint }).amount ?? 0n), 0n);
+      claimed = logs.reduce(
+        (sum, log) => sum + ((log.args as { amount?: bigint }).amount ?? 0n),
+        0n,
+      );
     } catch {
       // A refused log query must not break the claim control it sits next to.
     }
@@ -125,8 +128,7 @@ export default function ClaimButton({ onChainState }: ClaimButtonProps = {}) {
       await publicClient?.waitForTransactionReceipt({ hash });
       setPhase({ name: "done", hash, amount: claimable });
     } catch (error) {
-      const rejected =
-        error instanceof Error && /reject|denied|4001/i.test(error.message);
+      const rejected = error instanceof Error && /reject|denied|4001/i.test(error.message);
       setPhase({
         name: "failed",
         claimable,
@@ -157,8 +159,7 @@ export default function ClaimButton({ onChainState }: ClaimButtonProps = {}) {
     );
   }
 
-  const claimable =
-    phase.name === "ready" || phase.name === "failed" ? phase.claimable : null;
+  const claimable = phase.name === "ready" || phase.name === "failed" ? phase.claimable : null;
   const busy = phase.name === "signing" || phase.name === "confirming";
 
   return (
@@ -196,8 +197,8 @@ export default function ClaimButton({ onChainState }: ClaimButtonProps = {}) {
         // Says which number governs, so a creator whose dashboard shows an
         // amount is not left thinking the button is broken.
         <p className="text-xs text-gray-500">
-          Earnings become claimable once the sale is recorded on chain. The
-          figure above is read from the contract, not from this site.
+          Earnings become claimable once the sale is recorded on chain. The figure above is read
+          from the contract, not from this site.
         </p>
       )}
     </div>

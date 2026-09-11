@@ -1,15 +1,5 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM"],
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "verbatimModuleSyntax": true,
-    "skipLibCheck": true,
-    "noEmit": true,
-    "types": ["bun"]
-  },
+  "extends": "@bajigur/tsconfig/library.json",
+  "compilerOptions": { "lib": ["ES2022", "DOM"] },
   "include": ["src", "test"]
 }

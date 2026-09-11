@@ -1,23 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { CheckCircle2, PenLine, Sparkles, UploadCloud } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import Nav from "@/components/Nav";
-import { CATEGORIES, formatUsdc, type Category, type PublicCatalogEntry } from "@/lib/api";
+import { CATEGORIES, type Category, formatUsdc, type PublicCatalogEntry } from "@/lib/api";
 import {
   ACCEPTED_MEDIA_TYPES,
-  ListingApiError,
   canonicalListingMessage,
   connectWallet,
   fetchListingBounds,
   getInjectedProvider,
+  ListingApiError,
+  type ListingBounds,
   prepareListing,
   randomListingNonce,
   signListingMessage,
   submitListing,
   usdcToAtomic,
-  type ListingBounds,
 } from "@/lib/listing";
 
 /**
@@ -218,15 +218,13 @@ export default function ListPromptPage() {
           List your prompt
         </h1>
         <p className="mb-1 text-sm text-gray-600">
-          Sell a prompt you wrote. Listing signs a message with your wallet —
-          not a transaction. No gas needed, and the wallet address is your
-          creator identity.
+          Sell a prompt you wrote. Listing signs a message with your wallet — not a transaction. No
+          gas needed, and the wallet address is your creator identity.
         </p>
         <p className="mb-8 text-xs text-gray-500">
           {boundsState.kind === "ready" && (
             <>
-              Published price bounds:{" "}
-              {formatUsdc(boundsState.bounds.minPriceAtomic)}–
+              Published price bounds: {formatUsdc(boundsState.bounds.minPriceAtomic)}–
               {formatUsdc(boundsState.bounds.maxPriceAtomic)} USDC per unlock.
             </>
           )}
@@ -236,17 +234,14 @@ export default function ListPromptPage() {
         </p>
 
         {phase.kind === "success" ? (
-          <div
-            role="status"
-            className="rounded-2xl border border-gray-200 px-6 py-16 text-center"
-          >
+          <div role="status" className="rounded-2xl border border-gray-200 px-6 py-16 text-center">
             <CheckCircle2 aria-hidden className="mx-auto mb-4 h-10 w-10 text-black" />
             <h2 className="mb-2 text-2xl font-normal tracking-tight">
               “{phase.entry.title}” is live
             </h2>
             <p className="mb-6 text-sm text-gray-600">
-              Your prompt is listed at {formatUsdc(phase.entry.priceAtomic)} per
-              unlock. Buyers can verify its content hash independently.
+              Your prompt is listed at {formatUsdc(phase.entry.priceAtomic)} per unlock. Buyers can
+              verify its content hash independently.
             </p>
             <div className="flex items-center justify-center gap-3">
               <Link
@@ -319,9 +314,8 @@ export default function ListPromptPage() {
               <label className="flex flex-col gap-1.5">
                 <span className="text-sm font-medium text-black">Prompt body</span>
                 <span className="text-xs text-gray-500">
-                  The full text buyers unlock. It is hashed with the published
-                  rule so buyers can verify delivery byte-for-byte; it never
-                  appears publicly.
+                  The full text buyers unlock. It is hashed with the published rule so buyers can
+                  verify delivery byte-for-byte; it never appears publicly.
                 </span>
                 <textarea
                   name="body"
@@ -344,17 +338,16 @@ export default function ListPromptPage() {
                     Preview — the output of running this prompt
                   </span>
                   <span className="text-xs text-gray-500">
-                    Run the prompt, capture the result as an image or short
-                    clip, and upload the file. Links aren&apos;t accepted:
-                    previews are served from Promit-owned storage only, so a
-                    URL can&apos;t change under a buyer after they paid.
+                    Run the prompt, capture the result as an image or short clip, and upload the
+                    file. Links aren&apos;t accepted: previews are served from Promit-owned storage
+                    only, so a URL can&apos;t change under a buyer after they paid.
                   </span>
                   {/* The limits the server enforces, said before the upload
                       rather than after it. A rejection that only arrives on
                       submit costs the creator the whole form. */}
                   <span className="text-xs text-gray-500">
-                    PNG, JPEG, WebP, MP4 or WebM, up to 10 MB. Short clips
-                    compress well: ten seconds of H.264 is usually under 300 KB.
+                    PNG, JPEG, WebP, MP4 or WebM, up to 10 MB. Short clips compress well: ten
+                    seconds of H.264 is usually under 300 KB.
                   </span>
                   <input
                     ref={fileInputRef}
@@ -391,8 +384,8 @@ export default function ListPromptPage() {
                     className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-black focus-visible:outline-none disabled:bg-gray-50 disabled:text-gray-400"
                   />
                   <span className="mt-1 block text-xs text-gray-500">
-                    Prom It downloads it once and serves its own copy, so the
-                    preview can&apos;t change after someone pays to see it.
+                    Prom It downloads it once and serves its own copy, so the preview can&apos;t
+                    change after someone pays to see it.
                   </span>
                 </div>
 
@@ -425,8 +418,8 @@ export default function ListPromptPage() {
                     className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-black"
                   />
                   <span>
-                    This preview was generated by running this exact prompt.
-                    The catalog states this claim next to your listing.
+                    This preview was generated by running this exact prompt. The catalog states this
+                    claim next to your listing.
                   </span>
                 </label>
                 {errorFor("attestation") && (
@@ -447,9 +440,7 @@ export default function ListPromptPage() {
                   className={`${inputClass} max-w-40`}
                 />
                 {errorFor("price", "priceAtomic") && (
-                  <span className="text-xs text-red-700">
-                    {errorFor("price", "priceAtomic")}
-                  </span>
+                  <span className="text-xs text-red-700">{errorFor("price", "priceAtomic")}</span>
                 )}
               </label>
 

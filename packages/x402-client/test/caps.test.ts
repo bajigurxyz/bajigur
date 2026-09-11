@@ -3,7 +3,12 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { SessionCapExceededError, SpendLedger, SpendLedgerCorruptError, defaultConfigDir } from "../src";
+import {
+  defaultConfigDir,
+  SessionCapExceededError,
+  SpendLedger,
+  SpendLedgerCorruptError,
+} from "../src";
 
 function freshDir(): string {
   return mkdtempSync(join(tmpdir(), "promit-ledger-"));

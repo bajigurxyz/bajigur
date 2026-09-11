@@ -18,8 +18,7 @@ const ENDPOINTS = {
 } as const;
 
 /** Tipe media yang diterima backend (mirror ACCEPTED_MEDIA_TYPES). */
-export const ACCEPTED_MEDIA_TYPES =
-  "image/webp,image/png,image/jpeg,video/mp4,video/webm";
+export const ACCEPTED_MEDIA_TYPES = "image/webp,image/png,image/jpeg,video/mp4,video/webm";
 
 export interface ListingBounds {
   minPriceAtomic: string;
@@ -137,7 +136,11 @@ async function readError(res: Response): Promise<ListingApiError> {
       data.fields,
     );
   } catch {
-    return new ListingApiError(res.status, "request_failed", `Request failed with status ${res.status}.`);
+    return new ListingApiError(
+      res.status,
+      "request_failed",
+      `Request failed with status ${res.status}.`,
+    );
   }
 }
 
@@ -193,7 +196,11 @@ export function submitListing(
         }
       } catch {
         reject(
-          new ListingApiError(xhr.status, "request_failed", `Listing failed with status ${xhr.status}.`),
+          new ListingApiError(
+            xhr.status,
+            "request_failed",
+            `Listing failed with status ${xhr.status}.`,
+          ),
         );
       }
     };

@@ -1,20 +1,20 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
-import { encodePaymentRequiredHeader, encodePaymentResponseHeader } from "@x402/core/http";
-import type { PaymentRequirements } from "@x402/core/types";
 import {
   BASE_SEPOLIA_NETWORK,
   BASE_SEPOLIA_USDC,
+  type ClientEvmSigner,
+  hashPromptText,
   PerPromptCapExceededError,
   SessionCapExceededError,
   SpendLedgerCorruptError,
-  hashPromptText,
-  type ClientEvmSigner,
-} from "@promit/x402-client";
+} from "@bajigur/x402-client";
+import { encodePaymentRequiredHeader, encodePaymentResponseHeader } from "@x402/core/http";
+import type { PaymentRequirements } from "@x402/core/types";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import {
+  createBrowserSpendLedger,
   SignatureRejectedError,
   UnlockFailedError,
-  createBrowserSpendLedger,
   unlockPrompt,
 } from "@/lib/unlock";
 
@@ -98,25 +98,25 @@ class FakeStorage implements Storage {
  * PAYMENT-SIGNATURE arrives, then the configured settled answer — by
  * default the locked U4 success body (text, contentHash, txHash).
  */
-function fakeUnlockServer(
-  accepts: PaymentRequirements[],
-  settled?: () => Response,
-) {
+function fakeUnlockServer(accepts: PaymentRequirements[], settled?: () => Response) {
   const paid: Request[] = [];
   const fetchMock = async (input: Request | string | URL, init?: RequestInit) => {
     const request = new Request(input as Request | string, init);
     if (!request.headers.has("PAYMENT-SIGNATURE")) {
-      return new Response(JSON.stringify({ error: "payment_required", message: "Payment required." }), {
-        status: 402,
-        headers: {
-          "content-type": "application/json",
-          "PAYMENT-REQUIRED": encodePaymentRequiredHeader({
-            x402Version: 2,
-            resource: { url: request.url },
-            accepts,
-          }),
+      return new Response(
+        JSON.stringify({ error: "payment_required", message: "Payment required." }),
+        {
+          status: 402,
+          headers: {
+            "content-type": "application/json",
+            "PAYMENT-REQUIRED": encodePaymentRequiredHeader({
+              x402Version: 2,
+              resource: { url: request.url },
+              accepts,
+            }),
+          },
         },
-      });
+      );
     }
     paid.push(request);
     if (settled) return settled();
@@ -148,7 +148,10 @@ function fakeUnlockServer(
   return { fetchMock, paid };
 }
 
-function baseRequest(signer: ClientEvmSigner, fetchMock: typeof fetch | ((i: Request | string | URL, init?: RequestInit) => Promise<Response>)) {
+function baseRequest(
+  signer: ClientEvmSigner,
+  fetchMock: typeof fetch | ((i: Request | string | URL, init?: RequestInit) => Promise<Response>),
+) {
   return {
     promptId: PROMPT_ID,
     advertisedContentHash: hashPromptText(PROMPT_TEXT),
@@ -220,7 +223,10 @@ describe("unlockPrompt against the real payment machinery", () => {
         ),
     );
 
-    const result = await unlockPrompt({ ...baseRequest(signer, fetchMock), advertisedContentHash: advertised });
+    const result = await unlockPrompt({
+      ...baseRequest(signer, fetchMock),
+      advertisedContentHash: advertised,
+    });
 
     expect(result.hashCheck.ok).toBe(false);
     expect(result.hashCheck.expectedHash).toBe(advertised);
@@ -234,7 +240,10 @@ describe("unlockPrompt against the real payment machinery", () => {
       [requirement()],
       () =>
         new Response(
-          JSON.stringify({ error: "settlement_failed", message: "The facilitator refused to settle." }),
+          JSON.stringify({
+            error: "settlement_failed",
+            message: "The facilitator refused to settle.",
+          }),
           { status: 402, headers: { "content-type": "application/json" } },
         ),
     );
@@ -251,7 +260,11 @@ describe("unlockPrompt against the real payment machinery", () => {
     const { signer } = recordingSigner();
     const { fetchMock } = fakeUnlockServer(
       [requirement()],
-      () => new Response(JSON.stringify({ id: PROMPT_ID }), { status: 200, headers: { "content-type": "application/json" } }),
+      () =>
+        new Response(JSON.stringify({ id: PROMPT_ID }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
     );
 
     await expect(unlockPrompt(baseRequest(signer, fetchMock))).rejects.toThrow(UnlockFailedError);

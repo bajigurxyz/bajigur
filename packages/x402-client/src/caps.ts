@@ -98,7 +98,10 @@ export class SpendLedger {
       typeof (parsed as { spentAtomic?: unknown }).spentAtomic !== "string" ||
       !/^\d+$/.test((parsed as { spentAtomic: string }).spentAtomic)
     ) {
-      throw new SpendLedgerCorruptError(this.file, "spentAtomic is not a non-negative integer string");
+      throw new SpendLedgerCorruptError(
+        this.file,
+        "spentAtomic is not a non-negative integer string",
+      );
     }
     return BigInt((parsed as { spentAtomic: string }).spentAtomic);
   }

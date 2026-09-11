@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
-import { ImageOff, Play, Pause, RotateCcw } from "lucide-react";
+import { ImageOff, Pause, Play, RotateCcw } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { mediaUrl, type PublicCatalogEntry } from "@/lib/api";
 
 /**

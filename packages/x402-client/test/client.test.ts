@@ -9,12 +9,12 @@ import type { PaymentRequirements } from "@x402/core/types";
 import {
   BASE_SEPOLIA_NETWORK,
   BASE_SEPOLIA_USDC,
+  type ClientEvmSigner,
+  createPromitFetch,
+  type FetchLike,
   PerPromptCapExceededError,
   PolicyRefusalError,
   SessionCapExceededError,
-  createPromitFetch,
-  type ClientEvmSigner,
-  type FetchLike,
 } from "../src";
 
 const PAY_TO = "0x2222222222222222222222222222222222222222";
@@ -242,7 +242,11 @@ describe("createPromitFetch", () => {
       },
     };
     const { fetchMock } = fakeServer([requirement()]);
-    const handle = createPromitFetch({ signer: failingSigner, configDir: freshDir(), fetch: fetchMock });
+    const handle = createPromitFetch({
+      signer: failingSigner,
+      configDir: freshDir(),
+      fetch: fetchMock,
+    });
     await expect(handle.fetchWithPayment(RESOURCE_URL)).rejects.toThrow();
     expect(handle.ledger.spent()).toBe(0n);
   });

@@ -87,11 +87,20 @@
   },
   "overrides": [
     {
-      "includes": ["**/test/**", "**/*.test.ts", "**/*.spec.ts"],
+      "includes": [
+        "**/test/**",
+        "**/__tests__/**",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts"
+      ],
       "linter": {
         "rules": {
           "suspicious": {
             "noExplicitAny": "off"
+          },
+          "style": {
+            "noNonNullAssertion": "off"
           }
         }
       }
@@ -102,6 +111,33 @@
         "rules": {
           "suspicious": {
             "noUnknownAtRules": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/web/**", "apps/landingpage/**"],
+      "linter": {
+        "rules": {
+          "a11y": "off",
+          "correctness": {
+            "useExhaustiveDependencies": "off"
+          },
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          },
+          "performance": {
+            "noImgElement": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.css"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noImportantStyles": "off"
           }
         }
       }

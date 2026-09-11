@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
 import {
-  ContentHashMismatchError,
   assertContentHash,
+  ContentHashMismatchError,
   hashPromptText,
   normalizePromptText,
   verifyContentHash,
@@ -17,11 +17,15 @@ describe("normalizePromptText (published normalization rule)", () => {
   });
 
   test("strips trailing whitespace at the end of the text only", () => {
-    expect(normalizePromptText("  keep leading\nkeep  inner \n\n  \t")).toBe("  keep leading\nkeep  inner");
+    expect(normalizePromptText("  keep leading\nkeep  inner \n\n  \t")).toBe(
+      "  keep leading\nkeep  inner",
+    );
   });
 
   test("changes nothing else", () => {
-    expect(normalizePromptText("Prompt with Ünïcode – untouched")).toBe("Prompt with Ünïcode – untouched");
+    expect(normalizePromptText("Prompt with Ünïcode – untouched")).toBe(
+      "Prompt with Ünïcode – untouched",
+    );
   });
 });
 

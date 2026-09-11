@@ -1,9 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import AgentOnboarding, {
-  ONBOARDING_TARGETS,
-} from "../AgentOnboarding";
 import Home from "@/app/page";
+import AgentOnboarding, { ONBOARDING_TARGETS } from "../AgentOnboarding";
 import { stubClipboard } from "./helpers";
 
 afterEach(cleanup);
@@ -22,9 +20,7 @@ const MARKERS: Record<string, string> = {
 
 describe("target honesty", () => {
   it("covers every marker and keeps ids in sync", () => {
-    expect(ONBOARDING_TARGETS.map((t) => t.id).sort()).toEqual(
-      Object.keys(MARKERS).sort(),
-    );
+    expect(ONBOARDING_TARGETS.map((t) => t.id).sort()).toEqual(Object.keys(MARKERS).sort());
   });
 
   it("never presents npx promit as a runnable command — it is not on npm", () => {
@@ -42,9 +38,7 @@ describe("target honesty", () => {
 
   it("points at no invented host — only the deployed API, github, and the faucet", () => {
     for (const target of ONBOARDING_TARGETS) {
-      const hosts =
-        `${target.snippet}\n${target.note}`.match(/https?:\/\/[^\s"'`]+/g) ??
-        [];
+      const hosts = `${target.snippet}\n${target.note}`.match(/https?:\/\/[^\s"'`]+/g) ?? [];
       for (const host of hosts) {
         expect(host).toMatch(
           /^(https:\/\/github\.com\/Lexirieru\/promit\.git|https:\/\/promitbackend-production\.up\.railway\.app|https:\/\/faucet\.circle\.com)/,
@@ -95,9 +89,7 @@ describe("tabs", () => {
     fireEvent.keyDown(tabs[0], { key: "ArrowRight" });
     expect(tabs[1].getAttribute("aria-selected")).toBe("true");
     expect(document.activeElement).toBe(tabs[1]);
-    expect(screen.getByRole("tabpanel").textContent).toContain(
-      MARKERS[ONBOARDING_TARGETS[1].id],
-    );
+    expect(screen.getByRole("tabpanel").textContent).toContain(MARKERS[ONBOARDING_TARGETS[1].id]);
 
     fireEvent.keyDown(tabs[1], { key: "ArrowLeft" });
     expect(tabs[0].getAttribute("aria-selected")).toBe("true");
@@ -155,11 +147,7 @@ describe("copy button", () => {
 describe("landing integration", () => {
   it("mounts the onboarding section and the why-buy sentence on the home page", () => {
     render(<Home />);
-    expect(
-      screen.getByRole("tablist", { name: "Choose your agent" }),
-    ).toBeTruthy();
-    expect(
-      screen.getByText(/running that exact prompt/i),
-    ).toBeTruthy();
+    expect(screen.getByRole("tablist", { name: "Choose your agent" })).toBeTruthy();
+    expect(screen.getByText(/running that exact prompt/i)).toBeTruthy();
   });
 });

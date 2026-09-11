@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import {
   useAccount,
   useConnect,
@@ -13,7 +13,7 @@ import { baseSepolia } from "wagmi/chains";
 import UnlockButton from "@/components/UnlockButton";
 import { fetchOwnedUnlocks } from "@/lib/api";
 import { fetchOwnedPrompt } from "@/lib/entitlement";
-import { UnlockFailedError, unlockPrompt, type UnlockedPrompt } from "@/lib/unlock";
+import { type UnlockedPrompt, UnlockFailedError, unlockPrompt } from "@/lib/unlock";
 import { paidEntry } from "./helpers";
 
 /**
@@ -141,7 +141,11 @@ describe("UnlockButton — wallet yang sudah memiliki", () => {
 
   test("server yang tidak mengakui kepemilikan menjadi error yang terlihat, bukan tagihan diam-diam", async () => {
     vi.mocked(fetchOwnedPrompt).mockRejectedValue(
-      new UnlockFailedError(401, "entitlement_expired", "The entitlement proof is outside its validity window."),
+      new UnlockFailedError(
+        401,
+        "entitlement_expired",
+        "The entitlement proof is outside its validity window.",
+      ),
     );
     render(<UnlockButton entry={paidEntry} />);
     fireEvent.click(await screen.findByRole("button", { name: /view your unlocked prompt/i }));

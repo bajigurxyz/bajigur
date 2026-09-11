@@ -68,7 +68,9 @@ function dashboard(overrides: Record<string, unknown> = {}) {
 const stubFetch = (body: unknown, ok = true) =>
   vi.stubGlobal(
     "fetch",
-    vi.fn(async () => ({ ok, status: ok ? 200 : 500, json: async () => body }) as unknown as Response),
+    vi.fn(
+      async () => ({ ok, status: ok ? 200 : 500, json: async () => body }) as unknown as Response,
+    ),
   );
 
 beforeEach(() => {

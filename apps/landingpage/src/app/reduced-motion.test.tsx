@@ -7,10 +7,7 @@ import Home from "./page";
 
 afterEach(cleanup);
 
-const css = readFileSync(
-  join(dirname(fileURLToPath(import.meta.url)), "globals.css"),
-  "utf8",
-);
+const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "globals.css"), "utf8");
 
 /** Extract the brace-balanced body of the at-rule starting at `query`. */
 function atRuleBody(source: string, query: string): string {
@@ -29,9 +26,9 @@ function atRuleBody(source: string, query: string): string {
 describe("prefers-reduced-motion guard", () => {
   it("keeps every staggered element on an animation that ends at full opacity", () => {
     const { container } = render(<Home />);
-    const hidden = Array.from(
-      container.querySelectorAll<HTMLElement>("[style]"),
-    ).filter((el) => el.style.opacity === "0");
+    const hidden = Array.from(container.querySelectorAll<HTMLElement>("[style]")).filter(
+      (el) => el.style.opacity === "0",
+    );
     // The staggered entrance elements all start invisible…
     expect(hidden.length).toBeGreaterThan(0);
     // …so each one must carry a guarded animation class, or reduced-motion

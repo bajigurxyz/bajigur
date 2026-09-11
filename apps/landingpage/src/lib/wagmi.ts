@@ -1,6 +1,6 @@
-import { http } from "wagmi";
+import { type AppKitNetwork, baseSepolia } from "@reown/appkit/networks";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { baseSepolia, type AppKitNetwork } from "@reown/appkit/networks";
+import { http } from "wagmi";
 
 /**
  * Wallet connection config (U6, reworked for Reown AppKit). One chain only:

@@ -19,9 +19,7 @@ describe("lazy loading", () => {
   it("attaches no clip src until the card scrolls into view", () => {
     const io = stubIntersectionObserver();
     stubMatchMedia(false);
-    const { container } = render(
-      <MediaPreview entry={freeVideoEntry} className="aspect-video" />,
-    );
+    const { container } = render(<MediaPreview entry={freeVideoEntry} className="aspect-video" />);
 
     const video = container.querySelector("video")!;
     // Off-screen: only the poster is referenced, the 1–8 MB clip is not.
@@ -39,9 +37,7 @@ describe("prefers-reduced-motion (extends U1's guard to media)", () => {
     const io = stubIntersectionObserver();
     stubMatchMedia(true);
     const play = window.HTMLMediaElement.prototype.play as ReturnType<typeof vi.fn>;
-    const { container } = render(
-      <MediaPreview entry={freeVideoEntry} className="aspect-video" />,
-    );
+    const { container } = render(<MediaPreview entry={freeVideoEntry} className="aspect-video" />);
     act(() => io.intersect());
 
     expect(play).not.toHaveBeenCalled();
@@ -72,9 +68,7 @@ describe("failure after the poster is up", () => {
   it("renders a named fallback with retry instead of an empty box", async () => {
     const io = stubIntersectionObserver();
     stubMatchMedia(false);
-    const { container } = render(
-      <MediaPreview entry={freeVideoEntry} className="aspect-video" />,
-    );
+    const { container } = render(<MediaPreview entry={freeVideoEntry} className="aspect-video" />);
     act(() => io.intersect());
 
     const video = container.querySelector("video")!;

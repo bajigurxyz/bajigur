@@ -3,7 +3,7 @@
  * `turbopack.resolveAlias` in next.config.ts (browser condition only — the
  * server keeps the real builtins).
  *
- * Why it exists: `@promit/x402-client` imports these at module top level for
+ * Why it exists: `@bajigur/x402-client` imports these at module top level for
  * its FILE spend ledger, and Turbopack refuses Node builtins in browser
  * chunks. The browser injects a Storage-backed ledger instead (lib/unlock.ts
  * always passes `ledger:` to `createPromitFetch`), so these names only need
@@ -11,14 +11,12 @@
  * throws so an accidental future call fails loudly instead of corrupting
  * spend accounting silently.
  */
-const refuse =
-  (name: string) =>
-  (): never => {
-    throw new Error(
-      `${name} is unavailable in the browser build; the file spend ledger is Node-only. ` +
-        `Pass a Storage-backed ledger (see lib/unlock.ts).`,
-    );
-  };
+const refuse = (name: string) => (): never => {
+  throw new Error(
+    `${name} is unavailable in the browser build; the file spend ledger is Node-only. ` +
+      `Pass a Storage-backed ledger (see lib/unlock.ts).`,
+  );
+};
 
 export const mkdirSync = refuse("node:fs mkdirSync");
 export const readFileSync = refuse("node:fs readFileSync");

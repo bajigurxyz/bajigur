@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { type ReactNode, useState } from "react";
 import { WagmiProvider } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmi";
 // Side-effect import: runs createAppKit once, before any child can call an

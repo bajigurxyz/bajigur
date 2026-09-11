@@ -1,7 +1,7 @@
-import { x402Client, x402HTTPClient, type BeforePaymentCreationHook } from "@x402/core/client";
+import { type BeforePaymentCreationHook, x402Client, x402HTTPClient } from "@x402/core/client";
 import type { PaymentRequired, PaymentRequirements } from "@x402/core/types";
-import { registerExactEvmScheme } from "@x402/evm/exact/client";
 import type { ClientEvmSigner } from "@x402/evm";
+import { registerExactEvmScheme } from "@x402/evm/exact/client";
 import { wrapFetchWithPayment } from "@x402/fetch";
 
 import { SpendLedger } from "./caps";
@@ -15,8 +15,8 @@ import {
 import {
   PerPromptCapExceededError,
   PolicyRefusalError,
-  SessionCapExceededError,
   type PolicyViolation,
+  SessionCapExceededError,
 } from "./errors";
 
 export interface SpendPolicy {
@@ -27,16 +27,29 @@ export interface SpendPolicy {
 /** Plain call signature so mocks and wrapped fetches interchange freely. */
 export type FetchLike = (input: Request | string | URL, init?: RequestInit) => Promise<Response>;
 
-function denominationViolations(requirement: PaymentRequirements, index: number): PolicyViolation[] {
+function denominationViolations(
+  requirement: PaymentRequirements,
+  index: number,
+): PolicyViolation[] {
   const violations: PolicyViolation[] = [];
   if (requirement.scheme !== EXACT_SCHEME) {
     violations.push({ index, field: "scheme", actual: requirement.scheme, expected: EXACT_SCHEME });
   }
   if (requirement.network !== BASE_SEPOLIA_NETWORK) {
-    violations.push({ index, field: "network", actual: requirement.network, expected: BASE_SEPOLIA_NETWORK });
+    violations.push({
+      index,
+      field: "network",
+      actual: requirement.network,
+      expected: BASE_SEPOLIA_NETWORK,
+    });
   }
   if (requirement.asset.toLowerCase() !== BASE_SEPOLIA_USDC.toLowerCase()) {
-    violations.push({ index, field: "asset", actual: requirement.asset, expected: BASE_SEPOLIA_USDC });
+    violations.push({
+      index,
+      field: "asset",
+      actual: requirement.asset,
+      expected: BASE_SEPOLIA_USDC,
+    });
   }
   return violations;
 }
@@ -46,7 +59,14 @@ function atomicAmount(requirement: PaymentRequirements, index: number): bigint {
     throw new PolicyRefusalError(
       `refusing payment: accepts[${index}].amount ${JSON.stringify(requirement.amount)} is not a ` +
         `non-negative integer atomic amount`,
-      [{ index, field: "amount", actual: requirement.amount, expected: "a base-10 atomic integer" }],
+      [
+        {
+          index,
+          field: "amount",
+          actual: requirement.amount,
+          expected: "a base-10 atomic integer",
+        },
+      ],
     );
   }
   return BigInt(requirement.amount);
@@ -72,7 +92,10 @@ export function selectPaymentRequirement(
   sessionSpentAtomic: bigint,
 ): PaymentRequirements {
   if (accepts.length === 0) {
-    throw new PolicyRefusalError("refusing payment: the server offered no payment requirements", []);
+    throw new PolicyRefusalError(
+      "refusing payment: the server offered no payment requirements",
+      [],
+    );
   }
 
   const violations: PolicyViolation[] = [];
