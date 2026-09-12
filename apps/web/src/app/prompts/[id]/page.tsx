@@ -91,7 +91,8 @@ export default function PromptDetailPage({ params }: PageProps<"/prompts/[id]">)
               <PromptPreview
                 src={load.prompt.previewMedia}
                 title={load.prompt.title}
-                className="h-40"
+                className="aspect-[16/9] w-full"
+                sizes="(max-width: 768px) 100vw, 768px"
               />
               <ul className="flex flex-wrap gap-1.5">
                 {load.prompt.tags.map((tag) => (
