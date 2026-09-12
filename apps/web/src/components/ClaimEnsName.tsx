@@ -2,14 +2,8 @@
 
 import { Check, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { ENS_PARENT, labelError } from "@/lib/ens";
-
-type Availability =
-  | { phase: "idle" }
-  | { phase: "checking" }
-  | { phase: "free" }
-  | { phase: "taken" }
-  | { phase: "unsupported" };
+import { ENS_PARENT } from "@/lib/ens";
+import { useNameAvailability } from "@/lib/useNameAvailability";
 
 type Claim =
   | { phase: "idle" }
@@ -38,10 +32,9 @@ export default function ClaimEnsName({
   onClaimed?: () => void;
 }) {
   const [label, setLabel] = useState("");
-  const [available, setAvailable] = useState<Availability>({ phase: "idle" });
   const [claim, setClaim] = useState<Claim>({ phase: "idle" });
+  const available = useNameAvailability(label);
 
-  const invalid = label ? labelError(label) : undefined;
   const claimed = current ?? (claim.phase === "done" ? claim.name : undefined);
 
   if (claimed) {
@@ -59,24 +52,6 @@ export default function ClaimEnsName({
       </div>
     );
   }
-
-  const check = async (next: string) => {
-    setLabel(next);
-    setAvailable({ phase: "idle" });
-    if (labelError(next)) return;
-    setAvailable({ phase: "checking" });
-    try {
-      const res = await fetch(`/api/ens/available?label=${encodeURIComponent(next)}`);
-      if (res.status === 501) {
-        setAvailable({ phase: "unsupported" });
-        return;
-      }
-      const data = (await res.json()) as { available?: boolean };
-      setAvailable({ phase: data.available ? "free" : "taken" });
-    } catch {
-      setAvailable({ phase: "idle" });
-    }
-  };
 
   const submit = async () => {
     setClaim({ phase: "claiming" });
@@ -96,7 +71,7 @@ export default function ClaimEnsName({
     }
   };
 
-  const canClaim = Boolean(label) && !invalid && available.phase === "free";
+  const canClaim = available.phase === "free";
 
   return (
     <div className="space-y-3 rounded-2xl border border-gray-200 p-5">
@@ -111,28 +86,24 @@ export default function ClaimEnsName({
       <div className="flex items-center gap-2">
         <input
           value={label}
-          onChange={(event) => check(event.target.value.toLowerCase().trim())}
+          onChange={(event) => setLabel(event.target.value.toLowerCase().trim())}
           placeholder="yourname"
           aria-label="Name to claim"
-          aria-invalid={Boolean(invalid)}
+          aria-invalid={available.phase === "invalid"}
           className="w-40 rounded-xl border border-gray-300 px-3 py-2 font-mono text-sm focus-visible:ring-2 focus-visible:ring-black focus-visible:outline-none"
         />
         <span className="font-mono text-sm text-gray-500">.{ENS_PARENT}</span>
       </div>
 
       <p aria-live="polite" className="text-xs">
-        {invalid && <span className="text-red-700">{invalid}</span>}
-        {!invalid && available.phase === "checking" && (
-          <span className="text-gray-500">Checking…</span>
-        )}
-        {!invalid && available.phase === "free" && (
+        {available.phase === "invalid" && <span className="text-red-700">{available.reason}</span>}
+        {available.phase === "checking" && <span className="text-gray-500">Checking…</span>}
+        {available.phase === "free" && (
           <span className="text-green-700">
             {label}.{ENS_PARENT} is available.
           </span>
         )}
-        {!invalid && available.phase === "taken" && (
-          <span className="text-red-700">Already taken.</span>
-        )}
+        {available.phase === "taken" && <span className="text-red-700">Already taken.</span>}
         {available.phase === "unsupported" && (
           <span className="text-gray-500">Claiming names is not live yet.</span>
         )}

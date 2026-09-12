@@ -20,7 +20,8 @@ matching from Promit, stop and read the API instead.
 | `/` | Redirect to `/prompts`. Marketing is `apps/landingpage`, a separate origin. |
 | `/prompts` | The marketplace, from `GET /prompts`, filtered by tag. |
 | `/prompts/[id]` | One prompt plus the unlock control. |
-| `/connect` | Privy sign-in, granting Bajigur a signer, and the Claude Desktop config. |
+| `/welcome` | Onboarding: wallet, payments, then a name. Required before buying or publishing. |
+| `/connect` | Privy sign-in, granting Bajigur a signer, and the Claude setup command. |
 | `/my-prompts` | Bought (licences held) and Published (prompts whose `payTo` is this wallet). |
 | `/profile` | Wallet, Hedera account, balances, and activation when there is no account yet. |
 
@@ -31,6 +32,20 @@ that pays somebody else. Every Published card carries `Buyers`, read from the
 ERC-1155 `LicenseIssued` log rather than our own bookkeeping, so it cannot
 disagree with who can open the prompt. A buyer who has claimed a name under
 bajigur.eth shows as that name; everyone else shows as their Hedera account.
+
+Onboarding is three steps and the order is forced by the API, not chosen:
+`/ens/claim` reads the account and public key out of the agent token, so a name
+cannot be claimed before the wallet is linked, and the wallet cannot be linked
+before Privy has made one. `RequireOnboarding` stands in front of `/my-prompts`
+for that reason, and the marketplace deliberately stays public.
+
+The name is not ceremony. `payToOf()` falls back to the platform account when a
+creator's name has no `bajigur.hedera` record, so publishing without one means
+buyers pay us instead of the creator.
+
+`useNameAvailability` is debounced and keyed by the label it answers, so typing
+is one request rather than one per key and a slow reply about `ax` cannot land
+after a fast reply about `axel`.
 
 Still absent: an earnings dashboard.
 

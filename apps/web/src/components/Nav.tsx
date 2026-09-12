@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import WalletButton from "@/components/WalletButton";
+import { useOnboarding } from "@/lib/useOnboarding";
 
 /**
  * App navigation. Every item points at a surface that exists — do not add one
@@ -27,6 +28,7 @@ const NAV_LINKS: { label: string; href: string }[] = [
 
 export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const onboarding = useOnboarding();
 
   return (
     <>
@@ -55,6 +57,14 @@ export default function Nav() {
         </div>
 
         <div className="hidden items-center gap-4 sm:flex">
+          {onboarding.phase === "incomplete" && (
+            <Link
+              href="/welcome"
+              className="rounded-full bg-black px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              Finish setup
+            </Link>
+          )}
           <WalletButton />
         </div>
 

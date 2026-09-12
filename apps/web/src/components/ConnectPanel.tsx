@@ -7,9 +7,7 @@ import CopyButton from "@/components/CopyButton";
 import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
 import WalletButton from "@/components/WalletButton";
 import { useAgent } from "@/lib/useAgent";
-import { useWalletAccess } from "@/lib/useWalletAccess";
-
-type Step = "idle" | "granting" | "linking" | "error";
+import { useLinkAgent } from "@/lib/useLinkAgent";
 
 const MCP_URL = `${(process.env.NEXT_PUBLIC_MCP_URL ?? "http://localhost:3004").replace(/\/+$/, "")}/mcp`;
 
@@ -30,35 +28,10 @@ const addCommand = (token: string) =>
  * stated on the control itself, before they agree.
  */
 export default function ConnectPanel() {
-  const { ready, authenticated, getAccessToken } = usePrivy();
-  const access = useWalletAccess();
+  const { ready, authenticated } = usePrivy();
   const { state, refresh } = useAgent();
-  const [step, setStep] = useState<Step>("idle");
-  const [message, setMessage] = useState("");
+  const { access, step, message, link: connect, busy } = useLinkAgent(refresh);
   const [token, setToken] = useState<string | null>(null);
-
-  const connect = async () => {
-    setStep("granting");
-    setMessage("");
-    try {
-      await access.grant();
-      setStep("linking");
-      const privyAccessToken = await getAccessToken();
-      if (!privyAccessToken) throw new Error("Privy returned no access token");
-      const res = await fetch("/api/agent/link", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ privyAccessToken }),
-      });
-      const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error ?? `linking failed (${res.status})`);
-      await refresh();
-      setStep("idle");
-    } catch (err) {
-      setStep("error");
-      setMessage(err instanceof Error ? err.message : "Connecting the wallet failed.");
-    }
-  };
 
   // Fetched as soon as the wallet is linked. The command is useless without it,
   // so a reveal step would only put a click between the user and their copy.
@@ -168,12 +141,10 @@ export default function ConnectPanel() {
       <button
         type="button"
         onClick={connect}
-        disabled={step === "granting" || step === "linking"}
+        disabled={busy}
         className="inline-flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60"
       >
-        {(step === "granting" || step === "linking") && (
-          <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
-        )}
+        {busy && <Loader2 aria-hidden className="h-4 w-4 animate-spin" />}
         {step === "granting"
           ? "Waiting for your approval…"
           : step === "linking"

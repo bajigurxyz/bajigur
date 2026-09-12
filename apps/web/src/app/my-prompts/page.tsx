@@ -6,6 +6,7 @@ import Buyers from "@/components/Buyers";
 import Nav from "@/components/Nav";
 import PromptCard from "@/components/PromptCard";
 import PublishPrompt from "@/components/PublishPrompt";
+import RequireOnboarding from "@/components/RequireOnboarding";
 import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
 import { fetchLicenses, fetchPrompts, type Prompt } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
@@ -118,61 +119,57 @@ export default function MyPromptsPage() {
           {account && <p className="mt-2 font-mono text-xs text-gray-500">{account}</p>}
         </header>
 
-        {!account && (
-          <p className="rounded-2xl border border-gray-200 p-8 text-center text-sm text-gray-600">
-            <Link href="/profile" className="underline hover:text-black">
-              Activate your wallet
-            </Link>{" "}
-            to see what it holds.
-          </p>
-        )}
+        <RequireOnboarding
+          title="Finish setting up first"
+          blurb="Buying and publishing both need a wallet Bajigur can sign for, and a name buyers can pay."
+        >
+          {load.phase === "pending" && (
+            <SkeletonRegion
+              label="Loading your prompts…"
+              className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {["a", "b", "c"].map((key) => (
+                <Skeleton key={key} className="h-48 rounded-2xl" />
+              ))}
+            </SkeletonRegion>
+          )}
 
-        {load.phase === "pending" && (
-          <SkeletonRegion
-            label="Loading your prompts…"
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {["a", "b", "c"].map((key) => (
-              <Skeleton key={key} className="h-48 rounded-2xl" />
-            ))}
-          </SkeletonRegion>
-        )}
+          {load.phase === "error" && (
+            <p
+              role="alert"
+              className="rounded-2xl border border-gray-200 p-8 text-center text-sm text-gray-600"
+            >
+              Couldn&apos;t read your prompts right now. Try again in a moment.
+            </p>
+          )}
 
-        {load.phase === "error" && (
-          <p
-            role="alert"
-            className="rounded-2xl border border-gray-200 p-8 text-center text-sm text-gray-600"
-          >
-            Couldn&apos;t read your prompts right now. Try again in a moment.
-          </p>
-        )}
-
-        {load.phase === "ready" && (
-          <div className="space-y-10">
-            <Section
-              title="Bought"
-              blurb="Paid for once. The licence is onchain, so these open free from any client, forever."
-              prompts={load.bought}
-              empty={
-                <>
-                  Nothing bought yet.{" "}
-                  <Link href="/prompts" className="underline hover:text-black">
-                    Browse the marketplace
-                  </Link>
-                  .
-                </>
-              }
-            />
-            <Section
-              title="Published"
-              blurb="Prompts you sell. Every purchase pays this wallet directly, with nothing held in between."
-              prompts={load.made}
-              empty="You haven't published a prompt yet."
-              action={account ? <PublishPrompt onPublished={reload} /> : undefined}
-              footer={(prompt) => <Buyers promptId={prompt.id} />}
-            />
-          </div>
-        )}
+          {load.phase === "ready" && (
+            <div className="space-y-10">
+              <Section
+                title="Bought"
+                blurb="Paid for once. The licence is onchain, so these open free from any client, forever."
+                prompts={load.bought}
+                empty={
+                  <>
+                    Nothing bought yet.{" "}
+                    <Link href="/prompts" className="underline hover:text-black">
+                      Browse the marketplace
+                    </Link>
+                    .
+                  </>
+                }
+              />
+              <Section
+                title="Published"
+                blurb="Prompts you sell. Every purchase pays this wallet directly, with nothing held in between."
+                prompts={load.made}
+                empty="You haven't published a prompt yet."
+                action={account ? <PublishPrompt onPublished={reload} /> : undefined}
+                footer={(prompt) => <Buyers promptId={prompt.id} />}
+              />
+            </div>
+          )}
+        </RequireOnboarding>
       </main>
     </div>
   );
