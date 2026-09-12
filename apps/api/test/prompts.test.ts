@@ -41,6 +41,7 @@ const registry = {
     },
   ],
   accountOf: async () => "0.0.5555",
+  evmOf: async () => "0x00000000000000000000000000000000000015b3",
 };
 const identity = async (headers: Headers) => headers.get("x-hedera-account") ?? undefined;
 const records: Record<string, string> = {
@@ -253,6 +254,7 @@ describe("buyers", () => {
         available: async () => true,
         labelOf: async () => "buyer",
         claim: async () => "0x0",
+        setText: async () => "0x0",
       },
       agent: {
         secret: "s",
@@ -305,6 +307,9 @@ describe("publishing", () => {
       const at = rows.findIndex((r) => r.id === id);
       if (at >= 0) rows.splice(at, 1);
     },
+    addFeedback: async () => {},
+    feedbackFor: async () => [],
+    feedback: async () => undefined,
   };
   const publisher = createApp({
     facilitator,

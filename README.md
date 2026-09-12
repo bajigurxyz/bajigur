@@ -13,6 +13,9 @@ can discover, pay for, and use a prompt on its own.
 - Creators and agents are **ENSv2 names** under `bajigur.eth` (our own
   subregistry on Sepolia); the creator's Hedera payout account is read live
   from its `bajigur.hedera` text record.
+- Buyers rate the creators they bought from, through **ERC-8004** on Hedera. The creator's
+  ENS name carries their agent id, and the agent carries the name back, so reputation
+  follows the name rather than an address.
 - Anyone can **claim a name and publish a prompt**: Bajigur pays the Sepolia gas
   and registers the name to the user's own wallet, and a published prompt is
   priced, registered onchain, and paid straight to its author.
@@ -33,6 +36,8 @@ gateway). Design notes:
 | Remote MCP server (Streamable HTTP, paste the URL into any MCP client) | https://mcp.bajigur.xyz/mcp |
 | Bazantic gateway (x402/MPP on Base, MCP) | https://tuguge4rzbcsvgrevhkkjf43em.bazgateway.com |
 | Bazantic Recipe | `design-prompt-finder` |
+| Creator profile with onchain reputation | https://api.bajigur.xyz/creators/kiel.bajigur.eth |
+| ERC-8004 creator agent (ENS name onchain) | agent **115**, `ens` metadata `kiel.bajigur.eth`, rated through [`ReputationRegistry`](https://hashscan.io/testnet/contract/0.0.7919998) `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
 | ERC-8004 agent card | https://api.bajigur.xyz/.well-known/agent.json (agent **111** on Hedera testnet) |
 | `PromptRegistry` (verified source) | [0x59de4C018968E0357EeF77042dD2Fc2ff33e1418](https://hashscan.io/testnet/contract/0x59de4C018968E0357EeF77042dD2Fc2ff33e1418) |
 | HCS settlement audit topic | [0.0.10462113](https://hashscan.io/testnet/topic/0.0.10462113) |
@@ -48,6 +53,7 @@ Proof transactions on Hedera testnet:
 | Agent pays 0.2 HBAR over x402 | [0.0.9185802@1789056622.039948026](https://hashscan.io/testnet/transaction/0.0.9185802-1789056622-039948026) |
 | Privy wallet pays over x402 | [0.0.9185802@1789059182.997299836](https://hashscan.io/testnet/transaction/0.0.9185802-1789059182-997299836) |
 | Agent token only (API signs via Privy) | [0.0.9185802@1789131132.231709809](https://hashscan.io/testnet/transaction/0.0.9185802-1789131132-231709809) |
+| Buyer rates a creator (ERC-8004, signed by their Privy wallet) | [0.0.10497977@1789213244.887394093](https://hashscan.io/testnet/transaction/0.0.10497977-1789213244-887394093) |
 | Buyer with an ENS name pays its creator | [0.0.7162784@1789206663.898896205](https://hashscan.io/testnet/transaction/0.0.7162784-1789206663-898896205) |
 
 A wallet that signed in with Privy claimed `claude.bajigur.eth` through the API

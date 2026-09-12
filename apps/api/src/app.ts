@@ -3,7 +3,9 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { type AgentClaims, type AgentOptions, agentRoutes, evmOf } from "./agent";
+import { creatorRoutes } from "./creators";
 import { hederaAccountOf, isValidLabel, type Registrar } from "./ens";
+import type { Publish } from "./hcs";
 import { agentCard, openapi } from "./meta";
 import {
   addPrompt,
@@ -18,6 +20,7 @@ import {
   tinybars,
 } from "./prompts";
 import { atomic, rateLimit, validate } from "./publish";
+import type { Reputation } from "./reputation";
 import type { Store } from "./store";
 import { requirementsFor, service, type X402Options, x402 } from "./x402";
 
@@ -25,9 +28,18 @@ export type AppOptions = X402Options & {
   agent?: Omit<AgentOptions, "allowedPayTo">;
   registrar?: Registrar;
   store?: Store;
+  reputation?: Reputation;
+  publish?: Publish;
 };
 
-export function createApp({ agent, registrar, store, ...options }: AppOptions = {}) {
+export function createApp({
+  agent,
+  registrar,
+  store,
+  reputation,
+  publish,
+  ...options
+}: AppOptions = {}) {
   platformAccount();
   const app = new Hono();
 
@@ -72,6 +84,19 @@ export function createApp({ agent, registrar, store, ...options }: AppOptions = 
 
   app.get("/openapi.json", (c) => c.json(openapi(new URL(c.req.url).origin)));
   app.get("/.well-known/agent.json", (c) => c.json(agentCard(new URL(c.req.url).origin)));
+
+  app.route(
+    "/creators",
+    creatorRoutes({
+      ens: options.ens,
+      registrar,
+      registry: options.registry,
+      reputation,
+      store,
+      publish,
+      claimsOf: (headers) => claimsOf?.(headers) ?? Promise.resolve(undefined),
+    }),
+  );
 
   app.get("/prompts", async (c) =>
     c.json(await Promise.all(prompts.map((p) => publicPrompt(p, options.ens)))),

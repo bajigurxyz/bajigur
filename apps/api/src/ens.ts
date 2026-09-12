@@ -1,7 +1,7 @@
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
-import { normalize } from "viem/ens";
+import { namehash, normalize } from "viem/ens";
 
 export type Ens = { text(name: string, key: string): Promise<string | null> };
 
@@ -77,6 +77,7 @@ export type Registrar = {
   available(label: string): Promise<boolean>;
   labelOf(owner: string): Promise<string | null>;
   claim(label: string, owner: string, hederaAccount: string): Promise<string>;
+  setText(name: string, key: string, value: string): Promise<string>;
 };
 
 /// Claims subnames on the user's behalf: the platform pays the Sepolia gas, the user owns the name.
@@ -128,5 +129,34 @@ export function registrarClient(): Registrar | undefined {
       names.set(owner, { label, at: Date.now() });
       return hash;
     },
+    /// The platform holds ROLE_SET_TEXT on the shared resolver, so it can write a record
+    /// for any name under the parent. Used for machine-readable records only.
+    async setText(name, key, value) {
+      const resolver = process.env.ENS_RESOLVER as `0x${string}` | undefined;
+      if (!resolver) throw new Error("ENS_RESOLVER is not set");
+      const hash = await wallet.writeContract({
+        address: resolver,
+        abi: RESOLVER_ABI,
+        functionName: "setText",
+        args: [namehash(normalize(name)), key, value],
+      });
+      const receipt = await client.waitForTransactionReceipt({ hash });
+      if (receipt.status !== "success") throw new Error(`setText reverted (${hash})`);
+      return hash;
+    },
   };
 }
+
+const RESOLVER_ABI = [
+  {
+    type: "function",
+    name: "setText",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "node", type: "bytes32" },
+      { name: "key", type: "string" },
+      { name: "value", type: "string" },
+    ],
+    outputs: [],
+  },
+] as const;

@@ -1,10 +1,26 @@
 import { SQL } from "bun";
 import type { Prompt } from "./prompts";
 
+export type FeedbackRow = {
+  id: string;
+  creator: string;
+  agentId: number;
+  promptId: string;
+  buyerAccount: string;
+  buyerName?: string;
+  value: number;
+  comment?: string;
+  transactionId: string;
+  at: string;
+};
+
 export type Store = {
   all(): Promise<Prompt[]>;
   add(prompt: Prompt): Promise<void>;
   remove(id: string): Promise<void>;
+  addFeedback(row: FeedbackRow): Promise<void>;
+  feedbackFor(creator: string): Promise<FeedbackRow[]>;
+  feedback(id: string): Promise<FeedbackRow | undefined>;
 };
 
 type Row = {
@@ -59,7 +75,34 @@ export function postgresStore(): Store | undefined {
       creator text,
       registry_id integer,
       created_at timestamptz not null default now()
-    )`;
+    )`.then(
+    () => sql`
+    create table if not exists feedback (
+      id text primary key,
+      creator text not null,
+      agent_id integer not null,
+      prompt_id text not null,
+      buyer_account text not null,
+      buyer_name text,
+      value integer not null,
+      comment text,
+      transaction_id text not null,
+      created_at timestamptz not null default now()
+    )`,
+  );
+
+  const toFeedback = (r: Record<string, unknown>): FeedbackRow => ({
+    id: String(r.id),
+    creator: String(r.creator),
+    agentId: Number(r.agent_id),
+    promptId: String(r.prompt_id),
+    buyerAccount: String(r.buyer_account),
+    ...(r.buyer_name ? { buyerName: String(r.buyer_name) } : {}),
+    value: Number(r.value),
+    ...(r.comment ? { comment: String(r.comment) } : {}),
+    transactionId: String(r.transaction_id),
+    at: new Date(r.created_at as string).toISOString(),
+  });
 
   return {
     async all() {
@@ -79,6 +122,31 @@ export function postgresStore(): Store | undefined {
     async remove(id) {
       await ready;
       await sql`delete from prompts where id = ${id}`;
+    },
+    // The onchain feedback carries a URI and a hash; this is the text behind them.
+    async addFeedback(row) {
+      await ready;
+      await sql`
+        insert into feedback (id, creator, agent_id, prompt_id, buyer_account, buyer_name, value, comment, transaction_id)
+        values (${row.id}, ${row.creator}, ${row.agentId}, ${row.promptId}, ${row.buyerAccount},
+                ${row.buyerName ?? null}, ${row.value}, ${row.comment ?? null}, ${row.transactionId})`;
+    },
+    async feedbackFor(creator) {
+      await ready;
+      const rows = (await sql`
+        select * from feedback where creator = ${creator} order by created_at desc`) as Record<
+        string,
+        unknown
+      >[];
+      return rows.map(toFeedback);
+    },
+    async feedback(id) {
+      await ready;
+      const rows = (await sql`select * from feedback where id = ${id}`) as Record<
+        string,
+        unknown
+      >[];
+      return rows[0] ? toFeedback(rows[0]) : undefined;
     },
   };
 }

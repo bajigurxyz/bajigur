@@ -18,8 +18,10 @@ export type Settlement = {
 };
 
 export type OnSettled = (settlement: Settlement) => Promise<void>;
+export type Publish = (message: unknown) => Promise<void>;
 
-export function hcsPublisher(): OnSettled | undefined {
+/// One topic for everything worth auditing: settlements and, now, creator feedback.
+export function hcsTopic(): Publish | undefined {
   const topic = process.env.HCS_TOPIC_ID;
   const operator = process.env.X402_PAY_TO_ADDRESS;
   const key = process.env.X402_PAY_TO_KEY;
@@ -36,10 +38,10 @@ export function hcsPublisher(): OnSettled | undefined {
   );
   const topicId = TopicId.fromString(topic);
 
-  return async (settlement) => {
+  return async (message) => {
     await new TopicMessageSubmitTransaction()
       .setTopicId(topicId)
-      .setMessage(JSON.stringify(settlement))
+      .setMessage(JSON.stringify(message))
       .execute(client)
       .then((res) => res.getReceipt(client));
   };

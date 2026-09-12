@@ -55,6 +55,7 @@ const app = createApp({
     register: async () => ({ id: 42, transactionId: "0.0.1@2.0" }),
     buyers: async () => [],
     accountOf: async () => undefined,
+    evmOf: async () => undefined,
   },
   identity: async () => undefined,
   agent: {
@@ -234,6 +235,7 @@ describe("claiming a name", () => {
       claims.push({ label, owner, hedera });
       return "0xabc";
     },
+    setText: async () => "0xdef",
   };
   const named = createApp({
     facilitator,

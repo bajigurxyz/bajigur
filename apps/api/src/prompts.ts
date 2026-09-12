@@ -95,7 +95,16 @@ export const creatorOf = (prompt: Pick<Prompt, "creator" | "payTo">) =>
 // Creator payout: the creator's ENS `bajigur.hedera` record when set, else the prompt's payTo, else the platform.
 export async function payToOf(prompt: Pick<Prompt, "payTo" | "creator">, ens?: Ens) {
   const creator = creatorOf(prompt);
-  if (creator && ens) return hederaAccountOf(creator, ens);
+  if (creator && ens) {
+    try {
+      return await hederaAccountOf(creator, ens);
+    } catch (err) {
+      // A creator's broken name must not break the whole catalogue. Their own payTo is
+      // safe to fall back to; the platform account is not, so a seed still fails loudly.
+      if (!prompt.payTo) throw err;
+      console.warn(`${creator}: ${String(err)}; paying its recorded account instead`);
+    }
+  }
   return prompt.payTo ?? platformAccount();
 }
 

@@ -25,6 +25,7 @@ export type Registry = {
   hasLicence(account: string, registryId: number): Promise<boolean>;
   buyers(registryId: number): Promise<Buyer[]>;
   accountOf(address: string): Promise<string | undefined>;
+  evmOf(account: string): Promise<string | undefined>;
 };
 
 export type Identity = (headers: Headers) => Promise<string | undefined>;
@@ -80,6 +81,12 @@ export function contractRegistry(): Registry | undefined {
           transactionId: decodeAbiParameters([{ type: "string" }], log.data as `0x${string}`)[0],
           at: isoOf(log.timestamp),
         }));
+    },
+
+    async evmOf(accountId) {
+      return account(accountId)
+        .then((a) => a.evm_address)
+        .catch(() => undefined);
     },
 
     async accountOf(evmAddress) {

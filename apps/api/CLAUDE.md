@@ -96,6 +96,27 @@
   `x-bajigur-admin: ADMIN_KEY` lets `/agent/link` take a raw
   `{walletId, address}` for app-owned wallets (tests, demos). Privy policies
   cannot gate `secp256k1_sign`, so caps live here, not in Privy.
+- Reputation, `src/reputation.ts` + `src/creators.ts`: ERC-8004 on Hedera testnet.
+  Both registries are deployed there as singletons, `IdentityRegistry`
+  `0x8004A818BFB912233c491871b3d84c89A494BD9e` and `ReputationRegistry`
+  `0x8004B663056A597Dffe9eCcC1965A193B7388713` (it answers `getIdentityRegistry()`
+  with the first), so this is Hedera and ERC-8004 at the same time: HBAR gas, HashScan,
+  no bridge. A creator **is** their ENS name. The first time someone rates them we mint
+  their agent, write `ens` into its onchain metadata, hand the token to the creator's own
+  wallet, and write `erc8004` = `eip155:296:<registry>:<agentId>` onto their ENS name, so
+  the link reads both ways: name to agent and agent to name.
+- `POST /creators/:name/feedback` takes `{like, comment, promptId}` from a bearer agent
+  token. Only a wallet holding a licence for one of that creator's prompts may rate, and
+  never the creator themselves. The transaction is signed and **paid by the buyer's own
+  Privy wallet**, because `giveFeedback` reverts with "Self-feedback not allowed" for the
+  agent's owner, and a rating nobody paid for is worth nothing. The comment text goes to
+  Postgres and to the HCS topic; the chain holds the score, the `feedbackURI` and its hash.
+  `GET /creators/:name` is the public profile (prompts, likes, onchain summary, comments),
+  `GET /creators/:name/agent.json` is that creator's ERC-8004 registration file, and
+  `GET /creators/:name/feedback/:id` is what `feedbackURI` points at.
+- `payToOf` falls back to a prompt's recorded `payTo` when the creator's ENS record cannot
+  be read, so one broken name cannot 500 the catalogue. A seed without a `payTo` still
+  fails loudly rather than quietly paying the platform.
 - `GET /prompts/:id/buyers` is creator-gated (agent token whose account equals the
   prompt's `payTo`) and reads `LicenseIssued` from the mirror node's contract log,
   because the ERC-1155 balance is what grants access, so the list can never disagree

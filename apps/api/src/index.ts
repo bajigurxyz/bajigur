@@ -1,8 +1,9 @@
 import { platformAssociate, platformOnboard, privyLinkWallet, privySigner } from "./agent";
 import { createApp } from "./app";
 import { ensClient, registrarClient } from "./ens";
-import { hcsPublisher } from "./hcs";
+import { hcsTopic } from "./hcs";
 import { contractRegistry, signedIdentity } from "./registry";
+import { reputation } from "./reputation";
 import { postgresStore } from "./store";
 
 const port = Number(process.env.PORT ?? 3002);
@@ -12,8 +13,12 @@ const secret = process.env.AGENT_TOKEN_SECRET;
 if (!signer || !secret)
   console.warn("agent wallets disabled: set PRIVY_APP_SECRET and AGENT_TOKEN_SECRET");
 
+const topic = hcsTopic();
+
 const app = createApp({
-  onSettled: hcsPublisher(),
+  onSettled: topic,
+  publish: topic,
+  reputation: reputation(signer),
   registry: contractRegistry(),
   identity: signedIdentity,
   ens: process.env.ENS_NAME ? ensClient() : undefined,
