@@ -81,7 +81,11 @@ export default function ProfilePage() {
                 <CopyField
                   label="Wallet address"
                   value={wallet.address}
-                  hint="Created for you by Privy. No seed phrase to keep."
+                  hint={
+                    account
+                      ? "Created for you by Privy. No seed phrase to keep."
+                      : "Created for you by Privy. Send anything here and Hedera creates the account below on arrival."
+                  }
                 />
                 <CopyField
                   label="Hedera account"
@@ -129,12 +133,17 @@ export default function ProfilePage() {
             <section className="space-y-3">
               <h2 className="text-lg font-medium">Balance</h2>
               {!linked && !onChain && (
-                <p className="rounded-2xl border border-gray-200 p-6 text-sm text-gray-600">
-                  <Link href="/connect" className="underline hover:text-black">
-                    Set up payments
-                  </Link>{" "}
-                  to create your Hedera account.
-                </p>
+                <div className="space-y-2 rounded-2xl border border-gray-200 p-6 text-sm text-gray-600">
+                  <p>Nothing has reached this wallet yet, so Hedera has not created its account.</p>
+                  <p>
+                    <Link href="/connect" className="underline hover:text-black">
+                      Set up payments
+                    </Link>{" "}
+                    and Bajigur funds it for you. Or send HBAR or USDC to the wallet address above
+                    from anywhere: the account is created on arrival, and no account has to exist
+                    first.
+                  </p>
+                </div>
               )}
               {linked && balances.phase === "loading" && (
                 <div aria-hidden className="h-24 animate-pulse rounded-2xl bg-gray-100" />
@@ -199,7 +208,7 @@ export default function ProfilePage() {
                   >
                     faucet.circle.com
                   </a>
-                  . Paste the Hedera account above, not the wallet address.
+                  . Either address works: they are the same account.
                 </p>
               )}
             </section>
