@@ -84,7 +84,7 @@ the paid request.
 Status 2026-09-11: steps 1 to 4 shipped and verified on testnet (HCS trail,
 discovery, HBAR, verified `PromptRegistry`
 `0x59de4C018968E0357EeF77042dD2Fc2ff33e1418`, licence minting, free
-re-access). API live at https://api-production-fe21.up.railway.app. Privy
+re-access). API live at https://api.bajigur.xyz. Privy
 server wallet paid over x402. ERC-8004 agent 111 registered. Bazantic
 gateway `tuguge4rzbcsvgrevhkkjf43em` active and Recipe `design-prompt-finder`
 published (track dropped in favour of ENS). ENS: `bajigur.eth` on ENSv2 Sepolia

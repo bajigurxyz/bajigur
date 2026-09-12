@@ -52,7 +52,7 @@ export function createApp({ agent, registrar, store, ...options }: AppOptions = 
   if (store) {
     let at = 0;
     let inflight: Promise<void> | undefined;
-    app.use("*", async (c, next) => {
+    app.use("*", async (_c, next) => {
       if (Date.now() - at > 30_000 && !inflight) {
         at = Date.now();
         inflight = store

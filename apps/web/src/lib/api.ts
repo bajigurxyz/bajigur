@@ -7,9 +7,10 @@
  * in this app does it server side (see app/api/unlock/[id]/route.ts).
  */
 
-export const API_BASE = (
-  process.env.NEXT_PUBLIC_API_URL ?? "https://api-production-fe21.up.railway.app"
-).replace(/\/+$/, "");
+export const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? "https://api.bajigur.xyz").replace(
+  /\/+$/,
+  "",
+);
 
 const ENDPOINTS = {
   /** Free catalogue: every prompt, bodies stripped. */

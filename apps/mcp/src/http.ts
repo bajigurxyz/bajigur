@@ -21,7 +21,7 @@ import { createServer } from "./server";
  * offer to log in rather than report a failure.
  */
 
-const API = process.env.BAJIGUR_API_URL ?? "https://api-production-fe21.up.railway.app";
+const API = process.env.BAJIGUR_API_URL ?? "https://api.bajigur.xyz";
 /** The web app, which is also this resource server's OAuth authorization server. */
 const APP = (process.env.BAJIGUR_APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
 const PORT = Number(process.env.MCP_PORT ?? process.env.PORT ?? 3004);

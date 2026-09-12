@@ -55,11 +55,13 @@ forge verify-contract <address> src/PromptRegistry.sol:PromptRegistry \
 `script/RegisterAgent.s.sol` registers the Bajigur service on the ERC-8004
 IdentityRegistry (`0x8004A818BFB912233c491871b3d84c89A494BD9e` on Hedera
 testnet) with `ERC8004_AGENT_URI` pointing at the API's
-`/.well-known/agent.json`. Registered as agent **111**, owned by the platform
+`/.well-known/agent.json`. The registration onchain still carries the Railway hostname
+(`api-production-fe21.up.railway.app`), which serves the same card; re-run the
+script to move it to the custom domain. Registered as agent **111**, owned by the platform
 account.
 
 ```bash
-ERC8004_AGENT_URI=https://api-production-fe21.up.railway.app/.well-known/agent.json \
+ERC8004_AGENT_URI=https://api.bajigur.xyz/.well-known/agent.json \
   forge script script/RegisterAgent.s.sol --rpc-url hedera_testnet --broadcast
 ```
 

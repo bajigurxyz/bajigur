@@ -8,7 +8,7 @@ prompts. Owned by Kiel. Design in
   stays on the user's machine, or an agent token). `src/http.ts` is the hosted
   Streamable HTTP server: stateless, one endpoint for everyone, the wallet
   comes from the request's `Authorization: Bearer <agent token>`; without a
-  token it is read-only. Live at `https://mcp-production-bbfe.up.railway.app/mcp`
+  token it is read-only. Live at `https://mcp.bajigur.xyz/mcp`
   (Railway service `mcp`, `apps/mcp/Dockerfile`, deploy with
   `railway up --service mcp --detach`). It publishes RFC 9728 metadata at
   `/.well-known/oauth-protected-resource` pointing at `BAJIGUR_APP_URL` (the

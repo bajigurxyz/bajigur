@@ -22,7 +22,7 @@ import { useEffect, useRef, useState } from "react";
  */
 
 const REPO = "https://github.com/bajigurxyz/bajigur.git";
-const API = "https://api-production-fe21.up.railway.app";
+const API = "https://api.bajigur.xyz";
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
 const MCP_URL = `${(process.env.NEXT_PUBLIC_MCP_URL ?? "http://localhost:3004").replace(/\/+$/, "")}/mcp`;
 

@@ -17,14 +17,14 @@ gateways:
         and every purchase mints an onchain licence so the same wallet re-reads
         the prompt for free from any client.
       tags: ["design", "motion", "prompts", "frontend", "x402", "hedera"]
-      product_website: https://api-production-fe21.up.railway.app
+      product_website: https://api.bajigur.xyz
       docs_url: https://github.com/bajigurxyz/bajigur
 
     upstream:
-      url: https://api-production-fe21.up.railway.app
+      url: https://api.bajigur.xyz
       spec:
         type: openapi
-        url: https://api-production-fe21.up.railway.app/openapi.json
+        url: https://api.bajigur.xyz/openapi.json
       auth:
         type: api-key
         delivery: header

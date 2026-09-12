@@ -21,7 +21,7 @@ const MARKERS: Record<string, string> = {
 /** The only hosts allowed to appear: the repo, the live API, and the two faucets. */
 const ALLOWED_HOSTS = [
   "https://github.com/bajigurxyz/bajigur.git",
-  "https://api-production-fe21.up.railway.app",
+  "https://api.bajigur.xyz",
   "https://portal.hedera.com",
   "https://faucet.circle.com",
   "http://localhost:3000",
@@ -43,7 +43,7 @@ describe("target honesty", () => {
     for (const target of ONBOARDING_TARGETS) {
       const block = `${target.snippet}\n${target.note}`;
       if (!block.includes("BAJIGUR_API_URL")) continue;
-      expect(block).toContain("https://api-production-fe21.up.railway.app");
+      expect(block).toContain("https://api.bajigur.xyz");
       expect(block).not.toMatch(/BAJIGUR_API_URL[^\n]*localhost/);
     }
   });

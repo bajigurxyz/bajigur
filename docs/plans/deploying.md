@@ -6,8 +6,8 @@ authorization server and why OAuth cannot work for anyone but us.
 
 | Service | Where | Status |
 | --- | --- | --- |
-| `apps/api` | Railway | live, `api-production-fe21.up.railway.app` |
-| `apps/mcp` | Railway | live, `mcp-production-bbfe.up.railway.app` |
+| `apps/api` | Railway | live, `api.bajigur.xyz` |
+| `apps/mcp` | Railway | live, `mcp.bajigur.xyz` |
 | `apps/landingpage` | Vercel | not deployed |
 | `apps/web` | Vercel | not deployed |
 
@@ -46,7 +46,7 @@ NEXT_PUBLIC_APP_URL=https://app.bajigur.xyz
 `apps/web`:
 
 ```
-NEXT_PUBLIC_API_URL=https://api-production-fe21.up.railway.app
+NEXT_PUBLIC_API_URL=https://api.bajigur.xyz
 NEXT_PUBLIC_LANDING_URL=https://bajigur.xyz
 NEXT_PUBLIC_PRIVY_APP_ID=<the app id the API also uses>
 NEXT_PUBLIC_PRIVY_SIGNER_ID=<key quorum id>
@@ -66,8 +66,8 @@ Keep Hostinger's nameservers and edit records there.
 | `@` | A | the apex IP Vercel shows you | the existing `A @ 2.57.91.91` parking record |
 | `www` | CNAME | `cname.vercel-dns.com` | the existing `CNAME www bajigur.xyz` |
 | `app` | CNAME | `cname.vercel-dns.com` | new |
-| `mcp` | CNAME | `mcp-production-bbfe.up.railway.app` | new |
-| `api` | CNAME | `api-production-fe21.up.railway.app` | new |
+| `mcp` | CNAME | `mcp.bajigur.xyz` | new |
+| `api` | CNAME | `api.bajigur.xyz` | new |
 
 **Do not copy an apex IP from anywhere, including this file.** Add the domain in
 the Vercel dashboard first and use the record it prints. Vercel has changed that

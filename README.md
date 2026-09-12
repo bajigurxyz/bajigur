@@ -26,14 +26,14 @@ gateway). Design notes:
 
 | What | Where |
 | --- | --- |
-| API (x402-gated, Hedera testnet) | https://api-production-fe21.up.railway.app |
-| Catalogue (free) | https://api-production-fe21.up.railway.app/prompts |
-| Discovery directory (x402 bazaar shape) | https://api-production-fe21.up.railway.app/discovery/resources |
-| OpenAPI | https://api-production-fe21.up.railway.app/openapi.json |
-| Remote MCP server (Streamable HTTP, paste the URL into any MCP client) | https://mcp-production-bbfe.up.railway.app/mcp |
+| API (x402-gated, Hedera testnet) | https://api.bajigur.xyz |
+| Catalogue (free) | https://api.bajigur.xyz/prompts |
+| Discovery directory (x402 bazaar shape) | https://api.bajigur.xyz/discovery/resources |
+| OpenAPI | https://api.bajigur.xyz/openapi.json |
+| Remote MCP server (Streamable HTTP, paste the URL into any MCP client) | https://mcp.bajigur.xyz/mcp |
 | Bazantic gateway (x402/MPP on Base, MCP) | https://tuguge4rzbcsvgrevhkkjf43em.bazgateway.com |
 | Bazantic Recipe | `design-prompt-finder` |
-| ERC-8004 agent card | https://api-production-fe21.up.railway.app/.well-known/agent.json (agent **111** on Hedera testnet) |
+| ERC-8004 agent card | https://api.bajigur.xyz/.well-known/agent.json (agent **111** on Hedera testnet) |
 | `PromptRegistry` (verified source) | [0x59de4C018968E0357EeF77042dD2Fc2ff33e1418](https://hashscan.io/testnet/contract/0x59de4C018968E0357EeF77042dD2Fc2ff33e1418) |
 | HCS settlement audit topic | [0.0.10462113](https://hashscan.io/testnet/topic/0.0.10462113) |
 | ENSv2 name (Sepolia) | `bajigur.eth`, owner `0xE610…2bAa`, resolver [`0x7f38…87f6`](https://sepolia.etherscan.io/address/0x7f381419050525025bBB6811CF5821E0615487f6), subregistry [`0x9673…461c`](https://sepolia.etherscan.io/address/0x9673702a3C850fa1c41d94C908083Fc85F59461c) |

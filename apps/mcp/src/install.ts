@@ -100,7 +100,7 @@ Try: "search bajigur for a marquee prompt, then buy it"
           "command": "bun",
           "args": ["$(pwd)/apps/mcp/src/index.ts"],
           "env": {
-            "BAJIGUR_API_URL": "https://api-production-fe21.up.railway.app",
+            "BAJIGUR_API_URL": "https://api.bajigur.xyz",
             "BAJIGUR_AGENT_TOKEN": "YOUR_AGENT_TOKEN"
           }
         }

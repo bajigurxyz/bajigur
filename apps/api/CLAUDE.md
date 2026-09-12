@@ -8,7 +8,7 @@
 - Dev server runs on port 3002 (`PORT`): `bun run dev --filter=@bajigur/api`.
 - Production runs on Railway (project `bajigur`, service `api`) from
   `apps/api/Dockerfile` with the repo as build context; public URL
-  `https://api-production-fe21.up.railway.app`. Deploy with
+  `https://api.bajigur.xyz`. Deploy with
   `railway up --service api --detach` from the repo root; variables live in
   Railway (same names as `.env`), plus `RAILWAY_DOCKERFILE_PATH`.
   `src/index.ts` rewrites the request scheme from `x-forwarded-proto` so 402
