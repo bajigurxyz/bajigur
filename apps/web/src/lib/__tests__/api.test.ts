@@ -30,6 +30,7 @@ describe("price formatting", () => {
   it("keeps the API's decimal string intact", () => {
     expect(formatUsd("0.02")).toBe("$0.02");
     expect(formatUsd("0.10")).toBe("$0.10");
-    expect(formatHbar("0.2")).toBe("0.2 ℏ");
+    // Spelled out, not the ℏ sign: a price nobody can read is not a price.
+    expect(formatHbar("0.2")).toBe("0.2 HBAR");
   });
 });

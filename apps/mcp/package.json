@@ -5,12 +5,13 @@
   "type": "module",
   "description": "MCP server that lets Claude Desktop discover and pay for Bajigur prompts over x402",
   "scripts": {
-    "dev": "echo 'stdio server: add it to Claude Desktop, see README.md'",
-    "start": "bun run src/index.ts",
-    "build": "bun build src/index.ts --target=bun --outdir=dist",
+    "dev": "bun --watch src/http.ts",
+    "start": "bun run src/http.ts",
+    "build": "bun build src/http.ts src/index.ts --target=bun --outdir=dist",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist .turbo tsconfig.tsbuildinfo"
+    "clean": "rm -rf dist .turbo tsconfig.tsbuildinfo",
+    "start:stdio": "bun run src/index.ts"
   },
   "dependencies": {
     "@hiero-ledger/sdk": "2.85.0",

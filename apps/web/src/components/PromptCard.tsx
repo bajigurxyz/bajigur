@@ -58,10 +58,10 @@ export default function PromptCard({ prompt }: { prompt: Prompt }) {
       <div className="mt-auto flex items-center justify-between gap-3 pt-1">
         <span
           aria-label={`Price: ${price} in USDC, or ${formatHbar(prompt.priceHbar)}`}
-          className="rounded-full bg-black px-2.5 py-1 text-xs font-semibold text-white"
+          className="inline-flex items-baseline gap-1.5 rounded-full bg-black px-2.5 py-1 text-xs font-semibold text-white"
         >
-          {price}
-          <span className="ml-1.5 font-normal text-gray-300">/ {formatHbar(prompt.priceHbar)}</span>
+          {price} USDC
+          <span className="font-normal text-gray-400">or {formatHbar(prompt.priceHbar)}</span>
         </span>
         <Link
           href={`/prompts/${prompt.id}`}

@@ -98,8 +98,8 @@ export default function ConnectPanel() {
     return (
       <div className="space-y-4">
         <p className="text-sm text-gray-600">
-          Sign in with an email or a social account. Privy creates a wallet for you — there is no
-          seed phrase to keep and no gas to buy.
+          Sign in with an email or a social account. Privy creates a wallet for you, with no seed
+          phrase to keep and no gas to buy.
         </p>
         <WalletButton />
       </div>
@@ -116,7 +116,9 @@ export default function ConnectPanel() {
           </div>
           <div>
             <dt className="text-xs text-gray-500">Wallet</dt>
-            <dd className="font-mono text-xs break-all text-black">{wallet?.address ?? "—"}</dd>
+            <dd className="font-mono text-xs break-all text-black">
+              {wallet?.address ?? "Not set"}
+            </dd>
           </div>
           <div>
             <dt className="text-xs text-gray-500">Cap per payment</dt>
@@ -165,11 +167,11 @@ export default function ConnectPanel() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-600">
-        To let an agent buy prompts for you, delegate your wallet to Bajigur. Bajigur can then sign
-        Hedera transfers on your behalf — only to Bajigur creators, and only up to a fixed amount
-        per payment. You can revoke it at any time in Privy.
-      </p>
+      <ul className="space-y-1.5 text-sm text-gray-600">
+        <li>Bajigur signs payments for you, so an agent can buy without asking every time.</li>
+        <li>Only Bajigur creators can be paid, and never more than the cap per payment.</li>
+        <li>Revoke it in Privy whenever you want.</li>
+      </ul>
       <button
         type="button"
         onClick={connect}

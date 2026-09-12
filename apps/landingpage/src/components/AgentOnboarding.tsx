@@ -24,6 +24,7 @@ import { useEffect, useRef, useState } from "react";
 const REPO = "https://github.com/bajigurxyz/bajigur.git";
 const API = "https://api-production-fe21.up.railway.app";
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+const MCP_URL = `${(process.env.NEXT_PUBLIC_MCP_URL ?? "http://localhost:3004").replace(/\/+$/, "")}/mcp`;
 
 export type OnboardingTarget = {
   id: string;
@@ -35,98 +36,74 @@ export type OnboardingTarget = {
 
 export const ONBOARDING_TARGETS: OnboardingTarget[] = [
   {
-    id: "claude-delegated",
-    label: "Claude Desktop · no key",
-    intro:
-      "The recommended path. Sign in on the web app, delegate your wallet, and paste the token it gives you — you never hold a private key.",
-    snippet: `# 1. Clone, so Claude can run the MCP server from your checkout
-git clone ${REPO} && cd bajigur
-bun install
+    id: "claude-code",
+    label: "Claude Code",
+    intro: "One command. No clone, no install, no config file to find.",
+    snippet: `# Browse the catalogue straight away:
+claude mcp add --transport http bajigur ${MCP_URL}
 
-# 2. Sign in at ${APP_URL}/connect, delegate your wallet,
-#    and copy the agent token it shows you.
-
-# 3. claude_desktop_config.json — no Hedera key anywhere:
-{
-  "mcpServers": {
-    "bajigur": {
-      "command": "bun",
-      "args": ["$(pwd)/apps/mcp/src/index.ts"],
-      "env": {
-        "BAJIGUR_API_URL": "${API}",
-        "BAJIGUR_AGENT_TOKEN": "<paste the token from the web app>"
-      }
-    }
-  }
-}`,
-    note: "Bajigur signs each payment with your delegated Privy wallet, never above the cap the token carries. Revoke the delegation in Privy and the token dies with it.",
-  },
-  {
-    id: "claude-key",
-    label: "Claude Desktop · own wallet",
-    intro:
-      "Already have a Hedera testnet account? Pay from it directly and skip the web app entirely.",
-    snippet: `git clone ${REPO} && cd bajigur
-bun install
-
-# An ECDSA testnet account from https://portal.hedera.com, holding
-# testnet USDC from https://faucet.circle.com. No HBAR for gas needed —
-# the facilitator pays the Hedera fee.
-bun run hedera:associate
-
-# claude_desktop_config.json
-{
-  "mcpServers": {
-    "bajigur": {
-      "command": "bun",
-      "args": ["$(pwd)/apps/mcp/src/index.ts"],
-      "env": {
-        "BAJIGUR_API_URL": "${API}",
-        "HEDERA_NETWORK": "testnet",
-        "HEDERA_OPERATOR_ID": "0.0.xxxxxxx",
-        "HEDERA_OPERATOR_KEY": "<hex ecdsa private key>",
-        "X402_PAY_WITH": "usdc",
-        "X402_MAX_SPEND_USD": "1"
-      }
-    }
-  }
-}`,
-    note: "X402_PAY_WITH=hbar buys with HBAR instead; every prompt is priced in both.",
+# To buy, add the agent token from ${APP_URL}/connect:
+claude mcp add --transport http bajigur ${MCP_URL} \\
+  --header "Authorization: Bearer YOUR_AGENT_TOKEN"`,
+    note: "Then ask: “search bajigur for a marquee prompt and buy it”. Without a token search still works and only buying is refused, so you can look before you commit.",
   },
   {
     id: "mcp-json",
     label: "Cursor · Windsurf · Cline",
-    intro: "Any MCP-speaking agent takes the same stdio server. Paste this into its MCP config.",
+    intro: "Any MCP client that takes a URL. Paste this into its MCP config.",
     snippet: `{
   "mcpServers": {
     "bajigur": {
-      "command": "bun",
-      "args": ["/absolute/path/to/bajigur/apps/mcp/src/index.ts"],
-      "env": {
-        "BAJIGUR_API_URL": "${API}",
-        "BAJIGUR_AGENT_TOKEN": "<token from the web app>"
+      "type": "http",
+      "url": "${MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer YOUR_AGENT_TOKEN"
       }
     }
   }
 }`,
-    note: "Clone the repo and run bun install first, then point args at your checkout. Config file names differ per editor — most accept this mcpServers shape.",
+    note: `Drop the headers block to browse without a wallet. Get the token at ${APP_URL}/connect. Config file names differ per editor, but most accept this shape.`,
   },
   {
-    id: "cli",
-    label: "Terminal",
-    intro: "No agent at all: buy a prompt straight from the command line.",
+    id: "claude-desktop",
+    label: "Claude Desktop",
+    intro:
+      "Custom connectors take a URL but not a custom header yet, so the hosted endpoint is browse-only here. To buy, point Desktop at the server over stdio.",
+    snippet: `# Browse: Settings -> Connectors -> Add custom connector
+${MCP_URL}
+
+# Buy: claude_desktop_config.json, token from ${APP_URL}/connect
+{
+  "mcpServers": {
+    "bajigur": {
+      "command": "bunx",
+      "args": ["--bun", "github:bajigurxyz/bajigur/apps/mcp"],
+      "env": {
+        "BAJIGUR_API_URL": "${API}",
+        "BAJIGUR_AGENT_TOKEN": "YOUR_AGENT_TOKEN"
+      }
+    }
+  }
+}`,
+    note: "You still hold no private key: Bajigur signs each payment with the Privy wallet you delegated, never above the token's cap, and revoking the delegation kills the token.",
+  },
+  {
+    id: "self-host",
+    label: "Run it yourself",
+    intro: "Own the endpoint, or pay from your own Hedera account instead of a delegated wallet.",
     snippet: `git clone ${REPO} && cd bajigur
 bun install
 
-# HEDERA_OPERATOR_ID / HEDERA_OPERATOR_KEY: an ECDSA testnet account from
-# https://portal.hedera.com, funded with testnet USDC from
-# https://faucet.circle.com. No HBAR for gas — the facilitator pays the fee.
-cp .env.example .env
+# Serve the same remote endpoint on :3004
+bun run dev --filter=@bajigur/mcp
 
+# Or pay from your own account: an ECDSA testnet account from
+# https://portal.hedera.com with testnet USDC from https://faucet.circle.com.
+# No HBAR for gas: the facilitator pays the Hedera fee.
+cp .env.example .env
 bun run hedera:associate
-bun run buy marquee-logos
-X402_PAY_WITH=hbar bun run buy hero-scroll-reveal`,
-    note: "Reads the repo's root .env. Not published to npm — today the checkout is the install.",
+bun run buy marquee-logos`,
+    note: `Open ${MCP_URL.replace("/mcp", "")} in a browser for the full text version of these instructions.`,
   },
 ];
 
@@ -161,7 +138,7 @@ function CopySnippetButton({ text, label }: { text: string; label: string }) {
   };
 
   const caption =
-    state === "copied" ? "Copied!" : state === "error" ? "Copy failed — retry" : "Copy";
+    state === "copied" ? "Copied!" : state === "error" ? "Copy failed, retry" : "Copy";
 
   return (
     <>
@@ -231,7 +208,7 @@ export default function AgentOnboarding() {
       </h2>
       <p className="mb-3 max-w-2xl text-base text-gray-600 sm:text-lg">
         Why buy instead of improvising? A listing carries a preview written against that exact
-        prompt — the buyer pays for proven output, not for text a model could invent in a second.
+        prompt, so the buyer pays for proven output rather than text a model could invent.
       </p>
       <p className="mb-8 max-w-2xl text-sm text-gray-500">
         Every setup below talks to the live API on Hedera testnet. Prompts are priced in USDC or

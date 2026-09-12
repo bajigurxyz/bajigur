@@ -12,10 +12,10 @@ afterEach(cleanup);
  * point is apps/mcp/src/index.ts and the env names are the ones apps/mcp reads.
  */
 const MARKERS: Record<string, string> = {
-  "claude-delegated": "BAJIGUR_AGENT_TOKEN",
-  "claude-key": "HEDERA_OPERATOR_KEY",
-  "mcp-json": '"mcpServers"',
-  cli: "bun run buy",
+  "claude-code": "claude mcp add --transport http",
+  "mcp-json": '"type": "http"',
+  "claude-desktop": "Add custom connector",
+  "self-host": "git clone",
 };
 
 /** The only hosts allowed to appear: the repo, the live API, and the two faucets. */
@@ -25,6 +25,7 @@ const ALLOWED_HOSTS = [
   "https://portal.hedera.com",
   "https://faucet.circle.com",
   "http://localhost:3000",
+  "http://localhost:3004",
 ];
 
 describe("target honesty", () => {
@@ -66,7 +67,7 @@ describe("target honesty", () => {
 });
 
 describe("tabs", () => {
-  it("renders an accessible tablist and shows the keyless path first", () => {
+  it("renders an accessible tablist and shows the one-command path first", () => {
     render(<AgentOnboarding />);
     const tablist = screen.getByRole("tablist", { name: "Choose your agent" });
     const tabs = screen.getAllByRole("tab");
@@ -83,7 +84,7 @@ describe("tabs", () => {
     const panel = screen.getByRole("tabpanel");
     expect(panel.getAttribute("aria-labelledby")).toBe(tabs[0].id);
     expect(tabs[0].getAttribute("aria-controls")).toBe(panel.id);
-    expect(panel.textContent).toContain(MARKERS["claude-delegated"]);
+    expect(panel.textContent).toContain(MARKERS["claude-code"]);
     expect(tablist).toBeTruthy();
   });
 
@@ -129,19 +130,19 @@ describe("copy button", () => {
     const writeText = stubClipboard();
     render(<AgentOnboarding />);
 
-    const cliTarget = ONBOARDING_TARGETS.find((t) => t.id === "cli")!;
-    fireEvent.click(screen.getByRole("tab", { name: cliTarget.label }));
+    const lastTarget = ONBOARDING_TARGETS[ONBOARDING_TARGETS.length - 1]!;
+    fireEvent.click(screen.getByRole("tab", { name: lastTarget.label }));
     fireEvent.click(
       screen.getByRole("button", {
-        name: `Copy the ${cliTarget.label} setup block`,
+        name: `Copy the ${lastTarget.label} setup block`,
       }),
     );
 
     expect(await screen.findByText("Copied!")).toBeTruthy();
     expect(writeText).toHaveBeenCalledTimes(1);
-    expect(writeText).toHaveBeenCalledWith(cliTarget.snippet);
+    expect(writeText).toHaveBeenCalledWith(lastTarget.snippet);
     expect(screen.getByRole("status").textContent).toContain(
-      `${cliTarget.label} setup block copied to clipboard`,
+      `${lastTarget.label} setup block copied to clipboard`,
     );
   });
 
@@ -154,7 +155,7 @@ describe("copy button", () => {
       name: `Copy the ${ONBOARDING_TARGETS[0].label} setup block`,
     });
     fireEvent.click(button);
-    expect(await screen.findByText("Copy failed — retry")).toBeTruthy();
+    expect(await screen.findByText("Copy failed, retry")).toBeTruthy();
 
     fireEvent.click(button);
     expect(await screen.findByText("Copied!")).toBeTruthy();

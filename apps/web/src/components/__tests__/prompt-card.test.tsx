@@ -23,7 +23,7 @@ describe("PromptCard", () => {
     expect(screen.getByText("kiel.bajigur.eth")).toBeTruthy();
     expect(screen.getByText("marquee")).toBeTruthy();
     expect(screen.getByText("css")).toBeTruthy();
-    const price = screen.getByLabelText(/Price: \$0\.02 in USDC, or 0\.2/);
+    const price = screen.getByLabelText("Price: $0.02 in USDC, or 0.2 HBAR");
     expect(price.textContent).toContain("$0.02");
   });
 

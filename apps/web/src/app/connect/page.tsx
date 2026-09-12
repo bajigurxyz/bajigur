@@ -2,8 +2,8 @@ import ConnectPanel from "@/components/ConnectPanel";
 import Nav from "@/components/Nav";
 
 export const metadata = {
-  title: "Connect — Bajigur",
-  description: "Delegate a Privy wallet so your agent can buy prompts on Hedera.",
+  title: "Connect your wallet | Bajigur",
+  description: "Set up payments so your agent can buy prompts on Hedera.",
 };
 
 export default function ConnectPage() {
@@ -15,10 +15,6 @@ export default function ConnectPage() {
           <h1 className="mb-3 text-3xl font-normal tracking-tight sm:text-4xl">
             Connect your wallet
           </h1>
-          <p className="max-w-2xl text-base text-gray-600">
-            One wallet, spendable by your agents under a cap you control — in the browser, in Claude
-            Desktop, or anywhere else that speaks MCP.
-          </p>
         </header>
         <ConnectPanel />
       </main>

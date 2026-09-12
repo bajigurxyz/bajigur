@@ -80,7 +80,7 @@ export default function Home() {
             style={{ animationDelay: "0.4s", opacity: 0 }}
           >
             Bajigur is a marketplace of motion and web design prompts where one x402 request buys
-            one prompt — for humans in the browser and autonomous agents in Claude Desktop, MCP, and
+            one prompt, for humans in the browser and autonomous agents in Claude Desktop, MCP, and
             the CLI.
           </p>
 

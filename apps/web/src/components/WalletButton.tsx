@@ -5,7 +5,7 @@ import { Wallet } from "lucide-react";
 import Link from "next/link";
 import { PRIVY_APP_ID } from "@/app/providers";
 
-/** `0x1234…abcd` — enough to recognise, short enough for a button. */
+/** `0x1234…abcd`: enough to recognise, short enough for a button. */
 export function truncateAddress(address: string): string {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
@@ -32,7 +32,7 @@ export default function WalletButton() {
   if (!PRIVY_APP_ID) {
     return (
       <span className="text-xs text-gray-500">
-        Sign-in unavailable — NEXT_PUBLIC_PRIVY_APP_ID is not set
+        Sign-in unavailable. NEXT_PUBLIC_PRIVY_APP_ID is not set
       </span>
     );
   }
@@ -50,8 +50,8 @@ export default function WalletButton() {
     return (
       <div className="inline-flex items-center gap-2">
         <Link
-          href="/connect"
-          aria-label={`Signed in as ${label} — open wallet settings`}
+          href="/profile"
+          aria-label={`Signed in as ${label}. Open your profile`}
           className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 font-mono text-xs text-gray-700 transition-colors hover:border-black focus-visible:ring-2 focus-visible:ring-black focus-visible:outline-none"
         >
           <Wallet aria-hidden className="h-3.5 w-3.5" />

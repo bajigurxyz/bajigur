@@ -80,5 +80,11 @@ export function tagsOf(prompts: Prompt[]): string[] {
 /** "0.10" → "$0.10". Prices arrive as decimal strings, so this only adds the symbol. */
 export const formatUsd = (priceUsd: string) => `$${priceUsd}`;
 
-/** "0.2" → "0.2 ℏ". */
-export const formatHbar = (priceHbar: string) => `${priceHbar} ℏ`;
+/**
+ * "0.2" → "0.2 HBAR".
+ *
+ * Spelled out rather than using the ℏ sign: nobody reads a currency they have
+ * to decode, and the whole point of showing two prices is that the choice is
+ * obvious.
+ */
+export const formatHbar = (priceHbar: string) => `${priceHbar} HBAR`;

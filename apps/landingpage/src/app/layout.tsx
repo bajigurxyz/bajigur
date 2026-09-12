@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Bajigur — pay per prompt, not per month",
+  title: "Bajigur | pay per prompt, not per month",
   description:
     "A marketplace of motion and web design prompts an agent can discover, pay for, and use on its own. Settled over x402 on Hedera, straight to the creator.",
 };

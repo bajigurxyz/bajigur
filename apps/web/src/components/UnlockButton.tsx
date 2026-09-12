@@ -67,8 +67,8 @@ export default function UnlockButton({ prompt, linked }: { prompt: Prompt; linke
           </pre>
         </div>
         <p className="text-xs text-gray-500">
-          Yours for good — the licence is an ERC-1155 token in your wallet, so this prompt opens
-          free from any client now.
+          Yours for good. The licence is an ERC-1155 token in your wallet, so this prompt opens free
+          from any client now.
           {phase.transaction && (
             <>
               {" "}
@@ -136,8 +136,9 @@ export default function UnlockButton({ prompt, linked }: { prompt: Prompt; linke
       </button>
 
       <p className="text-xs text-gray-500">
-        {formatUsd(prompt.priceUsd)} in USDC, or {formatHbar(prompt.priceHbar)} — paid straight to{" "}
-        {prompt.creator ?? "the creator"}. No gas: the facilitator covers the Hedera fee.
+        {formatUsd(prompt.priceUsd)} in USDC, or {formatHbar(prompt.priceHbar)} (Hedera&apos;s
+        native currency), paid straight to {prompt.creator ?? "the creator"}. No gas: the
+        facilitator covers the Hedera fee.
       </p>
 
       {phase.kind === "paying" && (

@@ -44,7 +44,7 @@ export default function CopyButton({
   };
 
   const caption =
-    state === "copied" ? "Copied!" : state === "error" ? "Copy failed — retry" : "Copy";
+    state === "copied" ? "Copied!" : state === "error" ? "Copy failed, retry" : "Copy";
 
   return (
     <>

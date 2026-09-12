@@ -68,7 +68,7 @@ export default function PromptsPage() {
           <div role="alert" className="rounded-2xl border border-gray-200 p-8 text-center">
             <p className="mb-1 text-sm font-medium text-black">The catalogue didn&apos;t load</p>
             <p className="mb-5 text-sm text-gray-600">
-              The Bajigur API isn&apos;t reachable right now. Nothing is lost — try again.
+              The Bajigur API isn&apos;t reachable right now. Nothing is lost, so try again.
             </p>
             <button
               type="button"

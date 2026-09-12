@@ -22,7 +22,7 @@ const LANDING_URL = (process.env.NEXT_PUBLIC_LANDING_URL ?? "http://localhost:30
 const NAV_LINKS: { label: string; href: string }[] = [
   { label: "Gallery", href: "/prompts" },
   { label: "My licences", href: "/licenses" },
-  { label: "Connect", href: "/connect" },
+  { label: "Profile", href: "/profile" },
 ];
 
 export default function Nav() {

@@ -32,9 +32,6 @@ export default function Nav() {
         className="animate-fade-in-up relative z-20 mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6"
         style={{ animationDelay: "0.1s", opacity: 0 }}
       >
-        {/* Logo gelap di latar terang; kalau nav suatu saat pindah ke
-            permukaan gelap, beri varian atau `invert` — jangan biarkan
-            logo hitam di atas latar hitam. */}
         <Link href="/" className="flex items-center">
           <Image
             src="/logo.png"

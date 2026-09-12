@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Bajigur — design prompts, paid per use",
+  title: "Bajigur | design prompts, paid per use",
   description:
     "Browse the Bajigur catalogue, unlock a prompt for cents over x402, and keep it: every purchase mints an onchain licence your wallet re-reads for free.",
 };

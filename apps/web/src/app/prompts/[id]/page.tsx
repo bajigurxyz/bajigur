@@ -104,19 +104,19 @@ export default function PromptDetailPage({ params }: PageProps<"/prompts/[id]">)
               <div>
                 <dt className="text-xs text-gray-500">Price</dt>
                 <dd className="font-semibold text-black">
-                  {formatUsd(load.prompt.priceUsd)}{" "}
-                  <span className="font-normal text-gray-500">
-                    / {formatHbar(load.prompt.priceHbar)}
+                  {formatUsd(load.prompt.priceUsd)} USDC
+                  <span className="block text-xs font-normal text-gray-500">
+                    or {formatHbar(load.prompt.priceHbar)}
                   </span>
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-gray-500">Creator</dt>
-                <dd className="font-mono text-xs text-black">{load.prompt.creator ?? "—"}</dd>
+                <dd className="font-mono text-xs text-black">{load.prompt.creator ?? "Not set"}</dd>
               </div>
               <div>
                 <dt className="text-xs text-gray-500">Paid to</dt>
-                <dd className="font-mono text-xs text-black">{load.prompt.payTo ?? "—"}</dd>
+                <dd className="font-mono text-xs text-black">{load.prompt.payTo ?? "Not set"}</dd>
               </div>
             </dl>
 
