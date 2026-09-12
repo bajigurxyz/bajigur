@@ -1,24 +1,38 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { type ReactNode, useState } from "react";
-import { WagmiProvider } from "wagmi";
-import { wagmiConfig } from "@/lib/wagmi";
-// Side-effect import: runs createAppKit once, before any child can call an
-// AppKit hook. Module evaluation order is the init-before-render guarantee.
-import "@/lib/appkit";
+import { PrivyProvider } from "@privy-io/react-auth";
+import type { ReactNode } from "react";
 
 /**
- * Client-side providers for the whole app: wagmi (wallet connection) on top
- * of TanStack Query (wagmi v3 requires it). The QueryClient lives in state,
- * not module scope, so a Fast Refresh or a second React root never shares
- * cache between renders.
+ * Privy is the only wallet layer: users sign in with email or a social
+ * account and get an embedded wallet they never have to fund with gas.
+ *
+ * There is deliberately no wagmi/viem provider underneath. Bajigur settles on
+ * Hedera, not an EVM JSON-RPC chain: payments are Hedera `TransferTransaction`s
+ * signed through the delegated wallet by apps/api (see app/api/unlock), so the
+ * browser never builds, signs, or broadcasts a transaction itself.
  */
+export const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
+
 export default function Providers({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  // Without an app id PrivyProvider throws on mount and takes the whole tree
+  // with it. The catalogue is public, so degrade to a wallet-less app instead:
+  // every surface that needs an account says so on its own.
+  if (!PRIVY_APP_ID) return <>{children}</>;
+
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </WagmiProvider>
+    <PrivyProvider
+      appId={PRIVY_APP_ID}
+      config={{
+        // Embedded wallets only. An injected wallet could not sign a Hedera
+        // transaction through Privy's delegated signer, so offering one would
+        // be a dead end dressed up as a choice.
+        loginMethods: ["email", "google", "github"],
+        embeddedWallets: { ethereum: { createOnLogin: "users-without-wallets" } },
+        appearance: { theme: "light", accentColor: "#000000", walletChainType: "ethereum-only" },
+      }}
+    >
+      {children}
+    </PrivyProvider>
   );
 }

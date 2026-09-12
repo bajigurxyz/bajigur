@@ -1,5 +1,0 @@
-{
-  "extends": "@bajigur/tsconfig/library.json",
-  "compilerOptions": { "lib": ["ES2022", "DOM"] },
-  "include": ["src", "test"]
-}

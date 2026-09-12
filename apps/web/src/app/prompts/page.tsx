@@ -2,41 +2,24 @@
 
 import { RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
-import CategoryFilter from "@/components/CategoryFilter";
 import Nav from "@/components/Nav";
 import PromptCard from "@/components/PromptCard";
-import TierFilter from "@/components/TierFilter";
-import { type Category, fetchCatalog, type PublicCatalogEntry, type Tier } from "@/lib/api";
+import TagFilter from "@/components/TagFilter";
+import { fetchPrompts, type Prompt, tagsOf } from "@/lib/api";
 
-/**
- * The gallery. Fetches the full public catalog once and filters
- * client-side — 23 entries make a round-trip per pill pointless.
- *
- * Named states (R27):
- * - pending: skeleton grid + polite live announcement
- * - error:   message + retry (the backend may simply not be running)
- * - empty:   a selected category with no entries gets prose and a way
- *            back, never a silent blank grid
- * - ready:   the card grid
- */
-
-type LoadState =
-  | { phase: "pending" }
-  | { phase: "error" }
-  | { phase: "ready"; entries: PublicCatalogEntry[] };
+type LoadState = { phase: "pending" } | { phase: "error" } | { phase: "ready"; prompts: Prompt[] };
 
 export default function PromptsPage() {
   const [load, setLoad] = useState<LoadState>({ phase: "pending" });
-  const [category, setCategory] = useState<Category | null>(null);
-  const [tier, setTier] = useState<Tier | null>(null);
+  const [tag, setTag] = useState<string | null>(null);
   // Bumped by the retry control; the effect refetches on every bump.
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    fetchCatalog()
-      .then((entries) => {
-        if (!cancelled) setLoad({ phase: "ready", entries });
+    fetchPrompts()
+      .then((prompts) => {
+        if (!cancelled) setLoad({ phase: "ready", prompts });
       })
       .catch(() => {
         if (!cancelled) setLoad({ phase: "error" });
@@ -46,112 +29,71 @@ export default function PromptsPage() {
     };
   }, [attempt]);
 
-  const retry = () => {
-    setLoad({ phase: "pending" });
-    setAttempt((n) => n + 1);
-  };
-
-  // Category and tier compose: both null shows everything, either one narrows,
-  // both narrow together. Filtering client-side keeps every pill instant — the
-  // catalog is fetched once and is small enough that a round-trip per pill
-  // would be slower and could fail where a local filter cannot.
-  const visible =
-    load.phase === "ready"
-      ? load.entries.filter(
-          (e) =>
-            (category === null || e.category === category) && (tier === null || e.tier === tier),
-        )
-      : [];
-
-  const activeFilters = [category, tier === null ? null : tier === "free" ? "Free" : "Premium"]
-    .filter(Boolean)
-    .join(" + ");
-  const clearAll = () => {
-    setCategory(null);
-    setTier(null);
-  };
+  const prompts = load.phase === "ready" ? load.prompts : [];
+  const shown = tag ? prompts.filter((p) => p.tags.includes(tag)) : prompts;
 
   return (
     <div className="min-h-screen bg-white">
       <Nav />
 
-      <main className="mx-auto max-w-7xl px-4 pt-8 pb-24 sm:px-6">
-        <header className="animate-fade-in-up mb-8" style={{ animationDelay: "0.1s", opacity: 0 }}>
-          <h1 className="mb-2 text-3xl font-normal tracking-tight sm:text-4xl">Prompt gallery</h1>
-          <p className="max-w-2xl text-sm text-gray-600 sm:text-base">
-            Every preview below is real output. Free prompts copy straight to your clipboard; paid
-            prompts unlock for cents of USDC over x402.
+      <main className="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
+        <header className="py-8">
+          <h1 className="mb-3 text-3xl font-normal tracking-tight sm:text-4xl">Prompt gallery</h1>
+          <p className="max-w-2xl text-base text-gray-600">
+            Every prompt here is priced by its creator and paid straight to them over x402 on
+            Hedera. Buying one mints a licence to your wallet, so you only ever pay once.
           </p>
         </header>
 
-        <div className="animate-fade-in-up mb-8" style={{ animationDelay: "0.2s", opacity: 0 }}>
-          <CategoryFilter selected={category} onSelect={setCategory} />
-          <div className="mt-3">
-            <TierFilter selected={tier} onSelect={setTier} />
+        {load.phase === "ready" && prompts.length > 0 && (
+          <div className="mb-8">
+            <TagFilter tags={tagsOf(prompts)} selected={tag} onSelect={setTag} />
           </div>
-        </div>
+        )}
 
         {load.phase === "pending" && (
           <div
             role="status"
-            aria-label="Loading prompts"
-            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            aria-label="Loading the catalogue"
+            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
           >
-            {Array.from({ length: 6 }, (_, i) => (
-              <div
-                key={i}
-                aria-hidden
-                className="aspect-[4/3] animate-pulse rounded-2xl bg-gray-100"
-              />
+            {["a", "b", "c", "d", "e", "f"].map((key) => (
+              <div key={key} aria-hidden className="h-56 animate-pulse rounded-2xl bg-gray-100" />
             ))}
-            <span className="sr-only">Loading prompts…</span>
+            <span className="sr-only">Loading the catalogue…</span>
           </div>
         )}
 
         {load.phase === "error" && (
-          <div role="alert" className="rounded-2xl border border-gray-200 px-6 py-16 text-center">
-            <p className="mb-1 text-sm font-medium text-black">The catalog didn&apos;t load</p>
+          <div role="alert" className="rounded-2xl border border-gray-200 p-8 text-center">
+            <p className="mb-1 text-sm font-medium text-black">The catalogue didn&apos;t load</p>
             <p className="mb-5 text-sm text-gray-600">
-              The Prom It API isn&apos;t reachable right now. Check that the backend is running,
-              then try again.
+              The Bajigur API isn&apos;t reachable right now. Nothing is lost — try again.
             </p>
             <button
               type="button"
-              onClick={retry}
-              className="inline-flex items-center gap-1.5 rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
+              onClick={() => {
+                setLoad({ phase: "pending" });
+                setAttempt((n) => n + 1);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 px-4 py-2 text-xs font-medium text-black transition-colors hover:border-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
             >
-              <RotateCcw aria-hidden className="h-4 w-4" />
-              Retry
+              <RotateCcw aria-hidden className="h-3.5 w-3.5" />
+              Try again
             </button>
           </div>
         )}
 
-        {load.phase === "ready" && visible.length === 0 && (
-          <div className="rounded-2xl border border-gray-200 px-6 py-16 text-center">
-            <p className="mb-1 text-sm font-medium text-black">
-              {activeFilters === "" ? "The catalog is empty" : `No prompts match ${activeFilters}`}
-            </p>
-            <p className="mb-5 text-sm text-gray-600">
-              {activeFilters === ""
-                ? "Nothing has been listed yet. Check back soon."
-                : "Nobody has listed a prompt matching that combination so far."}
-            </p>
-            {activeFilters !== "" && (
-              <button
-                type="button"
-                onClick={clearAll}
-                className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-black transition-colors hover:border-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
-              >
-                Clear filters
-              </button>
-            )}
-          </div>
+        {load.phase === "ready" && shown.length === 0 && (
+          <p className="rounded-2xl border border-gray-200 p-8 text-center text-sm text-gray-600">
+            {prompts.length === 0 ? "The catalogue is empty." : `No prompt is tagged “${tag}” yet.`}
+          </p>
         )}
 
-        {load.phase === "ready" && visible.length > 0 && (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map((entry) => (
-              <PromptCard key={entry.id} entry={entry} />
+        {shown.length > 0 && (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {shown.map((prompt) => (
+              <PromptCard key={prompt.id} prompt={prompt} />
             ))}
           </div>
         )}
