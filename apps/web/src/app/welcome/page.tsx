@@ -2,13 +2,25 @@
 
 import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Nav from "@/components/Nav";
 import Onboarding from "@/components/Onboarding";
 import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
 import WalletButton from "@/components/WalletButton";
+import { useOnboarding } from "@/lib/useOnboarding";
 
 export default function WelcomePage() {
   const { ready, authenticated } = usePrivy();
+  const onboarding = useOnboarding();
+  const router = useRouter();
+
+  // Someone who already holds a name has nothing to do here. Sending them to
+  // the marketplace beats showing three ticked boxes and making them find the
+  // way out themselves. `replace` so Back does not drop them straight back in.
+  useEffect(() => {
+    if (onboarding.phase === "complete") router.replace("/prompts");
+  }, [onboarding.phase, router]);
 
   return (
     <div className="min-h-screen bg-white">

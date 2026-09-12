@@ -11,6 +11,7 @@ import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
 import { HbarMark, UsdcMark } from "@/components/TokenMark";
 import WalletButton from "@/components/WalletButton";
 import { useAgent } from "@/lib/useAgent";
+import { useClaimedName } from "@/lib/useClaimedName";
 import { useEmbeddedWallet } from "@/lib/useEmbeddedWallet";
 import { useHederaAccount } from "@/lib/useHederaAccount";
 
@@ -34,6 +35,9 @@ export default function ProfilePage() {
   // token knows the account once payments are set up, and the mirror node knows
   // it as soon as the chain does.
   const chain = useHederaAccount(wallet.address);
+  // Owned names are onchain, so they survive a browser that holds no agent token.
+  const claimed = useClaimedName(wallet.address);
+  const claimedName = claimed.phase === "ready" ? claimed.name : undefined;
   const onChain = chain.phase === "ready" && chain.account.exists ? chain.account : undefined;
   const me = linked ? agent.agent : undefined;
   const account = (me?.exists === false ? undefined : me?.account) ?? onChain?.account;
@@ -41,7 +45,8 @@ export default function ProfilePage() {
   // anything. Deciding earlier is what made this page offer to activate an
   // account that already existed.
   const settling =
-    agent.phase === "loading" || (wallet.address !== undefined && chain.phase === "loading");
+    agent.phase === "loading" ||
+    (wallet.address !== undefined && (chain.phase === "loading" || claimed.phase === "loading"));
   // The API reports balances alongside identity; the mirror lookup covers a
   // wallet that has an account but has not set up payments.
   const hbar = me?.hbar ?? onChain?.hbar;
@@ -203,7 +208,11 @@ export default function ProfilePage() {
                   <Skeleton className="h-9 w-48" />
                 </SkeletonRegion>
               ) : (
-                <ClaimEnsName current={me?.ensName} account={account} onClaimed={refreshAgent} />
+                <ClaimEnsName
+                  current={me?.ensName ?? claimedName}
+                  account={account}
+                  onClaimed={refreshAgent}
+                />
               )}
             </section>
 

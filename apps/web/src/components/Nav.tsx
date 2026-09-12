@@ -32,51 +32,58 @@ export default function Nav() {
 
   return (
     <>
-      <nav className="relative z-20 mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-        <a href={LANDING_URL} className="flex items-center">
-          <Image
-            src="/logo.png"
-            alt="Bajigur"
-            width={64}
-            height={64}
-            className="h-10 w-10 sm:h-12 sm:w-12"
-            priority
-          />
-        </a>
+      {/*
+        Sticky, because every page here is a long scroll and the nav is how you
+        leave it. Translucent with a blur so cards passing underneath read as
+        passing underneath rather than colliding with it.
+      */}
+      <nav className="sticky top-0 z-30 border-b border-gray-100 bg-white/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+          <a href={LANDING_URL} className="flex items-center">
+            <Image
+              src="/logo.png"
+              alt="Bajigur"
+              width={64}
+              height={64}
+              className="h-10 w-10 sm:h-12 sm:w-12"
+              priority
+            />
+          </a>
 
-        <div className="hidden gap-8 md:flex">
-          {NAV_LINKS.map(({ label, href }) => (
-            <Link
-              key={label}
-              href={href}
-              className="flex items-center gap-1 text-sm text-gray-700 transition-colors hover:text-black"
-            >
-              {label}
-            </Link>
-          ))}
+          <div className="hidden gap-8 md:flex">
+            {NAV_LINKS.map(({ label, href }) => (
+              <Link
+                key={label}
+                href={href}
+                className="flex items-center gap-1 text-sm text-gray-700 transition-colors hover:text-black"
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+
+          <div className="hidden items-center gap-4 sm:flex">
+            {onboarding.phase === "incomplete" && (
+              <Link
+                href="/welcome"
+                className="rounded-full bg-black px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
+                Finish setup
+              </Link>
+            )}
+            <WalletButton />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            className="sm:hidden"
+          >
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
-
-        <div className="hidden items-center gap-4 sm:flex">
-          {onboarding.phase === "incomplete" && (
-            <Link
-              href="/welcome"
-              className="rounded-full bg-black px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
-            >
-              Finish setup
-            </Link>
-          )}
-          <WalletButton />
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setMenuOpen((open) => !open)}
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-          className="sm:hidden"
-        >
-          {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
       </nav>
 
       {menuOpen && (

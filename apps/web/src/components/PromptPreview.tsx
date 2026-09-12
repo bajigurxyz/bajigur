@@ -3,6 +3,9 @@
 import Image from "next/image";
 import { useState } from "react";
 
+/** Extensions the browser plays as video rather than paints as an image. */
+const VIDEO = /\.(mp4|webm|mov|m4v|ogv|mkv)(\?|#|$)/i;
+
 /**
  * The creator's own recording of what a prompt produces, straight from the
  * catalogue's `previewMedia`.
@@ -12,8 +15,14 @@ import { useState } from "react";
  * had hand written and could drift from the prompt it claimed to show. A
  * prompt with no recording shows no preview, which is the honest gap.
  *
- * `unoptimized` on purpose: these are animated WebP, and the image optimizer
- * would flatten them to a still frame, which is the part worth showing.
+ * Two renderers, because a creator may upload either. Video files get a muted
+ * looping `<video>`; everything else goes through `next/image`. Matroska is
+ * accepted and attempted, but most browsers cannot decode it, so it will fall
+ * through to showing nothing rather than to a broken frame.
+ *
+ * `unoptimized` on purpose for images: animated WebP and GIF are the common
+ * case here, and the image optimizer would flatten them to a still frame, which
+ * is the part worth showing.
  */
 export default function PromptPreview({
   src,
@@ -41,15 +50,32 @@ export default function PromptPreview({
         bleed ? "" : "rounded-xl border border-gray-200"
       } ${className ?? ""}`}
     >
-      <Image
-        src={src}
-        alt={`Preview of ${title}`}
-        fill
-        unoptimized
-        sizes={sizes}
-        className="object-cover"
-        onError={() => setFailed(true)}
-      />
+      {VIDEO.test(src) ? (
+        // Muted, looping and inline: it is an illustration, not something the
+        // reader chose to play, so it must never make noise or take the screen.
+        <video
+          src={src}
+          className="absolute inset-0 h-full w-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          onError={() => setFailed(true)}
+        >
+          <track kind="captions" />
+        </video>
+      ) : (
+        <Image
+          src={src}
+          alt={`Preview of ${title}`}
+          fill
+          unoptimized
+          sizes={sizes}
+          className="object-cover"
+          onError={() => setFailed(true)}
+        />
+      )}
     </div>
   );
 }

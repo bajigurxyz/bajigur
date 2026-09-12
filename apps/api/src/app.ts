@@ -138,6 +138,19 @@ export function createApp({
     return c.json({ available: await registrar.available(label) });
   });
 
+  // Public on purpose: which name a wallet owns is onchain, and reading it must not
+  // need an agent token. It did, through /agent/me, and the cost was real: a browser
+  // without that cookie showed the claim form to someone who already owned a name,
+  // and offered to sell them a second one.
+  app.get("/ens/name", async (c) => {
+    const address = c.req.query("address") ?? "";
+    if (!registrar) return c.json({ error: "name claiming disabled" }, 503);
+    if (!/^0x[0-9a-fA-F]{40}$/.test(address))
+      return c.json({ error: "an address is required" }, 400);
+    const label = await registrar.labelOf(address);
+    return c.json(label ? { name: `${label}.${registrar.parent}`, label } : {});
+  });
+
   app.post("/ens/claim", async (c) => {
     if (!registrar) return c.json({ error: "name claiming disabled" }, 503);
     const claims = await claimsOf?.(c.req.raw.headers);
