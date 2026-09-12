@@ -7,6 +7,14 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+/**
+ * The form checks this browser holds an agent token before it posts, because
+ * the token is a cookie and a wallet set up elsewhere arrives without one.
+ * Answering that check is what lets these tests reach the publish call.
+ */
+const linked = (publish: Response) => (input: string | URL | Request) =>
+  Promise.resolve(String(input).includes("/api/agent/me") ? new Response("{}") : publish);
+
 /** Opens the form and fills everything the API requires. */
 function fill(overrides: Partial<Record<string, string>> = {}) {
   render(<PublishPrompt onPublished={() => {}} />);
@@ -41,13 +49,15 @@ describe("PublishPrompt", () => {
   it("sends tags as an array the API will accept", async () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
-      .mockResolvedValue(Response.json({ id: "a-test-prompt" }, { status: 201 }));
+      .mockImplementation(linked(Response.json({ id: "a-test-prompt" }, { status: 201 })) as never);
     fill();
 
     fireEvent.click(screen.getByRole("button", { name: "Publish" }));
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
-    const body = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
+    const publish = async () =>
+      fetchMock.mock.calls.find((call) => String(call[0]).endsWith("/api/prompts"));
+    await waitFor(async () => expect(await publish()).toBeTruthy());
+    const body = JSON.parse(String((await publish())?.[1]?.body));
     expect(body.tags).toEqual(["landing", "hero"]);
     // Strings, never numbers: 0.1 USDC is not representable in binary and a
     // payment one atomic unit off is refused.
@@ -66,8 +76,10 @@ describe("PublishPrompt", () => {
   });
 
   it("shows the API's own refusal rather than inventing one", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      Response.json({ error: "previewMedia host evil.test is not allowed" }, { status: 400 }),
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      linked(
+        Response.json({ error: "previewMedia host evil.test is not allowed" }, { status: 400 }),
+      ) as never,
     );
     fill();
 

@@ -4,6 +4,7 @@ import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import PromptPreview from "@/components/PromptPreview";
 import { HbarMark, UsdcMark } from "@/components/TokenMark";
+import { useAgentSession } from "@/lib/useAgentSession";
 
 type Step = "idle" | "publishing" | "error";
 
@@ -44,6 +45,7 @@ function Label({ children, hint }: { children: React.ReactNode; hint?: string })
  * tried.
  */
 export default function PublishPrompt({ onPublished }: { onPublished: () => void }) {
+  const session = useAgentSession();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<Step>("idle");
   const [message, setMessage] = useState("");
@@ -76,6 +78,12 @@ export default function PublishPrompt({ onPublished }: { onPublished: () => void
     setStep("publishing");
     setMessage("");
     try {
+      // This browser may hold no agent token even though the wallet finished
+      // setting up long ago: the token is a cookie, and cookies belong to one
+      // origin. Reissuing it here beats sending someone back through onboarding.
+      if (!(await session.ensure())) {
+        throw new Error("Could not reconnect your wallet. Try again in a moment.");
+      }
       const res = await fetch("/api/prompts", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -265,7 +273,11 @@ export default function PublishPrompt({ onPublished }: { onPublished: () => void
           className="inline-flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60"
         >
           {step === "publishing" && <Loader2 aria-hidden className="h-4 w-4 animate-spin" />}
-          {step === "publishing" ? "Registering onchain…" : "Publish"}
+          {session.linking
+            ? "Reconnecting your wallet…"
+            : step === "publishing"
+              ? "Registering onchain…"
+              : "Publish"}
         </button>
         <button
           type="button"

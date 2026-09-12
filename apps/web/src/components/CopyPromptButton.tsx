@@ -2,6 +2,7 @@
 
 import { Check, Copy, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useAgentSession } from "@/lib/useAgentSession";
 
 type State = "idle" | "fetching" | "copied" | "error";
 
@@ -21,6 +22,7 @@ const RESET_MS = 2500;
  * that missed.
  */
 export default function CopyPromptButton({ id, title }: { id: string; title: string }) {
+  const session = useAgentSession();
   const [state, setState] = useState<State>("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -40,6 +42,10 @@ export default function CopyPromptButton({ id, title }: { id: string; title: str
   const copy = async () => {
     setState("fetching");
     try {
+      if (!(await session.ensure())) {
+        settle("error");
+        return;
+      }
       const res = await fetch(`/api/unlock/${encodeURIComponent(id)}`, { method: "POST" });
       const data = (await res.json()) as { body?: string };
       if (!res.ok || !data.body) {

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import CopyButton from "@/components/CopyButton";
 import { formatHbar, formatUsd, type Prompt } from "@/lib/api";
+import { useAgentSession } from "@/lib/useAgentSession";
 
 type Phase =
   | { kind: "idle" }
@@ -33,11 +34,18 @@ const HASHSCAN = "https://hashscan.io/testnet/transaction";
  */
 export default function UnlockButton({ prompt, linked }: { prompt: Prompt; linked: boolean }) {
   const { authenticated } = usePrivy();
+  const session = useAgentSession();
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
 
   const unlock = async () => {
     setPhase({ kind: "paying" });
     try {
+      // Same reason as publishing: the token is per origin, and a wallet that
+      // set up elsewhere should not be told to set up again.
+      if (!(await session.ensure())) {
+        setPhase({ kind: "error", message: "Could not reconnect your wallet. Try again." });
+        return;
+      }
       const res = await fetch(`/api/unlock/${encodeURIComponent(prompt.id)}`, { method: "POST" });
       const data = (await res.json()) as { body?: string; transaction?: string; error?: string };
       if (!res.ok || !data.body) {
