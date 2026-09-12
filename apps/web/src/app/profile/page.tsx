@@ -11,6 +11,7 @@ import { fetchLicenses, type Prompt } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
 import { useBalances } from "@/lib/useBalances";
 import { useEmbeddedWallet } from "@/lib/useEmbeddedWallet";
+import { useHederaAccount } from "@/lib/useHederaAccount";
 
 const HASHSCAN = "https://hashscan.io/testnet/account";
 
@@ -30,7 +31,12 @@ export default function ProfilePage() {
   const balances = useBalances(linked);
   const [licences, setLicences] = useState<Prompt[] | null>(null);
 
-  const account = linked ? agent.agent.account : undefined;
+  // Two sources, because they become available at different times: the agent
+  // token knows the account once payments are set up, and the mirror node knows
+  // it as soon as the chain does.
+  const chain = useHederaAccount(wallet.address);
+  const onChain = chain.phase === "ready" && chain.account.exists ? chain.account : undefined;
+  const account = (linked ? agent.agent.account : undefined) ?? onChain?.account;
 
   useEffect(() => {
     if (!account) return;
@@ -80,7 +86,11 @@ export default function ProfilePage() {
                 <CopyField
                   label="Hedera account"
                   value={account}
-                  hint="Where payments come from, derived from the wallet above."
+                  hint={
+                    account
+                      ? "Where payments come from. The same wallet, under its Hedera name."
+                      : "The same wallet under its Hedera name. It is created the first time something is sent to the address, which is what setting up payments does."
+                  }
                 />
               </div>
               {!wallet.address && (
@@ -118,7 +128,7 @@ export default function ProfilePage() {
 
             <section className="space-y-3">
               <h2 className="text-lg font-medium">Balance</h2>
-              {!linked && (
+              {!linked && !onChain && (
                 <p className="rounded-2xl border border-gray-200 p-6 text-sm text-gray-600">
                   <Link href="/connect" className="underline hover:text-black">
                     Set up payments
@@ -133,6 +143,24 @@ export default function ProfilePage() {
                 <p className="rounded-2xl border border-gray-200 p-6 text-sm text-gray-600">
                   Couldn&apos;t read your balance from the Hedera mirror node right now.
                 </p>
+              )}
+              {!linked && onChain && (
+                <dl className="grid gap-4 rounded-2xl border border-gray-200 p-5 text-sm sm:grid-cols-2">
+                  <div>
+                    <dt className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <UsdcMark className="h-4 w-4" />
+                      USDC
+                    </dt>
+                    <dd className="text-lg font-semibold text-black">${onChain.usdc}</dd>
+                  </div>
+                  <div>
+                    <dt className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <HbarMark className="h-4 w-4" />
+                      HBAR
+                    </dt>
+                    <dd className="text-lg font-semibold text-black">{onChain.hbar}</dd>
+                  </div>
+                </dl>
               )}
               {linked && balances.phase === "ready" && (
                 <dl className="grid gap-4 rounded-2xl border border-gray-200 p-5 text-sm sm:grid-cols-3">
