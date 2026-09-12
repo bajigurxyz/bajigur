@@ -99,7 +99,7 @@ export default function ConnectPanel() {
           {token ? (
             <div className="overflow-hidden rounded-2xl bg-gray-950">
               <div className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-2.5">
-                <span className="text-xs text-gray-400">Terminal</span>
+                <span className="min-w-0 truncate text-xs text-gray-400">Terminal</span>
                 <CopyButton
                   text={addCommand(token)}
                   label="the Claude setup command"

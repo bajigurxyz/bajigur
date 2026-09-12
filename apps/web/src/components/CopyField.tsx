@@ -18,12 +18,20 @@ export default function CopyField({
   hint?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1.5 rounded-2xl border border-gray-200 p-4">
+    <div className="flex min-w-0 flex-col gap-1.5 rounded-2xl border border-gray-200 p-4">
       <span className="text-xs text-gray-500">{label}</span>
       {value ? (
         <div className="flex items-center justify-between gap-3">
-          <code className="truncate font-mono text-sm text-black">{value}</code>
-          <CopyButton text={value} label={label} />
+          {/*
+            `min-w-0` is what makes `truncate` work here. A flex item defaults
+            to min-width:auto, which is its content, so a 42-character address
+            refuses to shrink: it pushed the card past the screen and took the
+            whole page's horizontal scroll with it.
+          */}
+          <code className="min-w-0 truncate font-mono text-sm text-black">{value}</code>
+          <span className="shrink-0">
+            <CopyButton text={value} label={label} />
+          </span>
         </div>
       ) : (
         <span className="text-sm text-gray-400">Not available yet</span>

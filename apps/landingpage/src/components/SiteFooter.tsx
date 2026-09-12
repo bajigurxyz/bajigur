@@ -43,8 +43,8 @@ const SOCIALS: { label: string; href: string; Icon: typeof Github }[] = [
 function FooterCard() {
   return (
     <div className="mx-auto w-full max-w-6xl">
-      <div className="overflow-hidden rounded-[48px] border border-slate-200 bg-[#E9EBEE] shadow-sm">
-        <div className="m-2 rounded-[40px] bg-white shadow-sm">
+      <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-[#E9EBEE] shadow-sm sm:rounded-[48px]">
+        <div className="m-2 rounded-[26px] bg-white shadow-sm sm:rounded-[40px]">
           <div className="grid grid-cols-1 gap-12 p-8 md:grid-cols-2 md:p-10 lg:grid-cols-5 lg:p-12">
             <div className="space-y-8 lg:col-span-2">
               <div className="flex items-center gap-2.5">

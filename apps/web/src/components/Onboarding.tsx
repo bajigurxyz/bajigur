@@ -189,14 +189,14 @@ export default function Onboarding({ onDone }: { onDone?: () => void }) {
         active={current === "name"}
       >
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <input
               value={label}
               onChange={(event) => setLabel(event.target.value.toLowerCase().trim())}
               placeholder="yourname"
               aria-label="Name to claim"
               aria-invalid={availability.phase === "invalid"}
-              className="w-40 rounded-xl border border-gray-300 px-3 py-2 font-mono text-sm focus-visible:ring-2 focus-visible:ring-black focus-visible:outline-none"
+              className="w-full min-w-0 flex-1 rounded-xl border border-gray-300 px-3 py-2 font-mono text-sm sm:w-40 sm:flex-none focus-visible:ring-2 focus-visible:ring-black focus-visible:outline-none"
             />
             <span className="font-mono text-sm text-gray-500">.{ENS_PARENT}</span>
           </div>

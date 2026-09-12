@@ -41,7 +41,7 @@ export default function PromptCard({ prompt, owned = false }: { prompt: Prompt; 
 
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="text-sm font-semibold text-black">
+          <h3 className="min-w-0 text-sm font-semibold break-words text-black">
             <Link
               href={`/prompts/${prompt.id}`}
               className="rounded transition-colors hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
@@ -71,7 +71,12 @@ export default function PromptCard({ prompt, owned = false }: { prompt: Prompt; 
           ))}
         </ul>
 
-        <div className="mt-auto flex items-center justify-between gap-3 pt-1">
+        {/*
+          Wraps rather than squeezes. At 375px the price and the action do not
+          fit on one line, and a row that refuses to wrap pushes the action off
+          the card instead of under the price.
+        */}
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-1">
           <span
             aria-label={`Price: ${price} in USDC, or ${formatHbar(prompt.priceHbar)}`}
             className="inline-flex items-baseline gap-1.5 rounded-full bg-black px-2.5 py-1 text-xs font-semibold text-white"

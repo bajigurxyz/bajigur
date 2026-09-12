@@ -55,14 +55,14 @@ export default function UnlockButton({ prompt, linked }: { prompt: Prompt; linke
       <div className="space-y-3">
         <div className="overflow-hidden rounded-2xl bg-gray-950">
           <div className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-2.5">
-            <span className="text-xs text-gray-400">{prompt.title}</span>
+            <span className="min-w-0 truncate text-xs text-gray-400">{prompt.title}</span>
             <CopyButton
               text={phase.body}
               label={`the ${prompt.title} prompt`}
               className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:border-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
             />
           </div>
-          <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed whitespace-pre-wrap text-gray-100">
+          <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed break-words whitespace-pre-wrap text-gray-100">
             <code>{phase.body}</code>
           </pre>
         </div>

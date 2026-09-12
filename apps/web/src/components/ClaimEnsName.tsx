@@ -24,11 +24,9 @@ type Claim =
  */
 export default function ClaimEnsName({
   current,
-  account,
   onClaimed,
 }: {
   current?: string;
-  account?: string;
   onClaimed?: () => void;
 }) {
   const [label, setLabel] = useState("");
@@ -39,16 +37,13 @@ export default function ClaimEnsName({
 
   if (claimed) {
     return (
-      <div className="space-y-2 rounded-2xl border border-gray-200 p-5">
+      <div className="rounded-2xl border border-gray-200 p-5">
         <div className="flex items-center gap-2">
           <Check aria-hidden className="h-4 w-4" />
-          <code className="font-mono text-sm font-semibold text-black">{claimed}</code>
+          <code className="min-w-0 truncate font-mono text-sm font-semibold text-black">
+            {claimed}
+          </code>
         </div>
-        <p className="text-xs text-gray-500">
-          Buyers pay this name, not an account number. Its record points at{" "}
-          <code className="font-mono">{account ?? "your Hedera account"}</code>, so changing the
-          record changes where the money lands.
-        </p>
       </div>
     );
   }
@@ -83,14 +78,14 @@ export default function ClaimEnsName({
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <input
           value={label}
           onChange={(event) => setLabel(event.target.value.toLowerCase().trim())}
           placeholder="yourname"
           aria-label="Name to claim"
           aria-invalid={available.phase === "invalid"}
-          className="w-40 rounded-xl border border-gray-300 px-3 py-2 font-mono text-sm focus-visible:ring-2 focus-visible:ring-black focus-visible:outline-none"
+          className="w-full min-w-0 flex-1 rounded-xl border border-gray-300 px-3 py-2 font-mono text-sm sm:w-40 sm:flex-none focus-visible:ring-2 focus-visible:ring-black focus-visible:outline-none"
         />
         <span className="font-mono text-sm text-gray-500">.{ENS_PARENT}</span>
       </div>

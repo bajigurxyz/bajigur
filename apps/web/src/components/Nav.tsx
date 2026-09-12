@@ -62,7 +62,7 @@ export default function Nav() {
             ))}
           </div>
 
-          <div className="hidden items-center gap-4 sm:flex">
+          <div className="hidden items-center gap-4 md:flex">
             {onboarding.phase === "incomplete" && (
               <Link
                 href="/welcome"
@@ -79,32 +79,41 @@ export default function Nav() {
             onClick={() => setMenuOpen((open) => !open)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
-            className="sm:hidden"
+            className="md:hidden"
           >
             {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
-      </nav>
 
-      {menuOpen && (
-        <div className="absolute inset-x-0 top-[60px] z-30 border-b border-gray-200 bg-white/95 backdrop-blur-md">
-          <div className="flex flex-col gap-4 px-6 py-4">
-            {NAV_LINKS.map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                onClick={() => setMenuOpen(false)}
-                className="text-left text-sm text-gray-700 transition-colors hover:text-black"
-              >
-                {label}
-              </Link>
-            ))}
-            <div className="border-t border-gray-200 pt-4">
-              <WalletButton />
+        {menuOpen && (
+          <div className="border-t border-gray-200 bg-white/95 backdrop-blur-md md:hidden">
+            <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6">
+              {NAV_LINKS.map(({ label, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-left text-sm text-gray-700 transition-colors hover:text-black"
+                >
+                  {label}
+                </Link>
+              ))}
+              {onboarding.phase === "incomplete" && (
+                <Link
+                  href="/welcome"
+                  onClick={() => setMenuOpen(false)}
+                  className="self-start rounded-full bg-black px-4 py-1.5 text-xs font-medium text-white"
+                >
+                  Finish setup
+                </Link>
+              )}
+              <div className="border-t border-gray-200 pt-4">
+                <WalletButton />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </nav>
     </>
   );
 }

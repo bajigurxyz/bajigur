@@ -89,15 +89,7 @@ export default function ProfilePage() {
             <section className="space-y-3">
               <h2 className="text-lg font-medium">Your wallet</h2>
               <div className="grid gap-3 sm:grid-cols-2">
-                <CopyField
-                  label="Wallet address"
-                  value={wallet.address}
-                  hint={
-                    account
-                      ? "Created for you by Privy. No seed phrase to keep."
-                      : "Created for you by Privy. Send anything here and Hedera creates the account below on arrival."
-                  }
-                />
+                <CopyField label="Wallet address" value={wallet.address} />
                 {settling ? (
                   <SkeletonRegion
                     label="Looking up your Hedera account…"
@@ -108,15 +100,7 @@ export default function ProfilePage() {
                     <Skeleton className="h-3 w-full" />
                   </SkeletonRegion>
                 ) : (
-                  <CopyField
-                    label="Hedera account"
-                    value={account}
-                    hint={
-                      account
-                        ? "Where payments come from. The same wallet, under its Hedera name."
-                        : "The same wallet under its Hedera name. It is created the first time something is sent to the address, which is what setting up payments does."
-                    }
-                  />
+                  <CopyField label="Hedera account" value={account} />
                 )}
               </div>
               {!wallet.address && (
@@ -208,11 +192,7 @@ export default function ProfilePage() {
                   <Skeleton className="h-9 w-48" />
                 </SkeletonRegion>
               ) : (
-                <ClaimEnsName
-                  current={me?.ensName ?? claimedName}
-                  account={account}
-                  onClaimed={refreshAgent}
-                />
+                <ClaimEnsName current={me?.ensName ?? claimedName} onClaimed={refreshAgent} />
               )}
             </section>
 
