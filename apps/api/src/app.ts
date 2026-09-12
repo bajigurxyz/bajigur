@@ -5,15 +5,29 @@ import { logger } from "hono/logger";
 import { type AgentClaims, type AgentOptions, agentRoutes, evmOf } from "./agent";
 import { hederaAccountOf, isValidLabel, type Registrar } from "./ens";
 import { agentCard, openapi } from "./meta";
-import { findPrompt, payToOf, platformAccount, prompts, publicPrompt } from "./prompts";
+import {
+  addPrompt,
+  findPrompt,
+  loadPrompts,
+  payToOf,
+  platformAccount,
+  prompts,
+  publicPrompt,
+  removePrompt,
+  slugFor,
+  tinybars,
+} from "./prompts";
+import { atomic, rateLimit, validate } from "./publish";
+import type { Store } from "./store";
 import { requirementsFor, service, type X402Options, x402 } from "./x402";
 
 export type AppOptions = X402Options & {
   agent?: Omit<AgentOptions, "allowedPayTo">;
   registrar?: Registrar;
+  store?: Store;
 };
 
-export function createApp({ agent, registrar, ...options }: AppOptions = {}) {
+export function createApp({ agent, registrar, store, ...options }: AppOptions = {}) {
   platformAccount();
   const app = new Hono();
 
@@ -32,6 +46,27 @@ export function createApp({ agent, registrar, ...options }: AppOptions = {}) {
 
   app.use("*", logger());
   app.use("*", cors());
+
+  // Published prompts live in Postgres so they survive a deploy; the array stays the
+  // catalogue everything else reads, refreshed lazily so a second instance sees new rows.
+  if (store) {
+    let at = 0;
+    let inflight: Promise<void> | undefined;
+    app.use("*", async (c, next) => {
+      if (Date.now() - at > 30_000 && !inflight) {
+        at = Date.now();
+        inflight = store
+          .all()
+          .then(loadPrompts)
+          .catch((err) => console.error("catalogue refresh failed", err))
+          .finally(() => {
+            inflight = undefined;
+          });
+      }
+      if (inflight) await inflight;
+      await next();
+    });
+  }
 
   app.get("/health", (c) => c.json({ ok: true, service: `${APP_NAME}-api` }));
 
@@ -93,6 +128,64 @@ export function createApp({ agent, registrar, ...options }: AppOptions = {}) {
 
     const transaction = await registrar.claim(label, owner, claims.acct);
     return c.json({ name: `${label}.${registrar.parent}`, hedera: claims.acct, transaction });
+  });
+
+  // Publishing: the body is the product, so it is stored, hashed onchain and never
+  // returned without a licence. payTo comes from the token, never the request.
+  const allowPublish = rateLimit(Number(process.env.PUBLISH_PER_HOUR ?? 5));
+  app.post("/prompts", async (c) => {
+    const { registry } = options;
+    if (!store || !registry) return c.json({ error: "publishing disabled" }, 503);
+    const claims = await claimsOf?.(c.req.raw.headers);
+    if (!claims) return c.json({ error: "invalid agent token" }, 401);
+    const checked = validate((await c.req.json().catch(() => ({}))) as Record<string, unknown>);
+    if ("error" in checked) return c.json({ error: checked.error }, 400);
+    if (!allowPublish(claims.acct)) return c.json({ error: "too many prompts published" }, 429);
+
+    const name = nameOf(registrar);
+    const creator = (await name?.(evmOf(claims.pk)).catch(() => null)) ?? undefined;
+    const prompt = {
+      ...checked.prompt,
+      id: slugFor(checked.prompt.title),
+      payTo: claims.acct,
+      ...(creator ? { creator } : {}),
+    };
+    const { id, transactionId } = await registry.register({
+      contentHash: new Uint8Array(new Bun.CryptoHasher("sha256").update(prompt.body).digest()),
+      payTo: prompt.payTo,
+      priceUsdc: Number(atomic(prompt.priceUsd, 6)),
+      priceTinybar: Number(tinybars(prompt.priceHbar)),
+      uri: prompt.previewMedia ?? `bajigur:${prompt.id}`,
+    });
+    const published = { ...prompt, registryId: id };
+    await store.add(published);
+    addPrompt(published);
+    return c.json(
+      {
+        id: published.id,
+        registryId: id,
+        payTo: published.payTo,
+        creator: published.creator,
+        transaction: transactionId,
+      },
+      201,
+    );
+  });
+
+  // Unpublishing, so a creator can take back a mistake. The onchain registration and any
+  // licence already sold stay: the catalogue is ours to edit, the chain is the record.
+  app.delete("/prompts/:id", async (c) => {
+    const id = c.req.param("id");
+    const prompt = findPrompt(id);
+    if (!prompt) return c.notFound();
+    if (!store) return c.json({ error: "publishing disabled" }, 503);
+    if (!prompt.payTo) return c.json({ error: "seed prompts cannot be unpublished" }, 403);
+    const claims = await claimsOf?.(c.req.raw.headers);
+    if (!claims) return c.json({ error: "invalid agent token" }, 401);
+    if (claims.acct !== prompt.payTo) return c.json({ error: "not your prompt" }, 403);
+    await store.remove(id);
+    removePrompt(id);
+    return c.json({ id, unpublished: true });
   });
 
   // Who bought a prompt, for its creator only: a public buyer list is a public list of

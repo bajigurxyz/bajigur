@@ -11,6 +11,38 @@ export const openapi = (origin: string) => ({
   servers: [{ url: origin }],
   paths: {
     "/prompts": {
+      post: {
+        operationId: "publishPrompt",
+        summary:
+          "Publish a prompt. Bearer agent token; payTo and creator come from the token, never the body.",
+        security: [{ agentToken: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  preview: { type: "string" },
+                  body: { type: "string" },
+                  tags: { type: "array", items: { type: "string" } },
+                  priceUsd: { type: "string", description: 'Decimal string, e.g. "0.20"' },
+                  priceHbar: { type: "string", description: 'Decimal string, e.g. "2"' },
+                  previewMedia: { type: "string", description: "https URL on an allowed host" },
+                },
+                required: ["title", "preview", "body", "priceUsd", "priceHbar"],
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Published, and registered on PromptRegistry" },
+          "400": { description: "Invalid field" },
+          "401": { description: "Missing or invalid agent token" },
+          "429": { description: "Too many prompts published" },
+        },
+      },
       get: {
         operationId: "listPrompts",
         summary: "List prompts (id, title, tags, preview, prices). Free.",
@@ -37,6 +69,55 @@ export const openapi = (origin: string) => ({
             content: { "application/json": { schema: { $ref: "#/components/schemas/Listing" } } },
           },
           "404": { description: "Unknown prompt" },
+        },
+      },
+    },
+    "/prompts/{id}/buyers": {
+      get: {
+        operationId: "listBuyers",
+        summary: "Who holds a licence for this prompt. Creator only (agent token matching payTo).",
+        security: [{ agentToken: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+        responses: {
+          "200": { description: "Buyers, newest last" },
+          "401": { description: "Missing or invalid agent token" },
+          "403": { description: "Not the creator" },
+        },
+      },
+    },
+    "/ens/available": {
+      get: {
+        operationId: "nameAvailable",
+        summary: "Whether a label can still be claimed under the parent name. Free.",
+        parameters: [{ name: "label", in: "query", required: true, schema: { type: "string" } }],
+        responses: {
+          "200": { description: "{ available }" },
+          "400": { description: "Invalid label" },
+        },
+      },
+    },
+    "/ens/claim": {
+      post: {
+        operationId: "claimName",
+        summary:
+          "Claim <label>.<parent> for the token's wallet. Bajigur pays the Sepolia gas and writes the wallet's Hedera account into bajigur.hedera.",
+        security: [{ agentToken: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: { label: { type: "string" } },
+                required: ["label"],
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "{ name, hedera, transaction }" },
+          "401": { description: "Missing or invalid agent token" },
+          "409": { description: "Label taken, or this wallet already owns a name" },
         },
       },
     },
@@ -98,6 +179,9 @@ export const openapi = (origin: string) => ({
     },
   },
   components: {
+    securitySchemes: {
+      agentToken: { type: "http", scheme: "bearer", description: "Bajigur agent token" },
+    },
     schemas: {
       Listing: {
         type: "object",

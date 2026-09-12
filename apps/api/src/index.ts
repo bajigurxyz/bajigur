@@ -3,6 +3,7 @@ import { createApp } from "./app";
 import { ensClient, registrarClient } from "./ens";
 import { hcsPublisher } from "./hcs";
 import { contractRegistry, signedIdentity } from "./registry";
+import { postgresStore } from "./store";
 
 const port = Number(process.env.PORT ?? 3002);
 
@@ -17,6 +18,7 @@ const app = createApp({
   identity: signedIdentity,
   ens: process.env.ENS_NAME ? ensClient() : undefined,
   registrar: registrarClient(),
+  store: postgresStore(),
   agent:
     signer && secret
       ? {

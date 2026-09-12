@@ -11,7 +11,16 @@ import { decodeAbiParameters, keccak256, toBytes } from "viem";
 
 export type Buyer = { address: string; transactionId: string; at: string };
 
+export type Registration = {
+  contentHash: Uint8Array;
+  payTo: string;
+  priceUsdc: number;
+  priceTinybar: number;
+  uri: string;
+};
+
 export type Registry = {
+  register(input: Registration): Promise<{ id: number; transactionId: string }>;
   issue(registryId: number, payerAccount: string, transactionId: string): Promise<void>;
   hasLicence(account: string, registryId: number): Promise<boolean>;
   buyers(registryId: number): Promise<Buyer[]>;
@@ -77,6 +86,28 @@ export function contractRegistry(): Registry | undefined {
       const res = await fetch(`${mirror()}/accounts/${evmAddress}`);
       if (!res.ok) return undefined;
       return ((await res.json()) as { account?: string }).account;
+    },
+
+    // msg.sender is the platform wallet, so the onchain creator is us; payTo is the
+    // creator's own account and payTo is what receives the money. Deliberate, not an accident.
+    async register({ contentHash, payTo, priceUsdc, priceTinybar, uri }) {
+      const record = await new ContractExecuteTransaction()
+        .setContractId(contract)
+        .setGas(600_000)
+        .setFunction(
+          "register",
+          new ContractFunctionParameters()
+            .addBytes32(contentHash)
+            .addString(payTo)
+            .addUint64(priceUsdc)
+            .addUint64(priceTinybar)
+            .addString(uri),
+        )
+        .execute(client)
+        .then((res) => res.getRecord(client));
+      const id = record.contractFunctionResult?.getUint256(0);
+      if (!id) throw new Error("register returned no id");
+      return { id: Number(id.toString()), transactionId: record.transactionId.toString() };
     },
 
     async issue(registryId, payerAccount, transactionId) {

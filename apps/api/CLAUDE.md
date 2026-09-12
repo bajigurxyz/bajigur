@@ -102,7 +102,22 @@
   with who can open the prompt. A buyer's ENS name comes from `BajigurRegistrar.labelOf`,
   so only names claimed through `/ens/claim` show one; the seed names from
   `scripts/ens-setup.sh` predate that mapping and render as plain accounts.
-- Still to come: creator publishing from the web app.
+- Publishing, `POST /prompts` (bearer agent token): `src/publish.ts` validates,
+  `src/store.ts` persists. The body is the product, so it lives in Postgres
+  (`DATABASE_URL`, Railway service `Postgres`) and survives a deploy; the two
+  seed prompts stay in the bundle. `src/prompts.ts` keeps `prompts` as the array
+  everything reads, refreshed from the store at most every 30s by a middleware in
+  `createApp`, so a second instance sees new rows without a restart.
+  `payTo` is `claims.acct` and `creator` is the wallet's ENS name, both from the
+  token and never from the request: taking either from the body is how someone
+  publishes a prompt that pays them for another creator's work. `creatorOf` no
+  longer defaults a prompt that carries its own `payTo` to the platform name, which
+  would have sent published creators' income to us. Prices are decimal strings,
+  `previewMedia` must be https on an allowed host (`*.r2.dev` plus
+  `PREVIEW_MEDIA_HOSTS`), ids are slugs from the title, and publishing is rate
+  limited per wallet (`PUBLISH_PER_HOUR`, default 5) because each call mints an
+  onchain registration the platform pays for. `DELETE /prompts/:id` unpublishes,
+  creator only, seeds excluded; the onchain registration and sold licences stay.
 
 ## Layout
 

@@ -18,8 +18,9 @@ export type Prompt = {
 const catalog = (file: string) =>
   readFileSync(new URL(`./catalog/${file}`, import.meta.url), "utf8").trim();
 
-// ponytail: in-memory catalogue; bodies live in src/catalog. Move to a DB when creators publish from the web app.
-export const prompts: Prompt[] = [
+// Seed catalogue: bodies live in src/catalog and ship with the bundle. Everything a
+// creator publishes is in Postgres and merged in by `loadPrompts` (src/store.ts).
+const seeds: Prompt[] = [
   {
     id: "nova-ai-cinematic-landing",
     title: "Cinematic scroll-scrubbed landing page",
@@ -47,7 +48,36 @@ export const prompts: Prompt[] = [
   },
 ];
 
+export const prompts: Prompt[] = [...seeds];
+
 export const findPrompt = (id: string) => prompts.find((p) => p.id === id);
+
+/// Replaces the published half of the catalogue, leaving the seeds alone.
+export function loadPrompts(published: Prompt[]) {
+  prompts.length = 0;
+  prompts.push(...seeds, ...published);
+}
+
+export function addPrompt(prompt: Prompt) {
+  prompts.push(prompt);
+}
+
+export function removePrompt(id: string) {
+  const at = prompts.findIndex((p) => p.id === id);
+  if (at >= 0) prompts.splice(at, 1);
+}
+
+/// A readable, stable id from the title, with a suffix when it collides.
+export function slugFor(title: string) {
+  const base =
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 48) || "prompt";
+  if (!findPrompt(base)) return base;
+  for (let n = 2; ; n++) if (!findPrompt(`${base}-${n}`)) return `${base}-${n}`;
+}
 
 export function platformAccount() {
   const account = process.env.X402_PAY_TO_ADDRESS;
@@ -55,9 +85,12 @@ export function platformAccount() {
   return account;
 }
 
-// Seeds belong to the platform's creator name once ENS is configured.
-export const creatorOf = (prompt: Pick<Prompt, "creator">) =>
-  prompt.creator ?? (process.env.ENS_NAME ? `kiel.${process.env.ENS_NAME}` : undefined);
+// Seeds belong to the platform's creator name once ENS is configured. A published prompt
+// carries its own payTo, and must never inherit that name: payToOf resolves a creator name
+// to its own account, so inheriting it would pay us for somebody else's work.
+export const creatorOf = (prompt: Pick<Prompt, "creator" | "payTo">) =>
+  prompt.creator ??
+  (prompt.payTo || !process.env.ENS_NAME ? undefined : `kiel.${process.env.ENS_NAME}`);
 
 // Creator payout: the creator's ENS `bajigur.hedera` record when set, else the prompt's payTo, else the platform.
 export async function payToOf(prompt: Pick<Prompt, "payTo" | "creator">, ens?: Ens) {

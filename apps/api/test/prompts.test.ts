@@ -5,7 +5,7 @@ import { createApp } from "../src/app";
 process.env.X402_PAY_TO_ADDRESS = "0.0.4242";
 process.env.ENS_NAME = "bajigur.eth";
 
-import { payToOf, prompts, tinybars } from "../src/prompts";
+import { payToOf, prompts, type publicPrompt, tinybars } from "../src/prompts";
 
 const usdc = (usd: string) => String(Math.round(Number(usd) * 1_000_000));
 
@@ -32,6 +32,7 @@ const registry = {
     issued.push([id, payer, tx]);
   },
   hasLicence: async (account: string, id: number) => holders.has(`${account}:${id}`),
+  register: async () => ({ id: 42, transactionId: "0.0.1@2.0" }),
   buyers: async () => [
     {
       address: "0xa8f70558b1235769f99add8fe665752ca18d1f8a",
@@ -290,5 +291,108 @@ describe("buyers", () => {
       headers: { authorization: `Bearer ${other}` },
     });
     expect(denied.status).toBe(403);
+  });
+});
+
+describe("publishing", () => {
+  const rows: Awaited<ReturnType<typeof publicPrompt>>[] = [];
+  const store = {
+    all: async () => [],
+    add: async (p: (typeof prompts)[number]) => {
+      rows.push(p as (typeof rows)[number]);
+    },
+    remove: async (id: string) => {
+      const at = rows.findIndex((r) => r.id === id);
+      if (at >= 0) rows.splice(at, 1);
+    },
+  };
+  const publisher = createApp({
+    facilitator,
+    registry,
+    ens,
+    store,
+    agent: { secret: "s", signer: { signHash: async () => new Uint8Array(65) } },
+  });
+  const token = (acct: string) =>
+    agentTokens("s").issue({ sub: "u", wid: "w", acct, pk: "02", cap: "1" });
+  const post = async (body: unknown, acct = "0.0.5555") =>
+    publisher.request("/prompts", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${await token(acct)}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+  const valid = {
+    title: "Parallax pricing table",
+    preview: "A three-tier pricing table with a parallax background and monthly toggle.",
+    body: "x".repeat(60),
+    tags: ["pricing", "parallax"],
+    priceUsd: "0.50",
+    priceHbar: "5",
+    previewMedia: "https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/pricing.webp",
+  };
+
+  it("needs an agent token", async () => {
+    const res = await publisher.request("/prompts", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(valid),
+    });
+    expect(res.status).toBe(401);
+  });
+
+  it("refuses what the frontend cannot be trusted with", async () => {
+    const cases = [
+      { ...valid, priceUsd: "0" },
+      { ...valid, priceUsd: 0.5 },
+      { ...valid, priceHbar: "1.123456789" },
+      { ...valid, previewMedia: "http://pub-x.r2.dev/a.webp" },
+      { ...valid, previewMedia: "https://evil.example/a.webp" },
+      { ...valid, body: "too short" },
+      { ...valid, title: "ab" },
+    ];
+    for (const body of cases) expect((await post(body)).status).toBe(400);
+  });
+
+  it("publishes: slug id, payTo from the token, body stripped from the catalogue", async () => {
+    const res = await post(valid);
+    expect(res.status).toBe(201);
+    const created = (await res.json()) as { id: string; registryId: number; payTo: string };
+    expect(created).toMatchObject({
+      id: "parallax-pricing-table",
+      registryId: 42,
+      payTo: "0.0.5555",
+    });
+    expect(rows.at(-1)).toMatchObject({ id: "parallax-pricing-table", body: valid.body });
+
+    const listed = (await (await publisher.request("/prompts")).json()) as Record<
+      string,
+      unknown
+    >[];
+    const mine = listed.find((p) => p.id === "parallax-pricing-table");
+    expect(mine).toMatchObject({ payTo: "0.0.5555", priceUsd: "0.50" });
+    expect(mine).not.toHaveProperty("body");
+    // A published prompt never inherits the platform's creator name, which would pay us.
+    expect(mine?.creator).toBeUndefined();
+  });
+
+  it("gives a colliding title its own id", async () => {
+    const res = await post(valid);
+    expect(((await res.json()) as { id: string }).id).toBe("parallax-pricing-table-2");
+  });
+
+  it("unpublishes only for the creator, and never a seed", async () => {
+    const del = async (id: string, acct: string) =>
+      publisher.request(`/prompts/${id}`, {
+        method: "DELETE",
+        headers: { authorization: `Bearer ${await token(acct)}` },
+      });
+    expect((await del("parallax-pricing-table", "0.0.9999")).status).toBe(403);
+    expect((await del(prompts[0]?.id ?? "", "0.0.5555")).status).toBe(403);
+    expect((await del("parallax-pricing-table", "0.0.5555")).status).toBe(200);
+    expect(rows.some((r) => r.id === "parallax-pricing-table")).toBe(false);
+    expect((await publisher.request("/prompts/parallax-pricing-table")).status).toBe(404);
   });
 });

@@ -52,6 +52,7 @@ const app = createApp({
   registry: {
     issue: async () => {},
     hasLicence: async (a, id) => holders.has(`${a}:${id}`),
+    register: async () => ({ id: 42, transactionId: "0.0.1@2.0" }),
     buyers: async () => [],
     accountOf: async () => undefined,
   },
