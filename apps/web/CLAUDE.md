@@ -18,14 +18,17 @@ matching from Promit, stop and read the API instead.
 | Route | What it is |
 | --- | --- |
 | `/` | Redirect to `/prompts`. Marketing is `apps/landingpage`, a separate origin. |
-| `/prompts` | Catalogue from `GET /prompts`, filtered by tag. |
+| `/prompts` | The marketplace, from `GET /prompts`, filtered by tag. |
 | `/prompts/[id]` | One prompt plus the unlock control. |
-| `/connect` | Privy sign-in, wallet delegation, and the Claude Desktop config. |
-| `/licenses` | What the wallet owns, read from `GET /licenses/:account`. |
+| `/connect` | Privy sign-in, granting Bajigur a signer, and the Claude Desktop config. |
+| `/my-prompts` | Bought (licences held) and Published (prompts whose `payTo` is this wallet). |
+| `/profile` | Wallet, Hedera account, balances, and activation when there is no account yet. |
 
-Deliberately absent: a creator publishing form and an earnings dashboard.
-`apps/api` has no endpoint behind either — the catalogue is an in-memory array
-seeded by the team. Do not build a surface whose backend does not exist.
+Deliberately absent: a publishing form and an earnings dashboard. `apps/api` has
+no write route at all: the catalogue is a hardcoded array whose bodies are read
+from `src/catalog/*.md` in the deployed bundle, so publishing today means
+committing a file and redeploying. See `docs/plans/publishing-a-prompt.md`
+before building a button for it.
 
 ## How a purchase works
 
@@ -33,7 +36,8 @@ seeded by the team. Do not build a surface whose backend does not exist.
    Bajigur may sign for that wallet.
 2. `POST /api/agent/link` forwards the Privy access token to `apps/api`, which
    creates the wallet's Hedera account, associates USDC, and returns an agent
-   token. That token is stored in an **httpOnly cookie** and never reaches
+   token. Access is granted with `addSigners`, not `delegateWallet`: these
+   wallets run in a TEE, where the delegation hook throws. That token is stored in an **httpOnly cookie** and never reaches
    client JavaScript.
 3. `POST /api/unlock/[id]` runs the x402 flow server side: it builds the Hedera
    `TransferTransaction`, asks `apps/api` to sign it through Privy, and the
@@ -68,9 +72,14 @@ Hedera SDK out of the client bundle.
   inside an effect. Use a promise callback, or React's adjust-state-during-
   render pattern keyed on the value that changed (see `/licenses` and
   `/prompts/[id]`).
-- `NEXT_PUBLIC_PRIVY_APP_ID` is required for sign-in. Without it `Providers`
-  mounts no `PrivyProvider` and the app degrades to a public catalogue rather
-  than crashing.
+- `NEXT_PUBLIC_PRIVY_APP_ID` is required for sign-in, and
+  `NEXT_PUBLIC_PRIVY_SIGNER_ID` for payments: it names the key quorum Bajigur
+  signs with. Without the app id `Providers` mounts no `PrivyProvider` and the
+  app degrades to a public catalogue rather than crashing; without the signer
+  id both connect screens say so before the user clicks.
+- A Hedera account is not created with the wallet. It exists once something is
+  sent to the address, so `/profile` reads the mirror node directly and shows
+  activation steps until then.
 
 ## Tests
 
