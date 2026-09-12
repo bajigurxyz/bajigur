@@ -33,8 +33,9 @@ way.
   this; any new staggered element must use a guarded class.
 - Media lives under `public/media/`, referenced root-relative. Never hotlink a
   third-party host — `page.test.tsx` fails on any absolute or protocol-relative
-  media URL. `public/media/hero.mp4` is 1280x720 H.264 CRF 28, muted,
-  faststart, 1.2 MB; keep a replacement in that size class.
+  media URL. `public/media/hero.mp4` is 1280x724 H.264 CRF 28, muted,
+  faststart, 185 KB; keep a replacement in that size class. Source footage
+  arrives at 4K, which is a waste to decode behind text: scale it down first.
 
 ## Agent onboarding
 
