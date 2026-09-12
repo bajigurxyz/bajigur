@@ -4,13 +4,13 @@ import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import ActivateAccount from "@/components/ActivateAccount";
+import AssociateUsdc from "@/components/AssociateUsdc";
 import CopyField from "@/components/CopyField";
 import Nav from "@/components/Nav";
 import { HbarMark, UsdcMark } from "@/components/TokenMark";
 import WalletButton from "@/components/WalletButton";
 import { fetchLicenses, type Prompt } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
-import { useBalances } from "@/lib/useBalances";
 import { useEmbeddedWallet } from "@/lib/useEmbeddedWallet";
 import { useHederaAccount } from "@/lib/useHederaAccount";
 
@@ -27,9 +27,8 @@ const HASHSCAN = "https://hashscan.io/testnet/account";
 export default function ProfilePage() {
   const { ready, authenticated, user } = usePrivy();
   const wallet = useEmbeddedWallet();
-  const { state: agent } = useAgent();
+  const { state: agent, refresh: refreshAgent } = useAgent();
   const linked = agent.phase === "linked";
-  const balances = useBalances(linked);
   const [licences, setLicences] = useState<Prompt[] | null>(null);
 
   // Two sources, because they become available at different times: the agent
@@ -37,7 +36,13 @@ export default function ProfilePage() {
   // it as soon as the chain does.
   const chain = useHederaAccount(wallet.address);
   const onChain = chain.phase === "ready" && chain.account.exists ? chain.account : undefined;
-  const account = (linked ? agent.agent.account : undefined) ?? onChain?.account;
+  const me = linked ? agent.agent : undefined;
+  const account = (me?.exists === false ? undefined : me?.account) ?? onChain?.account;
+  // The API reports balances alongside identity; the mirror lookup covers a
+  // wallet that has an account but has not set up payments.
+  const hbar = me?.hbar ?? onChain?.hbar;
+  const usdc = me?.usdc ?? onChain?.usdc;
+  const needsUsdc = me?.exists === true && me.associated === false;
 
   useEffect(() => {
     if (!account) return;
@@ -133,61 +138,36 @@ export default function ProfilePage() {
 
             <section className="space-y-3">
               <h2 className="text-lg font-medium">Balance</h2>
-              {!account && <ActivateAccount address={wallet.address} />}
+              {!account && <ActivateAccount />}
 
-              {linked && balances.phase === "loading" && (
-                <div aria-hidden className="h-24 animate-pulse rounded-2xl bg-gray-100" />
-              )}
-              {linked && balances.phase === "unavailable" && (
-                <p className="rounded-2xl border border-gray-200 p-6 text-sm text-gray-600">
-                  Couldn&apos;t read your balance from the Hedera mirror node right now.
-                </p>
-              )}
-              {!linked && onChain && (
-                <dl className="grid gap-4 rounded-2xl border border-gray-200 p-5 text-sm sm:grid-cols-2">
-                  <div>
-                    <dt className="flex items-center gap-1.5 text-xs text-gray-500">
-                      <UsdcMark className="h-4 w-4" />
-                      USDC
-                    </dt>
-                    <dd className="text-lg font-semibold text-black">${onChain.usdc}</dd>
-                  </div>
-                  <div>
-                    <dt className="flex items-center gap-1.5 text-xs text-gray-500">
-                      <HbarMark className="h-4 w-4" />
-                      HBAR
-                    </dt>
-                    <dd className="text-lg font-semibold text-black">{onChain.hbar}</dd>
-                  </div>
-                </dl>
-              )}
-              {linked && balances.phase === "ready" && (
+              {account && needsUsdc && <AssociateUsdc onDone={refreshAgent} />}
+
+              {account && (
                 <dl className="grid gap-4 rounded-2xl border border-gray-200 p-5 text-sm sm:grid-cols-3">
                   <div>
                     <dt className="flex items-center gap-1.5 text-xs text-gray-500">
                       <UsdcMark className="h-4 w-4" />
                       USDC
                     </dt>
-                    <dd className="text-lg font-semibold text-black">
-                      ${balances.balances.usdc ?? "0.00"}
-                    </dd>
+                    <dd className="text-lg font-semibold text-black">${usdc ?? "0.00"}</dd>
                   </div>
                   <div>
                     <dt className="flex items-center gap-1.5 text-xs text-gray-500">
                       <HbarMark className="h-4 w-4" />
                       HBAR
                     </dt>
-                    <dd className="text-lg font-semibold text-black">
-                      {balances.balances.hbar ?? "0"}
-                    </dd>
+                    <dd className="text-lg font-semibold text-black">{hbar ?? "0"}</dd>
                   </div>
                   <div>
                     <dt className="text-xs text-gray-500">Cap per payment</dt>
-                    <dd className="text-lg font-semibold text-black">${balances.balances.cap}</dd>
+                    <dd className="text-lg font-semibold text-black">
+                      {me ? `$${me.cap}` : "Not set up"}
+                    </dd>
                   </div>
                 </dl>
               )}
-              {linked && balances.phase === "ready" && (
+
+              {account && (
                 <p className="text-xs text-gray-500">
                   Running low? Circle&apos;s faucet gives 20 testnet USDC every two hours at{" "}
                   <a

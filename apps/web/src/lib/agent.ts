@@ -25,6 +25,12 @@ export interface AgentIdentity {
   /** Per-payment USD cap the API will sign up to. */
   cap: string;
   walletId?: string;
+  /** Live account status from the mirror node, added by apps/api. */
+  exists?: boolean;
+  /** Whether the account can hold USDC. False means POST /agent/associate. */
+  associated?: boolean;
+  hbar?: string;
+  usdc?: string;
 }
 
 export interface LinkedAgent extends AgentIdentity {
