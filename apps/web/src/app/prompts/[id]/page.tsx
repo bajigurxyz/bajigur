@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
+import CreatorRating from "@/components/CreatorRating";
 import Nav from "@/components/Nav";
 import PromptPreview from "@/components/PromptPreview";
 import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
@@ -118,7 +119,12 @@ export default function PromptDetailPage({ params }: PageProps<"/prompts/[id]">)
               </div>
               <div>
                 <dt className="text-xs text-gray-500">Creator</dt>
-                <dd className="font-mono text-xs text-black">{load.prompt.creator ?? "Not set"}</dd>
+                <dd className="space-y-1.5">
+                  <span className="block font-mono text-xs text-black">
+                    {load.prompt.creator ?? "Not set"}
+                  </span>
+                  {load.prompt.rating && <CreatorRating rating={load.prompt.rating} />}
+                </dd>
               </div>
               <div>
                 <dt className="text-xs text-gray-500">Paid to</dt>

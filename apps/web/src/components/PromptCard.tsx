@@ -1,6 +1,7 @@
 import { Unlock } from "lucide-react";
 import Link from "next/link";
 import CopyPromptButton from "@/components/CopyPromptButton";
+import CreatorRating from "@/components/CreatorRating";
 import PromptPreview from "@/components/PromptPreview";
 import { HbarMark, UsdcMark } from "@/components/TokenMark";
 import { formatHbar, formatUsd, type Prompt } from "@/lib/api";
@@ -50,10 +51,15 @@ export default function PromptCard({ prompt, owned = false }: { prompt: Prompt; 
             </Link>
           </h3>
           {prompt.creator && (
-            // The creator is an ENSv2 subname whose text record is what the 402
-            // actually pays, so it is identity here, not decoration.
-            <span className="shrink-0 rounded-full border border-gray-200 px-2.5 py-0.5 font-mono text-[11px] text-gray-600">
-              {prompt.creator}
+            <span className="flex shrink-0 flex-col items-end gap-1">
+              {/*
+                The creator is an ENSv2 subname whose text record is what the 402
+                actually pays, so it is identity here, not decoration.
+              */}
+              <span className="rounded-full border border-gray-200 px-2.5 py-0.5 font-mono text-[11px] text-gray-600">
+                {prompt.creator}
+              </span>
+              {prompt.rating && <CreatorRating rating={prompt.rating} />}
             </span>
           )}
         </div>

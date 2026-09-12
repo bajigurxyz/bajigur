@@ -14,15 +14,17 @@ const CDN = "https://cdn.ethglobal.com/organizations";
  * people's trademarks, and a copy in our repo is a copy that goes stale the day
  * a brand is refreshed. `page.test.tsx` allows this one host and no other.
  *
- * ETHGlobal's wordmark is the exception on both counts: it is wide rather than
- * square, and it is ours to serve because it already has a transparent
- * background, which is the thing the CDN copies do not.
+ * Two of them are wide wordmarks rather than square marks, and both are served
+ * from our own public folder: they already have transparent backgrounds, which
+ * is the thing the CDN copies do not, and 8004scan's own URL carries a
+ * deployment hash that changes under us.
  */
 const SPONSORS: Sponsor[] = [
   { name: "Hedera", src: `${CDN}/bdi3h/square-logo/default.png`, href: "https://hedera.com" },
   { name: "Privy", src: `${CDN}/ijybm/square-logo/default.png`, href: "https://privy.io" },
   { name: "ENS", src: `${CDN}/bw7y9/square-logo/default.png`, href: "https://ens.domains" },
   { name: "ETHGlobal", src: "/ethglobal.png", href: "https://ethglobal.com", wordmark: true },
+  { name: "8004scan", src: "/8004scan.svg", href: "https://8004scan.io", wordmark: true },
 ];
 
 /**

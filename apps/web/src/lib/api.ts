@@ -45,6 +45,15 @@ export interface Prompt {
   payTo?: string;
   /** Absolute URL of a recording of this prompt's output, when the creator supplied one. */
   previewMedia?: string;
+  /**
+   * The creator's standing in the ERC-8004 reputation registry on Hedera, absent
+   * until somebody rates them.
+   *
+   * `score` is a net signed total, not an average and not a count of stars: the
+   * registry's `getSummary` adds up signed feedback, so two buyers can leave +1
+   * and -1 and land on zero. Rendering it out of five would be a lie.
+   */
+  rating?: { count: number; score: number; agent?: string };
 }
 
 /** Thrown for non-OK responses so callers can branch on status (404 → not-found). */
