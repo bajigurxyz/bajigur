@@ -4,8 +4,16 @@
 prompts. Owned by Kiel. Design in
 `../../docs/superpowers/specs/2026-09-10-bajigur-product-design.md`.
 
-- Local stdio server: the payer's Hedera key must stay on the user's machine,
-  so it is launched by Claude Desktop with `bun run src/index.ts`, never hosted.
+- Two transports. `src/index.ts` is the local stdio server (a raw Hedera key
+  stays on the user's machine, or an agent token). `src/http.ts` is the hosted
+  Streamable HTTP server: stateless, one endpoint for everyone, the wallet
+  comes from the request's `Authorization: Bearer <agent token>`; without a
+  token it is read-only. Live at `https://mcp-production-bbfe.up.railway.app/mcp`
+  (Railway service `mcp`, `apps/mcp/Dockerfile`, deploy with
+  `railway up --service mcp --detach`). It publishes RFC 9728 metadata at
+  `/.well-known/oauth-protected-resource` pointing at `BAJIGUR_APP_URL` (the
+  web app is the OAuth authorization server), and serves the install guide
+  (`src/install.ts`) on every other path.
 - It is a transport wrapper over `apps/api`. No catalogue or payment logic
   lives here; `src/pay.ts` only wraps `fetch` with the x402 Hedera client and a
   per-payment spend cap.
@@ -43,6 +51,8 @@ prompts. Owned by Kiel. Design in
 ```
 src/
   index.ts    stdio entry
+  http.ts     hosted Streamable HTTP entry (stateless, bearer agent token)
+  install.ts  plain-text install guide served by http.ts
   pay.ts      x402 client -> fetch with payment
   server.ts   createServer(): MCP tools
   externalSigner.ts  x402 Hedera signer over a rawSign callback (Privy, KMS)

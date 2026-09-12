@@ -27,6 +27,7 @@ gateway). Design notes:
 | Catalogue (free) | https://api-production-fe21.up.railway.app/prompts |
 | Discovery directory (x402 bazaar shape) | https://api-production-fe21.up.railway.app/discovery/resources |
 | OpenAPI | https://api-production-fe21.up.railway.app/openapi.json |
+| Remote MCP server (Streamable HTTP, paste the URL into any MCP client) | https://mcp-production-bbfe.up.railway.app/mcp |
 | Bazantic gateway (x402/MPP on Base, MCP) | https://tuguge4rzbcsvgrevhkkjf43em.bazgateway.com |
 | Bazantic Recipe | `design-prompt-finder` |
 | ERC-8004 agent card | https://api-production-fe21.up.railway.app/.well-known/agent.json (agent **111** on Hedera testnet) |
