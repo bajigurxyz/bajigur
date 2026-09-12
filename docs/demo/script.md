@@ -14,14 +14,14 @@ Problem first, then the turn. No product tour: the demo does that. 61 words
 over 30 seconds, cued to what is on screen.
 
 ```
-0:00  Every prompt like this one lives behind a subscription.
+0:00  Every design prompt library works the same way. You subscribe.
 
-0:05  Nineteen a month. Seventy nine. A hundred and ninety nine.
+0:05  Twenty nine a month. Ninety nine. Four hundred and ninety nine.
 0:10  [ let the number sit ]
 
 0:11  You wanted one prompt. You paid for a year.
 
-0:16  Here, one prompt costs twenty cents, bought by the agent itself.
+0:16  Here, one design prompt costs twenty cents, bought by the agent itself.
 
 0:21  Hedera settles it. Privy holds the wallet.
 0:24  ENS names the creator, and ERC-8004 decides which prompt wins.

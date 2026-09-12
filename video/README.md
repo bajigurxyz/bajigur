@@ -15,11 +15,14 @@ Six scenes, timed in `SCENES` at the top of `src/Opener.tsx`:
 | From | Scene |
 | --- | --- |
 | 0.0s | the problem, stated once |
-| 4.2s | the price climbing from $19 to $199 a month |
+| 4.2s | the price climbing from $29 to $499 a month |
 | 11.0s | you wanted one prompt, you paid for a year |
-| 15.0s | the turn: the same number slot, now $0.20 once |
+| 15.0s | the turn: the same number slot, now $0.20 once for one design prompt |
 | 20.4s | the four rails, one line each |
 | 26.2s | the end card, handing off to the recording |
+
+It says "design prompt" in the first line and again at the turn, so nobody reads
+it as paying per message in a chat. What is sold is the design prompt, once.
 
 The look is the landing page's: Inter, white on black and black on white,
 `-0.035em` tracking, the same rise-and-fade entrance, the same black to grey

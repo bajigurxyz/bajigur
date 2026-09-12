@@ -199,17 +199,16 @@ const PriceSlot = ({
 const PriceTicker = () => {
   const frame = useCurrentFrame();
   const tiers = [
-    [19, "Starter"],
-    [24, "Starter"],
-    [29, "Pro"],
-    [39, "Pro"],
-    [49, "Team"],
-    [59, "Team"],
-    [79, "Studio"],
-    [99, "Studio"],
-    [129, "Business"],
-    [159, "Business"],
-    [199, "Enterprise"],
+    [29, "Starter"],
+    [49, "Pro"],
+    [79, "Pro"],
+    [99, "Team"],
+    [149, "Team"],
+    [199, "Studio"],
+    [249, "Studio"],
+    [299, "Business"],
+    [399, "Business"],
+    [499, "Enterprise"],
   ] as const;
   const climb = s(5.8);
 
@@ -303,9 +302,9 @@ export const Opener = () => {
       <Sequence {...scene("problem")}>
         <Stage>
           <div style={{ textAlign: "center" }}>
-            <Chip text="Every prompt library you have ever opened" />
+            <Chip text="Every design prompt library you have ever opened" />
             <Line size={104} delay={6}>
-              Prompts like these
+              Design prompts like these
             </Line>
             <Line size={104} delay={10} style={{ ...gradientText, fontWeight: 500 }}>
               live behind a subscription.
@@ -338,10 +337,10 @@ export const Opener = () => {
         <Stage dark style={{ background: "transparent" }}>
           <div style={{ textAlign: "center" }}>
             <Line size={72} delay={10} style={{ fontWeight: 500, marginBottom: 56 }}>
-              Pay per prompt.
+              Pay per design prompt.
             </Line>
             <div style={useRise(18)}>
-              <PriceSlot label="One prompt" amount="0.20" unit="once" note="" dark />
+              <PriceSlot label="One design prompt" amount="0.20" unit="once" note="" dark />
             </div>
             <Line size={42} delay={44} style={{ color: "#a1a1aa", marginTop: 24 }}>
               Bought by the agent itself, not by you.
