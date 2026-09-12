@@ -31,6 +31,8 @@ export interface AgentIdentity {
   associated?: boolean;
   hbar?: string;
   usdc?: string;
+  /** The wallet's name under the parent, once apps/api reports one. */
+  ensName?: string;
 }
 
 export interface LinkedAgent extends AgentIdentity {

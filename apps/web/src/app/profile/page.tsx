@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import ActivateAccount from "@/components/ActivateAccount";
 import AssociateUsdc from "@/components/AssociateUsdc";
+import ClaimEnsName from "@/components/ClaimEnsName";
 import CopyField from "@/components/CopyField";
 import Nav from "@/components/Nav";
 import { HbarMark, UsdcMark } from "@/components/TokenMark";
@@ -181,6 +182,11 @@ export default function ProfilePage() {
                   . Either address works: they are the same account.
                 </p>
               )}
+            </section>
+
+            <section className="space-y-3">
+              <h2 className="text-lg font-medium">Your name</h2>
+              <ClaimEnsName current={me?.ensName} account={account} onClaimed={refreshAgent} />
             </section>
 
             <section className="space-y-3">
