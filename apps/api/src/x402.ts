@@ -105,13 +105,18 @@ export function x402({ facilitator, onSettled, registry, identity, ens }: X402Op
       mimeType: "application/json",
       ...service,
       extensions: declareDiscoveryExtension({
-        pathParams: { id: "hero-scroll-reveal" },
+        pathParams: { id: "nova-ai-cinematic-landing" },
         pathParamsSchema: {
           type: "object",
           properties: { id: { type: "string", description: "Prompt id from GET /prompts" } },
           required: ["id"],
         },
-        output: { example: { id: "hero-scroll-reveal", body: "Build a pinned hero section..." } },
+        output: {
+          example: {
+            id: "nova-ai-cinematic-landing",
+            body: "Build a dark, cinematic single-page landing site...",
+          },
+        },
       }),
     },
   };

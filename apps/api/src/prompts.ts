@@ -18,41 +18,8 @@ export type Prompt = {
 const catalog = (file: string) =>
   readFileSync(new URL(`./catalog/${file}`, import.meta.url), "utf8").trim();
 
-// ponytail: in-memory catalogue seeded by the team; move to a DB when creators publish from the web app
+// ponytail: in-memory catalogue; bodies live in src/catalog. Move to a DB when creators publish from the web app.
 export const prompts: Prompt[] = [
-  {
-    id: "hero-scroll-reveal",
-    title: "Hero scroll reveal",
-    tags: ["hero", "scroll", "gsap"],
-    preview: "Pinned hero with staggered headline reveal and parallax media on scroll.",
-    priceUsd: "0.10",
-    priceHbar: "1",
-    registryId: 1,
-    body: "Build a pinned hero section. On load, split the headline into words and reveal them with a 40ms stagger, 0.8s ease-out, from y:40 to y:0 with opacity 0 to 1. While the hero is pinned, scrub a parallax on the media: translateY from 0 to -120px over 100vh of scroll. Use GSAP ScrollTrigger. Respect prefers-reduced-motion by disabling parallax and collapsing stagger to 0.",
-  },
-  {
-    id: "magnetic-buttons",
-    title: "Magnetic buttons",
-    tags: ["button", "cursor", "micro-interaction"],
-    preview:
-      "Buttons that lean toward the cursor within a 80px radius and snap back with spring easing.",
-    priceUsd: "0.05",
-    priceHbar: "0.5",
-    registryId: 2,
-    body: "Add a magnetic effect to primary buttons. Track pointer position within an 80px radius of each button; translate the button toward the pointer by 30% of the offset, max 12px. On leave, return with a spring: stiffness 300, damping 20. Move the label an extra 10% for depth. Disable on touch devices and under prefers-reduced-motion.",
-  },
-  {
-    id: "glass-nav",
-    title: "Glass navigation bar",
-    tags: ["nav", "glassmorphism", "scroll"],
-    preview: "Sticky translucent nav that gains blur and a hairline border once the page scrolls.",
-    priceUsd: "0.05",
-    priceHbar: "0.5",
-    registryId: 4,
-    creator: process.env.ENS_NAME ? `axel.${process.env.ENS_NAME}` : undefined,
-    payTo: process.env.HEDERA_OPERATOR_ID,
-    body: "Build a sticky top navigation. At scrollY 0 it is fully transparent with white text. Past 24px of scroll, transition over 300ms ease-out to background rgba(255,255,255,0.72), backdrop-filter blur(16px) saturate(160%), a 1px bottom border at rgba(0,0,0,0.08), and dark text. Keep the logo 24px tall and links 14px with 24px gaps. Under prefers-reduced-motion switch states instantly.",
-  },
   {
     id: "nova-ai-cinematic-landing",
     title: "Cinematic scroll-scrubbed landing page",
@@ -77,16 +44,6 @@ export const prompts: Prompt[] = [
     priceHbar: "10",
     registryId: 6,
     body: catalog("core-features-tabs.md"),
-  },
-  {
-    id: "marquee-logos",
-    title: "Infinite logo marquee",
-    tags: ["marquee", "logos", "css"],
-    preview: "Seamless infinite logo strip in pure CSS that pauses on hover.",
-    priceUsd: "0.02",
-    priceHbar: "0.2",
-    registryId: 3,
-    body: "Create a logo marquee with pure CSS. Duplicate the logo track once so the loop is seamless, animate translateX from 0 to -50% over 30s linear infinite, and pause the animation on hover. Fade both edges with a mask-image linear gradient. Logos are 32px tall, 64px gap, grayscale at 60% opacity, full color on hover.",
   },
 ];
 

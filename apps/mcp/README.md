@@ -52,8 +52,8 @@ Pay with a Privy server wallet from a script instead: set `NEXT_PUBLIC_PRIVY_APP
 Buy from the terminal instead (reads the root `.env`):
 
 ```bash
-bun run buy marquee-logos
-X402_PAY_WITH=hbar bun run buy marquee-logos
+bun run buy nova-ai-cinematic-landing
+X402_PAY_WITH=hbar bun run buy nova-ai-cinematic-landing
 ```
 
 The Claude Agent Skills in `../../skills/` sit on top of this server. Bazantic

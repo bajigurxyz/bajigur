@@ -5,7 +5,9 @@ import { createApp } from "../src/app";
 process.env.X402_PAY_TO_ADDRESS = "0.0.4242";
 process.env.ENS_NAME = "bajigur.eth";
 
-import { prompts } from "../src/prompts";
+import { prompts, tinybars } from "../src/prompts";
+
+const usdc = (usd: string) => String(Math.round(Number(usd) * 1_000_000));
 
 const network = "hedera:testnet";
 
@@ -84,13 +86,26 @@ describe("catalogue", () => {
       pagination: { total: number };
     };
     expect(body.pagination.total).toBe(prompts.length);
+    const first = prompts[0] as (typeof prompts)[number];
     expect(body.items[0]).toMatchObject({
-      resource: "http://api.test/prompts/hero-scroll-reveal/unlock",
+      resource: `http://api.test/prompts/${first.id}/unlock`,
       type: "http",
       serviceName: "Bajigur",
       accepts: [
-        { scheme: "exact", network, asset: "0.0.429274", amount: "100000", payTo: "0.0.4242" },
-        { scheme: "exact", network, asset: "0.0.0", amount: "100000000", payTo: "0.0.4242" },
+        {
+          scheme: "exact",
+          network,
+          asset: "0.0.429274",
+          amount: usdc(first.priceUsd),
+          payTo: "0.0.4242",
+        },
+        {
+          scheme: "exact",
+          network,
+          asset: "0.0.0",
+          amount: tinybars(first.priceHbar),
+          payTo: "0.0.4242",
+        },
       ],
     });
   });
@@ -109,19 +124,23 @@ describe("GET /prompts/:id/unlock", () => {
     expect(res.status).toBe(402);
     const required = decode(res.headers.get("PAYMENT-REQUIRED") ?? "");
     const [accept, hbar] = required.accepts;
-    expect(hbar).toMatchObject({ asset: "0.0.0", amount: "100000000", payTo: "0.0.4242" });
+    expect(hbar).toMatchObject({
+      asset: "0.0.0",
+      amount: tinybars(prompt.priceHbar),
+      payTo: "0.0.4242",
+    });
     expect(accept).toMatchObject({
       scheme: "exact",
       network,
       payTo: "0.0.4242",
       asset: "0.0.429274",
-      amount: "100000",
+      amount: usdc(prompt.priceUsd),
       extra: { feePayer: "0.0.999" },
     });
     expect(required.extensions.bazaar.info.input).toMatchObject({
       type: "http",
       method: "GET",
-      pathParams: { id: "hero-scroll-reveal" },
+      pathParams: { id: prompt.id },
     });
   });
 
@@ -146,7 +165,7 @@ describe("GET /prompts/:id/unlock", () => {
       payer: "0.0.1234",
       payTo: "0.0.4242",
       asset: "0.0.429274",
-      amount: "100000",
+      amount: usdc(prompt.priceUsd),
       network,
       transaction: "0.0.1234@1.0",
     });

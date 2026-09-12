@@ -69,7 +69,7 @@ Contracts never sit in the payment path: on Hedera, x402 `payTo` must be a
 
 ## Payment flow
 
-1. Agent calls `GET /prompts/marquee-logos/unlock`.
+1. Agent calls `GET /prompts/nova-ai-cinematic-landing/unlock`.
 2. API answers `402` with a `PAYMENT-REQUIRED` header (x402 v2): two
    `accepts` entries, USDC (`0.0.429274`) and HBAR, `payTo` = the creator's
    account, `extra.feePayer` from Blocky402, plus bazaar discovery metadata.
@@ -104,14 +104,14 @@ Accounts on Hedera testnet (ECDSA keys from https://portal.hedera.com):
 
 ```bash
 bun run hedera:associate       # associate both accounts with testnet USDC, then fund the payer at https://faucet.circle.com
-bun run buy marquee-logos      # pay from the terminal through the MCP tools
-X402_PAY_WITH=hbar bun run buy marquee-logos
+bun run buy nova-ai-cinematic-landing   # pay from the terminal through the MCP tools
+X402_PAY_WITH=hbar bun run buy nova-ai-cinematic-landing
 bun run privy:spike            # pay with a Privy server wallet (needs PRIVY_* vars)
 ```
 
 Claude Desktop: copy the block in [`apps/mcp/README.md`](apps/mcp/README.md)
 into `claude_desktop_config.json`, restart, then ask
-"find a marquee prompt on Bajigur and buy it". New users need no Hedera key:
+"find a cinematic landing page prompt on Bajigur and buy it". New users need no Hedera key:
 sign in on the web app, delegate the Privy wallet, and paste the agent token
 as `BAJIGUR_AGENT_TOKEN`.
 
