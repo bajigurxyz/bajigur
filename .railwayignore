@@ -7,7 +7,6 @@ apps/web
 apps/landingpage
 apps/ai
 apps/indexer
-apps/mcp
 skills
 docs
 .env
