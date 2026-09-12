@@ -41,8 +41,7 @@ export const openapi = (origin: string) => ({
                   },
                   previewMedia: {
                     type: "string",
-                    description:
-                      "https URL on an allowed host, ending .webp .gif .png .jpg .mp4 or .webm",
+                    description: "https URL ending .webp .gif .png .jpg .mp4 or .webm",
                   },
                 },
                 required: ["title", "preview", "body", "priceUsd", "priceHbar"],

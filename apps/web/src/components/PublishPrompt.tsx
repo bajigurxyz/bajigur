@@ -183,12 +183,12 @@ export default function PublishPrompt({ onPublished }: { onPublished: () => void
           type="url"
           value={form.previewMedia}
           onChange={(e) => set("previewMedia")(e.target.value)}
-          placeholder="https://….r2.dev/preview.mp4"
+          placeholder="https://your-site.com/preview.mp4"
           className={field}
         />
         <span className="block text-xs text-gray-500">
           A recording or a still of what the prompt produces: mp4, webm, mov, gif, webp, png or jpg.
-          It is rendered in every visitor&apos;s browser, so only allowlisted hosts are accepted.
+          Any https address works, so you can point it at wherever the file already lives.
         </span>
       </label>
 

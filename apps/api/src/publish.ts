@@ -43,17 +43,16 @@ export const atomic = (value: string, decimals: number) => {
 };
 
 /// What a browser can actually show. Without this a creator can point the field at
-/// anything on an allowed host and the card renders an empty box.
+/// anything and the card renders an empty box.
+///
+/// The host is deliberately not restricted. Creators arrive with the recording
+/// already hosted somewhere — their own site, a CDN, wherever the work lives —
+/// and an allowlist meant every one of them had to re-upload to our bucket
+/// before they could publish at all. The URL is only ever put in an `<img>` or
+/// `<video>` src, so an unknown host can serve a broken file or see the
+/// visitor's IP, and nothing more; that is the cost of hotlinking, and it is
+/// the creator's own name on the card that carries it.
 const PREVIEW_TYPES = /\.(webp|gif|png|jpe?g|mp4|webm)$/i;
-
-/// Rendered in every visitor's browser, so the host is allowlisted.
-export const previewHostAllowed = (url: URL) => {
-  const extra = (process.env.PREVIEW_MEDIA_HOSTS ?? "")
-    .split(",")
-    .map((h) => h.trim())
-    .filter(Boolean);
-  return url.hostname.endsWith(".r2.dev") || extra.includes(url.hostname);
-};
 
 export function validate(input: PublishInput): { error: string } | { prompt: Published } {
   const title = text(input.title, 3, 120);
@@ -83,8 +82,6 @@ export function validate(input: PublishInput): { error: string } | { prompt: Pub
       return { error: "previewMedia must be an absolute https URL" };
     }
     if (url.protocol !== "https:") return { error: "previewMedia must be an absolute https URL" };
-    if (!previewHostAllowed(url))
-      return { error: `previewMedia host ${url.hostname} is not allowed` };
     if (!PREVIEW_TYPES.test(decodeURIComponent(url.pathname))) {
       return { error: "previewMedia must be a .webp, .gif, .png, .jpg, .mp4 or .webm file" };
     }

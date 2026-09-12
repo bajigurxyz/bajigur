@@ -78,7 +78,10 @@ describe("PublishPrompt", () => {
   it("shows the API's own refusal rather than inventing one", async () => {
     vi.spyOn(globalThis, "fetch").mockImplementation(
       linked(
-        Response.json({ error: "previewMedia host evil.test is not allowed" }, { status: 400 }),
+        Response.json(
+          { error: "previewMedia must be a .webp, .gif, .png, .jpg, .mp4 or .webm file" },
+          { status: 400 },
+        ),
       ) as never,
     );
     fill();
@@ -86,7 +89,7 @@ describe("PublishPrompt", () => {
     fireEvent.click(screen.getByRole("button", { name: "Publish" }));
 
     expect((await screen.findByRole("alert")).textContent).toContain(
-      "previewMedia host evil.test is not allowed",
+      "previewMedia must be a .webp, .gif, .png, .jpg, .mp4 or .webm file",
     );
   });
 });

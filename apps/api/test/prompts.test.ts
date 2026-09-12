@@ -341,12 +341,26 @@ describe("publishing", () => {
       { ...valid, priceUsd: 0.5 },
       { ...valid, priceHbar: "1.123456789" },
       { ...valid, previewMedia: "http://pub-x.r2.dev/a.webp" },
-      { ...valid, previewMedia: "https://evil.example/a.webp" },
       { ...valid, previewMedia: "https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/a.pdf" },
       { ...valid, body: "too short" },
       { ...valid, title: "ab" },
     ];
     for (const body of cases) expect((await post(body)).status).toBe(400);
+  });
+
+  it("takes a preview from wherever the creator already hosts it", async () => {
+    // The recording is usually already live on the creator's own site. Making
+    // them re-upload to our bucket first was a wall in front of publishing, and
+    // the URL only ever becomes an <img>/<video> src.
+    const res = await post({
+      ...valid,
+      title: "Hotlinked hero loop",
+      previewMedia: "https://motionsites.ai/assets/hero-nexora-preview-cx5HmUgo.gif",
+    });
+    expect(res.status).toBe(201);
+    expect(rows.at(-1)).toMatchObject({
+      previewMedia: "https://motionsites.ai/assets/hero-nexora-preview-cx5HmUgo.gif",
+    });
   });
 
   it("publishes: slug id, payTo from the token, body stripped from the catalogue", async () => {

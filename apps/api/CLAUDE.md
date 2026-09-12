@@ -135,8 +135,10 @@
   publishes a prompt that pays them for another creator's work. `creatorOf` no
   longer defaults a prompt that carries its own `payTo` to the platform name, which
   would have sent published creators' income to us. Prices are decimal strings,
-  `previewMedia` must be https on an allowed host (`*.r2.dev` plus
-  `PREVIEW_MEDIA_HOSTS`), ids are slugs from the title, and publishing is rate
+  `previewMedia` must be an https URL ending in a type a browser can show; the
+  host is deliberately unrestricted, because creators arrive with the recording
+  already hosted and an allowlist made them re-upload before they could publish
+  at all. Ids are slugs from the title, and publishing is rate
   limited per wallet (`PUBLISH_PER_HOUR`, default 5) because each call mints an
   onchain registration the platform pays for. `DELETE /prompts/:id` unpublishes,
   creator only, seeds excluded; the onchain registration and sold licences stay.

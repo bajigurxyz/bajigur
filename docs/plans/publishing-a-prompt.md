@@ -33,7 +33,7 @@ up a new prompt without a restart.
 | `creator` is the wallet's ENS name, from `BajigurRegistrar.labelOf` | Same reason, and it is what the reputation hangs off |
 | A prompt carrying its own `payTo` never inherits the platform's creator name | `payToOf` resolves a creator name to its own account, so inheriting it would route a published creator's income to us |
 | Prices are decimal strings with bounded places | `0.1` as a float is not representable, and a payment one atomic unit off is refused |
-| `previewMedia` must be https on an allowed host | It is rendered in an `<img>` in every visitor's browser |
+| `previewMedia` must be https and end in a type a browser shows | It is rendered in an `<img>` in every visitor's browser; the host is the creator's own choice |
 | Five prompts per wallet per hour | Each call mints an onchain registration whose gas we pay |
 
 ## Onchain
