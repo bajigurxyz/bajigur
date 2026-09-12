@@ -6,10 +6,14 @@ const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").rep
 import AgentOnboarding from "@/components/AgentOnboarding";
 import ChatDemo from "@/components/ChatDemo";
 import Footer from "@/components/Footer";
+import HeroVideo from "@/components/HeroVideo";
 import Nav from "@/components/Nav";
 import SiteFooter from "@/components/SiteFooter";
 
-const VIDEO_SRC = "/media/hero.mp4";
+/** The hero background, an HLS stream. `HeroVideo` knows how to play it. */
+const VIDEO_SRC = "https://stream.mux.com/E3rAKyTB54G02a702jKVDAsRnWoRXwUss6mjjctaODp8w.m3u8";
+/** The stream's own first frame, so the hero is never blank while it loads. */
+const POSTER_SRC = "/media/hero-poster.jpg";
 
 export default function Home() {
   return (
@@ -17,13 +21,10 @@ export default function Home() {
       {/* The hero keeps its full-viewport stage; the clipping that used to
           live on the page root moved here so sections can exist below it. */}
       <section className="relative h-screen w-full overflow-hidden">
-        <video
-          className="absolute inset-0 h-full w-full object-cover pt-[120px] md:pt-[200px]"
+        <HeroVideo
           src={VIDEO_SRC}
-          autoPlay
-          loop
-          muted
-          playsInline
+          poster={POSTER_SRC}
+          className="absolute inset-0 h-full w-full object-cover pt-[120px] md:pt-[200px]"
         />
 
         {/* White gradients dissolve the video into the clean upper section. */}

@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import Home from "./page";
@@ -56,6 +59,21 @@ const CATALOGUE_BUCKET = "https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/";
  * fetched than copied: a copy in our repo goes stale the day a brand changes.
  */
 const SPONSOR_HOSTS = ["https://cdn.ethglobal.com/"];
+
+/**
+ * The hero's stream is attached by script rather than written as an attribute,
+ * so the DOM check below cannot see it. Read the source instead: an allowance
+ * that silently stops covering the thing it was written for is worse than none.
+ */
+describe("the hero stream", () => {
+  const page = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "page.tsx"), "utf8");
+
+  it("comes from a host we chose on purpose", () => {
+    const url = page.match(/const VIDEO_SRC = "([^"]+)"/)?.[1];
+    expect(url, "VIDEO_SRC missing from page.tsx").toBeTruthy();
+    expect(url?.startsWith("https://stream.mux.com/") || url?.startsWith("/")).toBe(true);
+  });
+});
 
 describe("landing page media", () => {
   it("loads no media from a host we do not control", () => {
