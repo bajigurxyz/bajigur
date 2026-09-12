@@ -310,7 +310,12 @@ export function agentRoutes(o: AgentOptions) {
     };
     let link: { sub: string; walletId: string; address: string };
     if (body.privyAccessToken && o.linkWallet) {
-      link = await o.linkWallet(body.privyAccessToken);
+      try {
+        link = await o.linkWallet(body.privyAccessToken);
+      } catch (err) {
+        // A token Privy will not verify is the caller's problem, not ours.
+        return c.json({ error: err instanceof Error ? err.message : String(err) }, 401);
+      }
     } else if (
       body.walletId &&
       body.address &&

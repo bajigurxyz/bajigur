@@ -149,6 +149,26 @@ describe("agent routes", () => {
     expect([200, 409]).toContain(res.status);
   });
 
+  it("answers 401 when the Privy token does not verify", async () => {
+    const rejecting = createApp({
+      facilitator,
+      agent: {
+        secret: "s",
+        signer,
+        adminKey: "admin",
+        linkWallet: async () => {
+          throw new Error("Failed to verify authentication token");
+        },
+      },
+    });
+    const res = await rejecting.request("/agent/link", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ privyAccessToken: "bogus" }),
+    });
+    expect(res.status).toBe(401);
+  });
+
   it("refuses to link without the admin key or a Privy token", async () => {
     const res = await app.request("/agent/link", {
       method: "POST",
