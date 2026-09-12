@@ -19,9 +19,14 @@ const MARKERS: Record<string, string> = {
 };
 
 /** The only hosts allowed to appear: the repo, the live API, and the two faucets. */
+// The deployment now lives under one domain, and localhost stays only because
+// the snippets fall back to it when the env vars are absent, which is what a
+// local `bun run dev` sees.
 const ALLOWED_HOSTS = [
   "https://github.com/bajigurxyz/bajigur.git",
   "https://api.bajigur.xyz",
+  "https://app.bajigur.xyz",
+  "https://mcp.bajigur.xyz",
   "https://portal.hedera.com",
   "https://faucet.circle.com",
   "http://localhost:3000",

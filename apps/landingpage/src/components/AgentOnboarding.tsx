@@ -1,7 +1,7 @@
 "use client";
 
-import { Check, Copy } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import CopyButton from "@/components/CopyButton";
 
 /**
  * Agent onboarding: the landing section where a visitor with an agent copies
@@ -107,63 +107,6 @@ bun run buy marquee-logos`,
   },
 ];
 
-type CopyState = "idle" | "copied" | "error";
-
-const RESET_MS = 2500;
-
-function CopySnippetButton({ text, label }: { text: string; label: string }) {
-  const [state, setState] = useState<CopyState>("idle");
-  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(
-    () => () => {
-      if (resetTimer.current) clearTimeout(resetTimer.current);
-    },
-    [],
-  );
-
-  const settle = (next: CopyState) => {
-    setState(next);
-    if (resetTimer.current) clearTimeout(resetTimer.current);
-    resetTimer.current = setTimeout(() => setState("idle"), RESET_MS);
-  };
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      settle("copied");
-    } catch {
-      settle("error");
-    }
-  };
-
-  const caption =
-    state === "copied" ? "Copied!" : state === "error" ? "Copy failed, retry" : "Copy";
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={copy}
-        aria-label={`Copy the ${label} setup block`}
-        className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950 focus-visible:outline-none"
-      >
-        {state === "copied" ? (
-          <Check aria-hidden className="h-3.5 w-3.5" />
-        ) : (
-          <Copy aria-hidden className="h-3.5 w-3.5" />
-        )}
-        {caption}
-      </button>
-      {/* Announced to assistive tech; visually the button text already changed. */}
-      <span role="status" aria-live="polite" className="sr-only">
-        {state === "copied" && `${label} setup block copied to clipboard`}
-        {state === "error" && `Copying the ${label} setup block failed`}
-      </span>
-    </>
-  );
-}
-
 export default function AgentOnboarding() {
   const [activeId, setActiveId] = useState(ONBOARDING_TARGETS[0].id);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -259,7 +202,7 @@ export default function AgentOnboarding() {
         <div className="overflow-hidden rounded-2xl bg-gray-950">
           <div className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-2.5">
             <span className="truncate text-xs text-gray-400">{active.label}</span>
-            <CopySnippetButton text={active.snippet} label={active.label} />
+            <CopyButton text={active.snippet} label={active.label} />
           </div>
           <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed text-gray-100">
             <code>{active.snippet}</code>
@@ -267,6 +210,13 @@ export default function AgentOnboarding() {
         </div>
 
         <p className="mt-3 max-w-2xl text-xs text-gray-500">{active.note}</p>
+
+        <a
+          href="/mcp"
+          className="mt-4 inline-block text-sm text-gray-700 underline underline-offset-4 transition-colors hover:text-black"
+        >
+          Full MCP documentation
+        </a>
       </div>
     </section>
   );

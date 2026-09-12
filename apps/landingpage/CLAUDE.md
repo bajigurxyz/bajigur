@@ -55,6 +55,19 @@ down.**
 The section is deliberately free of entrance stagger — it sits below the fold,
 where time-based delays have already elapsed by the time anyone scrolls to it.
 
+## MCP documentation
+
+`src/app/mcp/page.tsx` is the page people are sent to when they hear Bajigur
+has an MCP server: what the three tools are, how to connect, how signing in
+works, and what happens when an agent spends money. It renders the same
+`AgentOnboarding` the home page does, so the command cannot differ between them.
+
+Every address comes from `NEXT_PUBLIC_MCP_URL` and `NEXT_PUBLIC_APP_URL`, never
+written by hand. That is not style: the deployment has moved hosts twice, and a
+hardcoded host survives the move and keeps pointing somewhere we left.
+`src/app/mcp/page.test.tsx` enforces it, along with the tool list matching what
+the server answers `tools/list` with.
+
 ## Tests
 
 `bun run test` → `vitest run`, jsdom, `@` → `./src`. Vitest globals are off:
