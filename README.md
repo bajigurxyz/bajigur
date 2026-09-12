@@ -13,6 +13,9 @@ can discover, pay for, and use a prompt on its own.
 - Creators and agents are **ENSv2 names** under `bajigur.eth` (our own
   subregistry on Sepolia); the creator's Hedera payout account is read live
   from its `bajigur.hedera` text record.
+- Anyone can **claim a name and publish a prompt**: Bajigur pays the Sepolia gas
+  and registers the name to the user's own wallet, and a published prompt is
+  priced, registered onchain, and paid straight to its author.
 
 Built for [ETHGlobal ETHOnline 2026](https://ethglobal.com/events/ethonline2026),
 targeting the **Hedera**, **Privy**, and **ENS** tracks (plus a Bazantic
@@ -35,7 +38,7 @@ gateway). Design notes:
 | HCS settlement audit topic | [0.0.10462113](https://hashscan.io/testnet/topic/0.0.10462113) |
 | ENSv2 name (Sepolia) | `bajigur.eth`, owner `0xE610…2bAa`, resolver [`0x7f38…87f6`](https://sepolia.etherscan.io/address/0x7f381419050525025bBB6811CF5821E0615487f6), subregistry [`0x9673…461c`](https://sepolia.etherscan.io/address/0x9673702a3C850fa1c41d94C908083Fc85F59461c) |
 | ENS subnames | `kiel.bajigur.eth` (creator, `bajigur.hedera=0.0.7275085`), `axel.bajigur.eth` (creator, self-claimed by `0xE5d8…e950`, `bajigur.hedera=0.0.8291460`), `agent.bajigur.eth` (agent) |
-| `BajigurRegistrar` (Sepolia, verified) | [0x418b68e12e29901362174d36b6fda230e3250976](https://sepolia.etherscan.io/address/0x418b68e12e29901362174d36b6fda230e3250976): anyone claims one free `<name>.bajigur.eth` |
+| `BajigurRegistrar` (Sepolia, verified) | [0x418b68e12e29901362174d36b6fda230e3250976](https://sepolia.etherscan.io/address/0x418b68e12e29901362174d36b6fda230e3250976): anyone claims one free `<name>.bajigur.eth`, for themselves or through the API |
 
 Proof transactions on Hedera testnet:
 
@@ -45,6 +48,12 @@ Proof transactions on Hedera testnet:
 | Agent pays 0.2 HBAR over x402 | [0.0.9185802@1789056622.039948026](https://hashscan.io/testnet/transaction/0.0.9185802-1789056622-039948026) |
 | Privy wallet pays over x402 | [0.0.9185802@1789059182.997299836](https://hashscan.io/testnet/transaction/0.0.9185802-1789059182-997299836) |
 | Agent token only (API signs via Privy) | [0.0.9185802@1789131132.231709809](https://hashscan.io/testnet/transaction/0.0.9185802-1789131132-231709809) |
+| Buyer with an ENS name pays its creator | [0.0.7162784@1789206663.898896205](https://hashscan.io/testnet/transaction/0.0.7162784-1789206663-898896205) |
+
+A wallet that signed in with Privy claimed `claude.bajigur.eth` through the API
+in [one Sepolia transaction](https://sepolia.etherscan.io/tx/0xda2fd533ee092a1719a612d7ef3ea8aa6e4781598389453808030a8f3a952531),
+which registered the name to that wallet and wrote its Hedera account into
+`bajigur.hedera` at the same time.
 
 ## Architecture
 
@@ -60,7 +69,7 @@ Proof transactions on Hedera testnet:
 
 | Piece | Role |
 | --- | --- |
-| `apps/api` | Bun + Hono. Free catalogue and discovery; `GET /prompts/:id/unlock` is x402-gated with the prompt's own price and the creator's Hedera account as `payTo`. After settlement it writes to HCS and mints the licence. Licence holders skip the 402 by proving their wallet with a signed header. |
+| `apps/api` | Bun + Hono. Free catalogue and discovery; `GET /prompts/:id/unlock` is x402-gated with the prompt's own price and the creator's Hedera account as `payTo`. After settlement it writes to HCS and mints the licence. Licence holders skip the 402 by proving their wallet with a signed header. `POST /prompts` publishes (Postgres, plus an onchain registration), `POST /ens/claim` claims a name for the caller, and `GET /prompts/:id/buyers` shows a creator who bought their work. |
 | `apps/mcp` | Local stdio MCP server with an x402 client. Tools: `search_prompts`, `get_prompt` (pays if needed), `my_licenses`. Pays either with a local Hedera key or, with `BAJIGUR_AGENT_TOKEN`, through the API and the user's delegated Privy wallet. |
 | `contracts/` | Foundry. `PromptRegistry` (Hedera): OpenZeppelin ERC-1155 + AccessControl; creators register and price their prompts, the API's `MINTER_ROLE` issues licences. `BajigurRegistrar` (Sepolia): ENSv2 subname registrar for `bajigur.eth`. `RegisterAgent` registers the service on ERC-8004. |
 | `apps/web`, `apps/landingpage` | Next.js. Privy sign-in, catalogue, purchases, licences. |
@@ -126,7 +135,7 @@ Requires [Bun](https://bun.sh) >= 1.3 and, for the contracts,
 | Hedera — AI & Agentic Payments | Live x402 service settled by Blocky402; MCP client completes real paid requests. Extras: per-prompt pricing, USDC (HTS) and HBAR in the settlement path, HCS audit trail, discovery directory, ERC-8004 agent 111. |
 | Bazantic — Recipes | Live gateway `tuguge4rzbcsvgrevhkkjf43em` (https://tuguge4rzbcsvgrevhkkjf43em.bazgateway.com, MCP at `/mcp`) over this API's OpenAPI; catalogue free, unlock $0.10; published Recipe **`design-prompt-finder`** (source: [`docs/bazantic/recipe.json`](docs/bazantic/recipe.json)). |
 | Privy — Financial Flow, B2B | Users delegate their Privy embedded wallet to Bajigur's signer (a Privy key quorum); the API onboards it on Hedera, funds it, and signs x402 payments through Privy `secp256k1_sign` only for transfers that pass per-token caps (proof: `0.0.9185802@1789131132.231709809`, paid with an agent token and no local key). One wallet, many capped agent tokens is the B2B story. |
-| ENS — Best Use of ENSv2 | `bajigur.eth` with its own ENSv2 subregistry on Sepolia and a `BajigurRegistrar` with our rules (one free name per wallet, own resolver, 10 years). Creators (`kiel.`, `axel.`) and agents (`agent.`) are subnames they own; the API resolves each creator's Hedera payout from its `bajigur.hedera` text record at 402 time and accepts names in `/licenses/:name`. Nothing hardcoded: change the record, the payout changes. |
+| ENS — Best Use of ENSv2 | `bajigur.eth` with its own ENSv2 subregistry on Sepolia and a `BajigurRegistrar` with our rules (one free name per wallet, own resolver, 10 years). Creators (`kiel.`, `axel.`) and agents (`agent.`) are subnames they own; the API resolves each creator's Hedera payout from its `bajigur.hedera` text record at 402 time and accepts names in `/licenses/:name`. Nothing hardcoded: change the record, the payout changes. A user who has never held ETH claims a name from the profile: `claimFor` registers it to their own wallet and writes their Hedera account into `bajigur.hedera` in the same transaction, and we pay the gas (proof: `claude.bajigur.eth`). The name then identifies them as a publisher and as a buyer. |
 
 ## Layout
 
