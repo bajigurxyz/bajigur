@@ -94,7 +94,7 @@ export async function recoverPublicKey(signer: Signer, walletId: string, address
 export function privyLinkWallet(): AgentOptions["linkWallet"] {
   const appId = process.env.PRIVY_APP_ID ?? process.env.NEXT_PUBLIC_PRIVY_APP_ID;
   const appSecret = process.env.PRIVY_APP_SECRET;
-  const verificationKey = process.env.PRIVY_VERIFICATION_KEY;
+  const verificationKey = process.env.PRIVY_VERIFICATION_KEY?.replace(/\\n/g, "\n");
   if (!appId || !appSecret || !verificationKey) return undefined;
   return async (token) => {
     const { user_id } = await verifyAccessToken({
