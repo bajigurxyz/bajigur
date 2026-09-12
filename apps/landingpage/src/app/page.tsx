@@ -78,12 +78,11 @@ export default function Home() {
           </h1>
 
           <p
-            className="animate-fade-in-up mx-auto mb-6 max-w-2xl px-2 text-base text-gray-600 sm:mb-8 sm:text-lg md:text-xl"
+            className="animate-fade-in-up mx-auto mb-6 max-w-3xl px-2 text-base text-gray-600 sm:mb-8 sm:text-lg md:text-xl"
             style={{ animationDelay: "0.4s", opacity: 0 }}
           >
-            Bajigur is a marketplace of motion and web design prompts where one x402 request buys
-            one prompt, for humans in the browser and autonomous agents in Claude Desktop, MCP, and
-            the CLI.
+            Buy one design prompt for a few cents, or let your AI buy it for you. Paid on Hedera,
+            wallet by Privy, names by ENS, ratings on 8004scan.
           </p>
 
           <Link
