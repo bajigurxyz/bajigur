@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import Nav from "@/components/Nav";
+import PromptPreview from "@/components/previews";
 import UnlockButton from "@/components/UnlockButton";
 import { ApiError, fetchPrompt, formatHbar, formatUsd, type Prompt } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
@@ -86,6 +87,7 @@ export default function PromptDetailPage({ params }: PageProps<"/prompts/[id]">)
                 {load.prompt.title}
               </h1>
               <p className="text-base leading-relaxed text-gray-600">{load.prompt.preview}</p>
+              <PromptPreview id={load.prompt.id} className="h-40" />
               <ul className="flex flex-wrap gap-1.5">
                 {load.prompt.tags.map((tag) => (
                   <li
