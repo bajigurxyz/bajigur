@@ -21,8 +21,6 @@ import CopyButton from "@/components/CopyButton";
  * named states and aria-live region.
  */
 
-const REPO = "https://github.com/bajigurxyz/bajigur.git";
-const API = "https://api.bajigur.xyz";
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
 const MCP_URL = `${(process.env.NEXT_PUBLIC_MCP_URL ?? "http://localhost:3004").replace(/\/+$/, "")}/mcp`;
 
@@ -68,42 +66,17 @@ claude mcp add --transport http bajigur ${MCP_URL} \\
     id: "claude-desktop",
     label: "Claude Desktop",
     intro:
-      "Custom connectors take a URL but not a custom header yet, so the hosted endpoint is browse-only here. To buy, point Desktop at the server over stdio.",
-    snippet: `# Browse: Settings -> Connectors -> Add custom connector
+      "Custom connectors take a URL and nothing else, which is all this needs. Sign in when it asks and buying works too.",
+    snippet: `# Settings -> Connectors -> Add custom connector
 ${MCP_URL}
 
-# Buy: claude_desktop_config.json, token from ${APP_URL}/connect
-{
-  "mcpServers": {
-    "bajigur": {
-      "command": "bunx",
-      "args": ["--bun", "github:bajigurxyz/bajigur/apps/mcp"],
-      "env": {
-        "BAJIGUR_API_URL": "${API}",
-        "BAJIGUR_AGENT_TOKEN": "YOUR_AGENT_TOKEN"
-      }
-    }
-  }
-}`,
+# That is the whole setup. The first time your agent tries to buy, the
+# server answers 401 and names its authorization server, so Desktop opens
+# the browser and you sign in with the same email you use on Bajigur.
+#
+# Prefer to paste a token instead? Get one at ${APP_URL}/connect and use
+# the mcp.json tab, which does take a header.`,
     note: "You still hold no private key: Bajigur signs each payment with the Privy wallet you delegated, never above the token's cap, and revoking the delegation kills the token.",
-  },
-  {
-    id: "self-host",
-    label: "Run it yourself",
-    intro: "Own the endpoint, or pay from your own Hedera account instead of a delegated wallet.",
-    snippet: `git clone ${REPO} && cd bajigur
-bun install
-
-# Serve the same remote endpoint on :3004
-bun run dev --filter=@bajigur/mcp
-
-# Or pay from your own account: an ECDSA testnet account from
-# https://portal.hedera.com with testnet USDC from https://faucet.circle.com.
-# No HBAR for gas: the facilitator pays the Hedera fee.
-cp .env.example .env
-bun run hedera:associate
-bun run buy marquee-logos`,
-    note: `Open ${MCP_URL.replace("/mcp", "")} in a browser for the full text version of these instructions.`,
   },
 ];
 

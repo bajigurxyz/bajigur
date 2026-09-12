@@ -72,8 +72,10 @@ revoking the delegation in Privy kills the token with it.
       }
     }
 
-  Claude Desktop: custom connectors do not take a custom header today. Use the
-  stdio server instead — see section 4.
+  Claude Desktop: custom connectors take no custom header, so add the URL from
+  section 1 and sign in when it asks. This server advertises its authorization
+  server (RFC 9728) and answers 401 the first time an agent tries to buy, which
+  is the signal a client needs to open the browser flow. Nothing to clone.
 
 
 3. TOOLS
@@ -88,29 +90,5 @@ revoking the delegation in Privy kills the token with it.
 Try: "search bajigur for a marquee prompt, then buy it"
 
 
-4. RUN IT YOURSELF (stdio, or with your own Hedera key)
--------------------------------------------------------
-  git clone https://github.com/bajigurxyz/bajigur.git && cd bajigur
-  bun install
-
-  claude_desktop_config.json:
-    {
-      "mcpServers": {
-        "bajigur": {
-          "command": "bun",
-          "args": ["$(pwd)/apps/mcp/src/index.ts"],
-          "env": {
-            "BAJIGUR_API_URL": "https://api.bajigur.xyz",
-            "BAJIGUR_AGENT_TOKEN": "YOUR_AGENT_TOKEN"
-          }
-        }
-      }
-    }
-
-  To pay from your own Hedera account instead of a delegated wallet, drop
-  BAJIGUR_AGENT_TOKEN and set HEDERA_OPERATOR_ID and HEDERA_OPERATOR_KEY. Get a
-  testnet account at https://portal.hedera.com and testnet USDC at
-  https://faucet.circle.com, then run \`bun run hedera:associate\` once. No HBAR
-  for gas is needed — the facilitator pays the Hedera fee.
 `;
 }

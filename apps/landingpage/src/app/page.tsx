@@ -4,8 +4,10 @@ import Link from "next/link";
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
 
 import AgentOnboarding from "@/components/AgentOnboarding";
+import ChatDemo from "@/components/ChatDemo";
 import Footer from "@/components/Footer";
 import Nav from "@/components/Nav";
+import SiteFooter from "@/components/SiteFooter";
 
 const VIDEO_SRC = "/media/hero.mp4";
 
@@ -97,6 +99,8 @@ export default function Home() {
       </section>
 
       <AgentOnboarding />
+      <ChatDemo />
+      <SiteFooter />
     </div>
   );
 }

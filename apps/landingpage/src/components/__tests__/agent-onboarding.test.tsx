@@ -15,15 +15,13 @@ const MARKERS: Record<string, string> = {
   "claude-code": "claude mcp add --transport http",
   "mcp-json": '"type": "http"',
   "claude-desktop": "Add custom connector",
-  "self-host": "git clone",
 };
 
-/** The only hosts allowed to appear: the repo, the live API, and the two faucets. */
+/** The only hosts allowed to appear. No repository: nothing here is cloned. */
 // The deployment now lives under one domain, and localhost stays only because
 // the snippets fall back to it when the env vars are absent, which is what a
 // local `bun run dev` sees.
 const ALLOWED_HOSTS = [
-  "https://github.com/bajigurxyz/bajigur.git",
   "https://api.bajigur.xyz",
   "https://app.bajigur.xyz",
   "https://mcp.bajigur.xyz",
@@ -32,6 +30,21 @@ const ALLOWED_HOSTS = [
   "http://localhost:3000",
   "http://localhost:3004",
 ];
+
+describe("nobody is told to clone", () => {
+  it("offers no setup that starts by fetching the repository", () => {
+    // The server is hosted. An agent asked to set Bajigur up reads whatever it
+    // finds and follows it literally, and a clone is a wrong turn it cannot
+    // recover from on its own: it ends up running a second copy of a server
+    // that is already running, with none of the credentials.
+    for (const target of ONBOARDING_TARGETS) {
+      const text = `${target.intro}\n${target.snippet}\n${target.note}`;
+      expect(text).not.toContain("git clone");
+      expect(text).not.toContain("github:");
+      expect(text).not.toContain("bun install");
+    }
+  });
+});
 
 describe("target honesty", () => {
   it("covers every marker and keeps ids in sync", () => {
