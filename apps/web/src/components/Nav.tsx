@@ -1,9 +1,12 @@
 "use client";
 
+import gsap from "gsap";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import NavLinks, { isActive, NAV_LINKS } from "@/components/NavLinks";
 import WalletButton from "@/components/WalletButton";
 import { useOnboarding } from "@/lib/useOnboarding";
 
@@ -20,15 +23,42 @@ const LANDING_URL = (process.env.NEXT_PUBLIC_LANDING_URL ?? "http://localhost:30
   "",
 );
 
-const NAV_LINKS: { label: string; href: string }[] = [
-  { label: "Marketplace", href: "/prompts" },
-  { label: "My prompts", href: "/my-prompts" },
-  { label: "Profile", href: "/profile" },
-];
-
 export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const onboarding = useOnboarding();
+  const pathname = usePathname();
+  const bar = useRef<HTMLElement>(null);
+
+  /**
+   * Depth on scroll, and none at the top.
+   *
+   * A sticky bar with a permanent shadow floats over a page it is not yet
+   * covering, which reads as a mistake. The shadow is what says "there is
+   * content underneath me", so it arrives only once there is.
+   */
+  useEffect(() => {
+    const element = bar.current;
+    if (!element) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let lifted: boolean | undefined;
+
+    const onScroll = () => {
+      const next = window.scrollY > 8;
+      if (next === lifted) return;
+      lifted = next;
+      gsap.to(element, {
+        boxShadow: next ? "0 1px 24px rgba(0,0,0,0.07)" : "0 1px 0 rgba(0,0,0,0)",
+        backgroundColor: next ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.7)",
+        duration: reduced ? 0 : 0.3,
+        ease: "power2.out",
+        overwrite: true,
+      });
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <>
@@ -37,7 +67,7 @@ export default function Nav() {
         leave it. Translucent with a blur so cards passing underneath read as
         passing underneath rather than colliding with it.
       */}
-      <nav className="sticky top-0 z-30 border-b border-gray-100 bg-white/80 backdrop-blur-md">
+      <nav ref={bar} className="sticky top-0 z-30 border-b border-gray-100/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
           <a href={LANDING_URL} className="flex items-center">
             <Image
@@ -50,17 +80,7 @@ export default function Nav() {
             />
           </a>
 
-          <div className="hidden gap-8 md:flex">
-            {NAV_LINKS.map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                className="flex items-center gap-1 text-sm text-gray-700 transition-colors hover:text-black"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
+          <NavLinks />
 
           <div className="hidden items-center gap-4 md:flex">
             {onboarding.phase === "incomplete" && (
@@ -93,7 +113,12 @@ export default function Nav() {
                   key={label}
                   href={href}
                   onClick={() => setMenuOpen(false)}
-                  className="text-left text-sm text-gray-700 transition-colors hover:text-black"
+                  aria-current={isActive(pathname, href) ? "page" : undefined}
+                  className={`rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+                    isActive(pathname, href)
+                      ? "bg-black/[0.06] font-medium text-black"
+                      : "text-gray-600 hover:text-black"
+                  }`}
                 >
                   {label}
                 </Link>

@@ -107,6 +107,22 @@ Hedera SDK out of the client bundle.
   sent to the address, so `/profile` reads the mirror node directly and shows
   activation steps until then.
 
+## Navigation
+
+`NavLinks` marks the page you are on twice: `aria-current="page"` for assistive
+tech, and a pill that slides between items on a GSAP tween. One pill that moves
+rather than three that fade, because the movement is what says where you came
+from. Its position is measured from the DOM rather than calculated, so a font
+that loads late cannot leave it sized for the fallback, and the first placement
+jumps rather than animating in from x=0.
+
+`isActive` treats `/prompts/<id>` as `/prompts` but refuses a bare prefix, or
+`/my-prompts` would light the marketplace too. `nav-links.test.tsx` holds both
+halves of that.
+
+The bar itself gains its shadow on scroll and has none at the top: a sticky bar
+with a permanent shadow floats over a page it is not yet covering.
+
 ## Tests
 
 `bun run test` → `vitest run`, jsdom, `@` → `./src`. Vitest globals are off:
