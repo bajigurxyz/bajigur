@@ -1,12 +1,10 @@
 "use client";
 
-import { useDelegatedActions, usePrivy, useSigners } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { useEmbeddedWallet } from "@/lib/useEmbeddedWallet";
-
-const SIGNER_ID = process.env.NEXT_PUBLIC_PRIVY_SIGNER_ID;
+import { SIGNER_ID, useWalletAccess } from "@/lib/useWalletAccess";
 
 type Step = "idle" | "working" | "error";
 
@@ -31,9 +29,7 @@ export default function AuthorizePanel({
   state?: string;
 }) {
   const { ready, authenticated, login, getAccessToken, user } = usePrivy();
-  const wallet = useEmbeddedWallet();
-  const { delegateWallet } = useDelegatedActions();
-  const { addSigners } = useSigners();
+  const access = useWalletAccess();
   const [step, setStep] = useState<Step>("idle");
   const [message, setMessage] = useState("");
 
@@ -44,19 +40,7 @@ export default function AuthorizePanel({
     setStep("working");
     setMessage("");
     try {
-      let address = wallet.address;
-      if (!address) {
-        await wallet.create();
-        address = wallet.address;
-        if (!address) throw new Error("Could not create a wallet for you.");
-      }
-      const delegated = user?.linkedAccounts.some(
-        (account) => account.type === "wallet" && "delegated" in account && account.delegated,
-      );
-      if (!delegated) {
-        await delegateWallet({ address, chainType: "ethereum" });
-        if (SIGNER_ID) await addSigners({ address, signers: [{ signerId: SIGNER_ID }] });
-      }
+      await access.grant();
       const privyAccessToken = await getAccessToken();
       const res = await fetch("/api/oauth/authorize", {
         method: "POST",
@@ -101,6 +85,16 @@ export default function AuthorizePanel({
                 An MCP client wants to buy prompts from your Bajigur wallet.
               </p>
             </div>
+
+            {!SIGNER_ID && (
+              <p
+                role="alert"
+                className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
+              >
+                Payments are not configured on this deployment: NEXT_PUBLIC_PRIVY_SIGNER_ID is
+                missing.
+              </p>
+            )}
 
             <ul className="space-y-1.5 rounded-2xl border border-gray-200 p-5 text-sm text-gray-600">
               <li>It can search the catalogue and read prompts you own.</li>

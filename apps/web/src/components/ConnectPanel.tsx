@@ -1,22 +1,15 @@
 "use client";
 
-import { useDelegatedActions, usePrivy, useSigners } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import CopyButton from "@/components/CopyButton";
 import WalletButton from "@/components/WalletButton";
 import { API_BASE } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
-import { useEmbeddedWallet } from "@/lib/useEmbeddedWallet";
+import { useWalletAccess } from "@/lib/useWalletAccess";
 
-/**
- * Optional: when set, the wallet is also granted to Bajigur's Privy key quorum
- * alongside the delegation. apps/api only requires `delegated`, so this is an
- * addition, not a precondition — a missing id must not block the flow.
- */
-const SIGNER_ID = process.env.NEXT_PUBLIC_PRIVY_SIGNER_ID;
-
-type Step = "idle" | "delegating" | "linking" | "error";
+type Step = "idle" | "granting" | "linking" | "error";
 
 function claudeConfig(token: string) {
   return `{
@@ -34,46 +27,26 @@ function claudeConfig(token: string) {
 }
 
 /**
- * The three states between signing in and an agent that can spend:
- * signed out, signed in but not delegated, and linked.
+ * The three states between signing in and an agent that can spend: signed out,
+ * signed in without access granted, and linked.
  *
- * Delegation is the part that deserves the explaining — the user is granting a
- * service the ability to move their money — so the caps and the revocation
- * path are stated on the control itself, before they agree, not afterwards.
+ * Granting access is the part that deserves explaining, since the user is
+ * letting a service move their money, so the caps and the revocation path are
+ * stated on the control itself, before they agree.
  */
 export default function ConnectPanel() {
-  const { ready, authenticated, getAccessToken, user } = usePrivy();
-  const wallet = useEmbeddedWallet();
-  const { delegateWallet } = useDelegatedActions();
-  const { addSigners } = useSigners();
+  const { ready, authenticated, getAccessToken } = usePrivy();
+  const access = useWalletAccess();
   const { state, refresh } = useAgent();
   const [step, setStep] = useState<Step>("idle");
   const [message, setMessage] = useState("");
   const [token, setToken] = useState<string | null>(null);
 
-  const delegated = user?.linkedAccounts.some(
-    (a) => a.type === "wallet" && "delegated" in a && a.delegated,
-  );
-
   const connect = async () => {
-    if (!wallet.address) {
-      // createOnLogin only fires on a fresh login, so anyone who signed in
-      // before it was configured has no wallet. Make one rather than telling
-      // them to sign out and back in.
-      await wallet.create();
-      if (!wallet.address) {
-        setStep("error");
-        setMessage("Could not create a wallet. Try again, or sign out and back in.");
-        return;
-      }
-    }
+    setStep("granting");
+    setMessage("");
     try {
-      if (!delegated) {
-        setStep("delegating");
-        await delegateWallet({ address: wallet.address, chainType: "ethereum" });
-        if (SIGNER_ID)
-          await addSigners({ address: wallet.address, signers: [{ signerId: SIGNER_ID }] });
-      }
+      await access.grant();
       setStep("linking");
       const privyAccessToken = await getAccessToken();
       if (!privyAccessToken) throw new Error("Privy returned no access token");
@@ -123,7 +96,7 @@ export default function ConnectPanel() {
           <div>
             <dt className="text-xs text-gray-500">Wallet</dt>
             <dd className="font-mono text-xs break-all text-black">
-              {wallet?.address ?? "Not set"}
+              {access.address ?? "Not set"}
             </dd>
           </div>
           <div>
@@ -173,6 +146,15 @@ export default function ConnectPanel() {
 
   return (
     <div className="space-y-4">
+      {!access.configured && (
+        <p
+          role="alert"
+          className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
+        >
+          Payments are not configured on this deployment: NEXT_PUBLIC_PRIVY_SIGNER_ID is missing.
+          Create a key quorum in the Privy dashboard under Authorization keys and set its id.
+        </p>
+      )}
       <ul className="space-y-1.5 text-sm text-gray-600">
         <li>Bajigur signs payments for you, so an agent can buy without asking every time.</li>
         <li>Only Bajigur creators can be paid, and never more than the cap per payment.</li>
@@ -181,17 +163,17 @@ export default function ConnectPanel() {
       <button
         type="button"
         onClick={connect}
-        disabled={step === "delegating" || step === "linking"}
+        disabled={step === "granting" || step === "linking"}
         className="inline-flex items-center gap-2 rounded-full bg-black px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60"
       >
-        {(step === "delegating" || step === "linking") && (
+        {(step === "granting" || step === "linking") && (
           <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
         )}
-        {step === "delegating"
+        {step === "granting"
           ? "Waiting for your approval…"
           : step === "linking"
             ? "Setting up your Hedera account…"
-            : "Delegate my wallet"}
+            : "Allow payments"}
       </button>
       {step === "linking" && (
         <p role="status" className="text-xs text-gray-500">
