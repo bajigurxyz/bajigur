@@ -51,7 +51,7 @@ export default function PromptDetailPage({ params }: PageProps<"/prompts/[id]">)
           href="/prompts"
           className="mt-6 inline-block text-sm text-gray-500 transition-colors hover:text-black"
         >
-          ← Back to the gallery
+          ← Back to the marketplace
         </Link>
 
         {load.phase === "pending" && (

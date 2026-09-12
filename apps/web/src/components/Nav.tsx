@@ -12,7 +12,7 @@ import WalletButton from "@/components/WalletButton";
  *
  * The marketing site is a separate origin (apps/landingpage), so the logo
  * links out to it through NEXT_PUBLIC_LANDING_URL rather than to "/", which
- * here is only a redirect into the gallery.
+ * here is only a redirect into the marketplace.
  */
 const LANDING_URL = (process.env.NEXT_PUBLIC_LANDING_URL ?? "http://localhost:3001").replace(
   /\/+$/,
@@ -20,8 +20,8 @@ const LANDING_URL = (process.env.NEXT_PUBLIC_LANDING_URL ?? "http://localhost:30
 );
 
 const NAV_LINKS: { label: string; href: string }[] = [
-  { label: "Gallery", href: "/prompts" },
-  { label: "My licences", href: "/licenses" },
+  { label: "Marketplace", href: "/prompts" },
+  { label: "My prompts", href: "/my-prompts" },
   { label: "Profile", href: "/profile" },
 ];
 

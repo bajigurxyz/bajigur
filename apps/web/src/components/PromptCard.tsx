@@ -5,7 +5,7 @@ import { HbarMark, UsdcMark } from "@/components/TokenMark";
 import { formatHbar, formatUsd, type Prompt } from "@/lib/api";
 
 /**
- * One gallery card: title, creator, preview line, tags, price, unlock.
+ * One marketplace card: title, creator, preview line, tags, price, unlock.
  *
  * Promit's design review finding carries over: the action row is ALWAYS in the
  * layout, never revealed on hover. Hover-reveal hides actions from keyboard,

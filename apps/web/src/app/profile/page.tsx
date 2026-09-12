@@ -204,14 +204,14 @@ export default function ProfilePage() {
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-lg font-medium">Licences</h2>
+              <h2 className="text-lg font-medium">Prompts</h2>
               {licences === null ? (
                 <div aria-hidden className="h-16 animate-pulse rounded-2xl bg-gray-100" />
               ) : licences.length === 0 ? (
                 <p className="rounded-2xl border border-gray-200 p-6 text-sm text-gray-600">
                   No prompts owned yet.{" "}
                   <Link href="/prompts" className="underline hover:text-black">
-                    Browse the gallery
+                    Browse the marketplace
                   </Link>
                   .
                 </p>

@@ -38,7 +38,7 @@ export default function PromptsPage() {
 
       <main className="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
         <header className="py-8">
-          <h1 className="mb-3 text-3xl font-normal tracking-tight sm:text-4xl">Prompt gallery</h1>
+          <h1 className="mb-3 text-3xl font-normal tracking-tight sm:text-4xl">Marketplace</h1>
           <p className="max-w-2xl text-base text-gray-600">
             Every prompt here is priced by its creator and paid straight to them over x402 on
             Hedera. Buying one mints a licence to your wallet, so you only ever pay once.
@@ -54,7 +54,7 @@ export default function PromptsPage() {
         {load.phase === "pending" && (
           <div
             role="status"
-            aria-label="Loading the catalogue"
+            aria-label="Loading the marketplace"
             className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
           >
             {["a", "b", "c", "d", "e", "f"].map((key) => (
