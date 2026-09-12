@@ -1,16 +1,14 @@
 "use client";
 
 import { usePrivy } from "@privy-io/react-auth";
-import Link from "next/link";
-import { useEffect, useState } from "react";
 import ActivateAccount from "@/components/ActivateAccount";
 import AssociateUsdc from "@/components/AssociateUsdc";
 import ClaimEnsName from "@/components/ClaimEnsName";
 import CopyField from "@/components/CopyField";
+import Faucets from "@/components/Faucets";
 import Nav from "@/components/Nav";
 import { HbarMark, UsdcMark } from "@/components/TokenMark";
 import WalletButton from "@/components/WalletButton";
-import { fetchLicenses, type Prompt } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
 import { useEmbeddedWallet } from "@/lib/useEmbeddedWallet";
 import { useHederaAccount } from "@/lib/useHederaAccount";
@@ -30,7 +28,6 @@ export default function ProfilePage() {
   const wallet = useEmbeddedWallet();
   const { state: agent, refresh: refreshAgent } = useAgent();
   const linked = agent.phase === "linked";
-  const [licences, setLicences] = useState<Prompt[] | null>(null);
 
   // Two sources, because they become available at different times: the agent
   // token knows the account once payments are set up, and the mirror node knows
@@ -44,21 +41,6 @@ export default function ProfilePage() {
   const hbar = me?.hbar ?? onChain?.hbar;
   const usdc = me?.usdc ?? onChain?.usdc;
   const needsUsdc = me?.exists === true && me.associated === false;
-
-  useEffect(() => {
-    if (!account) return;
-    let cancelled = false;
-    fetchLicenses(account)
-      .then((prompts) => {
-        if (!cancelled) setLicences(prompts);
-      })
-      .catch(() => {
-        if (!cancelled) setLicences([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [account]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -167,21 +149,6 @@ export default function ProfilePage() {
                   </div>
                 </dl>
               )}
-
-              {account && (
-                <p className="text-xs text-gray-500">
-                  Running low? Circle&apos;s faucet gives 20 testnet USDC every two hours at{" "}
-                  <a
-                    href="https://faucet.circle.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline hover:text-black"
-                  >
-                    faucet.circle.com
-                  </a>
-                  . Either address works: they are the same account.
-                </p>
-              )}
             </section>
 
             <section className="space-y-3">
@@ -190,32 +157,8 @@ export default function ProfilePage() {
             </section>
 
             <section className="space-y-3">
-              <h2 className="text-lg font-medium">Prompts</h2>
-              {licences === null ? (
-                <div aria-hidden className="h-16 animate-pulse rounded-2xl bg-gray-100" />
-              ) : licences.length === 0 ? (
-                <p className="rounded-2xl border border-gray-200 p-6 text-sm text-gray-600">
-                  No prompts owned yet.{" "}
-                  <Link href="/prompts" className="underline hover:text-black">
-                    Browse the marketplace
-                  </Link>
-                  .
-                </p>
-              ) : (
-                <ul className="divide-y divide-gray-200 rounded-2xl border border-gray-200">
-                  {licences.map((prompt) => (
-                    <li key={prompt.id} className="flex items-center justify-between gap-3 p-4">
-                      <Link
-                        href={`/prompts/${prompt.id}`}
-                        className="text-sm font-medium text-black hover:underline"
-                      >
-                        {prompt.title}
-                      </Link>
-                      <span className="font-mono text-xs text-gray-500">{prompt.creator}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <h2 className="text-lg font-medium">Faucets</h2>
+              <Faucets />
             </section>
           </div>
         )}

@@ -47,9 +47,13 @@ export function useWalletAccess() {
     try {
       await addSigners({ address, signers: [{ signerId: SIGNER_ID }] });
     } catch (err) {
-      // Already granted is indistinguishable from a real failure here, and
-      // linking below settles it either way.
-      console.warn("addSigners did not complete:", err);
+      // Granting twice is harmless and must not block, but anything else is
+      // the real reason payments will not work, so it has to be visible
+      // rather than buried in a console warning.
+      const message = err instanceof Error ? err.message : String(err);
+      if (!/already|exists|duplicate/i.test(message)) {
+        throw new Error(`Privy refused to add Bajigur as a signer: ${message}`);
+      }
     }
     return address;
   };
