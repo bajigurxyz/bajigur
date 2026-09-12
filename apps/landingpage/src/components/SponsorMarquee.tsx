@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
-type Sponsor = { name: string; src: string; href: string };
+type Sponsor = { name: string; src: string; href: string; wordmark?: boolean };
 
 const CDN = "https://cdn.ethglobal.com/organizations";
 
@@ -14,13 +14,19 @@ const CDN = "https://cdn.ethglobal.com/organizations";
  * people's trademarks, and a copy in our repo is a copy that goes stale the day
  * a brand is refreshed. `page.test.tsx` allows this one host and no other.
  *
- * ETHGlobal itself has no square mark there, so it falls back to its name.
+ * ETHGlobal's own wordmark comes from elsewhere, so it is the one entry that is
+ * wide rather than square.
  */
 const SPONSORS: Sponsor[] = [
   { name: "Hedera", src: `${CDN}/bdi3h/square-logo/default.png`, href: "https://hedera.com" },
   { name: "Privy", src: `${CDN}/ijybm/square-logo/default.png`, href: "https://privy.io" },
   { name: "ENS", src: `${CDN}/bw7y9/square-logo/default.png`, href: "https://ens.domains" },
-  { name: "ETHGlobal", src: "", href: "https://ethglobal.com" },
+  {
+    name: "ETHGlobal",
+    src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMG3qfEP5q3gJN7Q-ChM2TRRr61o2jVXi6CbV-sC9WVA1t66WLXCjOLgZP&s=10",
+    href: "https://ethglobal.com",
+    wordmark: true,
+  },
 ];
 
 /**
@@ -53,10 +59,20 @@ function Mark({ sponsor }: { sponsor: Sponsor }) {
         <Image
           src={sponsor.src}
           alt={sponsor.name}
-          width={140}
-          height={40}
+          width={sponsor.wordmark ? 320 : 96}
+          height={sponsor.wordmark ? 96 : 96}
           onError={() => setFailed(true)}
-          className="h-9 w-9 rounded-xl object-contain sm:h-11 sm:w-11"
+          className={
+            sponsor.wordmark
+              ? // A wide wordmark on a white plate. `multiply` is what takes the
+                // plate away: white is the identity for that blend, so the
+                // background falls through and only the mark itself darkens.
+                "h-6 w-auto mix-blend-multiply sm:h-8"
+              : // Square marks with the brand's own colour baked in. Cropping
+                // them to a circle is what removes Hedera's white corners
+                // without touching anyone's colours.
+                "h-9 w-9 rounded-full object-cover sm:h-11 sm:w-11"
+          }
         />
       )}
     </a>

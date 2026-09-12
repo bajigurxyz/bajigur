@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import AgentOnboarding from "@/components/AgentOnboarding";
 import CodeBlock from "@/components/CodeBlock";
-import Footer from "@/components/Footer";
 import Nav from "@/components/Nav";
+import SiteFooter from "@/components/SiteFooter";
 
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
 const MCP_URL = `${(process.env.NEXT_PUBLIC_MCP_URL ?? "http://localhost:3004").replace(/\/+$/, "")}/mcp`;
@@ -322,7 +322,7 @@ export default function McpDocsPage() {
         </div>
       </main>
 
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }
