@@ -16,7 +16,9 @@ import { createServer } from "./server";
  * anyone's credential, and two users hitting it pay from their own accounts.
  *
  * Without a token the catalogue still works and only buying is refused, so a
- * visitor can connect and look around before committing to anything.
+ * visitor can connect and look around before committing to anything. Refusing
+ * to buy is a 401 carrying the OAuth challenge, which is what makes the client
+ * offer to log in rather than report a failure.
  */
 
 const API = process.env.BAJIGUR_API_URL ?? "https://api-production-fe21.up.railway.app";
@@ -51,9 +53,33 @@ const protectedResourceMetadata = (origin: string) => ({
 });
 
 /** Tells the client which document explains how to authenticate here. */
-const challenge = (origin: string) => ({
-  "www-authenticate": `Bearer resource_metadata="${origin}/.well-known/oauth-protected-resource"`,
+const challenge = (origin: string, error: string) => ({
+  "www-authenticate": `Bearer resource_metadata="${origin}/.well-known/oauth-protected-resource", error="${error}"`,
 });
+
+/** Tools that spend the caller's money. Everything else is free to call. */
+const PAID_TOOLS = new Set(["get_prompt"]);
+
+/**
+ * Would this request spend money? Only a call to a paid tool does. `initialize`,
+ * `tools/list` and the read-only tools are how a visitor looks around, and they
+ * stay open so connecting does not demand a login first.
+ *
+ * The body is read from a clone, so the transport still gets to read it.
+ */
+async function spends(request: Request) {
+  if (request.method !== "POST") return false;
+  try {
+    const body = await request.clone().json();
+    const messages = Array.isArray(body) ? body : [body];
+    return messages.some(
+      (message) => message?.method === "tools/call" && PAID_TOOLS.has(message?.params?.name),
+    );
+  } catch {
+    // Unparseable body: let the transport produce the protocol error.
+    return false;
+  }
+}
 
 /** A paid fetch for this request's wallet, or undefined when no usable token came with it. */
 async function walletFor(request: Request) {
@@ -79,12 +105,24 @@ async function handleMcp(request: Request) {
   const token = bearer(request);
   const connected = await walletFor(request);
 
-  // A token that does not work is not the same as no token: the first means
-  // the client should authorize again, the second means someone is browsing.
+  // 401 is the only thing that starts OAuth. An MCP client reads the metadata
+  // named in WWW-Authenticate, registers itself, opens a browser, and retries
+  // with a token. Answer 200 with an error message instead and no client ever
+  // offers to log in: the user just sees the purchase refused.
+  //
+  // A token that does not work earns the challenge on any call, because that
+  // client should authorize again. A missing token earns it only when the call
+  // would spend money, so browsing the catalogue still needs no account.
   if (token && !connected) {
     return Response.json(
       { error: "invalid_token" },
-      { status: 401, headers: { ...CORS, ...challenge(origin) } },
+      { status: 401, headers: { ...CORS, ...challenge(origin, "invalid_token") } },
+    );
+  }
+  if (!connected && (await spends(request))) {
+    return Response.json(
+      { error: "unauthorized", error_description: "Buying a prompt needs a connected wallet." },
+      { status: 401, headers: { ...CORS, ...challenge(origin, "unauthorized") } },
     );
   }
   const server = createServer(API, connected?.paid ?? NO_WALLET, fetch, connected?.account);
