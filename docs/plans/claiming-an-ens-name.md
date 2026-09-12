@@ -1,61 +1,55 @@
 # Claiming a name under bajigur.eth
 
-The profile now has the surface. It calls two endpoints `apps/api` does not
-have yet, and answers 501 until it does, so nothing is broken in the meantime.
+Status: shipped. `GET /ens/available` and `POST /ens/claim` in `apps/api`, with
+the control on the profile page in `apps/web`.
 
-Agreed with Kiel: the name is claimed from the profile, `apps/api` sends the
-Sepolia transaction, and the user stays on Hedera and never needs Sepolia ETH.
+The user stays on Hedera, never switches chain, and never needs Sepolia ETH. The
+platform sends the transaction and pays the gas; the name belongs to the user.
 
-## What the frontend calls
+## The routes
 
 ```
-GET  /ens/available?label=axel      -> { available: boolean }
-POST /ens/claim                     -> { name, hedera, transaction? }
+GET  /ens/available?label=axel   -> { available: true }
+POST /ens/claim                  -> { name, hedera, transaction }
      Authorization: Bearer <agent token>
      { "label": "axel" }
 ```
 
-`GET /agent/me` should also report `ensName` once a wallet has one, so the
-profile shows the name instead of the claim form.
+`GET /agent/me` reports `ensName` once a wallet has one.
 
-## The trap: BajigurRegistrar cannot do this
+## Why the registrar needed a second entry point
+
+`claim(label, resolver)` registers to `msg.sender`. Called by the API that would
+be the API's own wallet, and `claimed[msg.sender]` would let the API claim
+exactly one name ever. So `BajigurRegistrar` gained:
 
 ```solidity
-mapping(address owner => uint256 tokenId) public claimed;
-
-function claim(string calldata label, address resolver) external returns (uint256 tokenId) {
-    if (claimed[msg.sender] != 0) revert AlreadyClaimed(msg.sender);
-    tokenId = REGISTRY.register(label, msg.sender, ...);
+function claimFor(string calldata label, address owner, string calldata hederaAccount)
+    external returns (uint256 tokenId)
+{
+    if (msg.sender != OPERATOR) revert NotOperator(msg.sender);
+    tokenId = _claim(label, owner, address(RESOLVER));
+    RESOLVER.setText(node(label), HEDERA_KEY, hederaAccount);
+}
 ```
 
-Called by the API, that registers the name to **the API's wallet**, not the
-user's. Worse, `claimed[msg.sender]` means the API could claim exactly one name
-ever, and every later user would revert with `AlreadyClaimed`.
+One name per wallet moved from `claimed[msg.sender]` to `labelOf[owner]`, which
+is the mapping the rule always meant. That mapping doubles as the address-to-name
+index the buyer list and the reputation use.
 
-Two ways out:
+## The record is not optional
 
-1. **Skip the registrar.** The platform wallet already holds `ROLE_REGISTRAR` on
-   the subregistry, which `ens-setup.sh` uses to create `kiel.` and `agent.`.
-   Call `IPermissionedRegistry.register(label, userAddress, ...)` directly and
-   pass the user's EVM address as owner. No contract change.
-2. **Add `claimFor(label, owner, resolver)`** to `BajigurRegistrar`, keyed on
-   `owner` rather than `msg.sender`, and restricted to the API.
-
-The first needs no redeploy. The second keeps one-name-per-wallet enforced
-onchain, which the first gives up unless the API tracks it.
-
-## Do not forget the text record
-
-Registering the name is half of it. `payToOf()` resolves a creator's payout by
-reading `bajigur.hedera` off their name, and falls back to the platform account
-when it is missing. A name without that record means a creator whose buyers pay
-Bajigur instead of them.
-
-So `/ens/claim` has to set `bajigur.hedera` to the caller's Hedera account in
-the same flow, the way `ens-setup.sh` does for the seed names.
+`payToOf` resolves a creator's payout from the `bajigur.hedera` record on their
+name. A name registered without that record is a creator whose buyers pay
+Bajigur instead of them, so `claimFor` writes it in the same transaction as the
+registration: if the record write reverts, the registration goes with it.
 
 ## Validation
 
-`src/lib/ens.ts` mirrors `isValidLabel` (3 to 32 characters of `[a-z0-9-]`, no
-leading or trailing hyphen) so a bad label is refused before it costs a round
-trip. That is a convenience, not the check: the contract still enforces it.
+`isValidLabel` is three to thirty-two characters of `[a-z0-9-]` with no leading
+or trailing hyphen, enforced in `apps/api/src/ens.ts` before a transaction is
+built and again in the contract. `apps/web/src/lib/ens.ts` mirrors it for the
+form. `/ens/available` refuses an invalid label with 400 and reports a taken one
+through the registry's own `getStatus`.
+
+Deployed: `0x418b68e12e29901362174d36b6fda230e3250976` on Sepolia, verified.

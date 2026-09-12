@@ -1,15 +1,13 @@
 # Deploying
 
-Four services. Two already run on Railway; the two Next apps are not deployed
-yet, which is why the MCP server still advertises `http://localhost:3000` as its
-authorization server and why OAuth cannot work for anyone but us.
+Four services, all live, each on its own subdomain of `bajigur.xyz`.
 
 | Service | Where | Status |
 | --- | --- | --- |
 | `apps/api` | Railway | live, `api.bajigur.xyz` |
 | `apps/mcp` | Railway | live, `mcp.bajigur.xyz` |
-| `apps/landingpage` | Vercel | not deployed |
-| `apps/web` | Vercel | not deployed |
+| `apps/landingpage` | Vercel | live, `bajigur.xyz` |
+| `apps/web` | Vercel | live, `app.bajigur.xyz` |
 
 ## Vercel, one project per app
 

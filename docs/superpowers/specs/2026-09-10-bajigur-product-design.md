@@ -1,6 +1,7 @@
 # Bajigur — product design
 
-Date: 2026-09-10. Status: agreed direction for ETHOnline 2026.
+Date: 2026-09-10. Status: built and live. This is the design it was built from;
+`docs/verify.md` checks the result against the chains.
 
 ## One line
 
