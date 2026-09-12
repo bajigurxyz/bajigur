@@ -106,6 +106,11 @@ export const openapi = (origin: string) => ({
           title: { type: "string" },
           tags: { type: "array", items: { type: "string" } },
           preview: { type: "string" },
+          previewMedia: {
+            type: "string",
+            format: "uri",
+            description: "Animated preview (webp/mp4) of the result, when available",
+          },
           priceUsd: { type: "string", example: "0.10" },
           priceHbar: { type: "string", example: "1" },
           payTo: {

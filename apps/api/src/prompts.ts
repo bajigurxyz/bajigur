@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { type Ens, hederaAccountOf } from "./ens";
 
 export type Prompt = {
@@ -10,8 +11,12 @@ export type Prompt = {
   registryId?: number;
   payTo?: string;
   creator?: string;
+  previewMedia?: string;
   body: string;
 };
+
+const catalog = (file: string) =>
+  readFileSync(new URL(`./catalog/${file}`, import.meta.url), "utf8").trim();
 
 // ponytail: in-memory catalogue seeded by the team; move to a DB when creators publish from the web app
 export const prompts: Prompt[] = [
@@ -47,6 +52,19 @@ export const prompts: Prompt[] = [
     creator: process.env.ENS_NAME ? `axel.${process.env.ENS_NAME}` : undefined,
     payTo: process.env.HEDERA_OPERATOR_ID,
     body: "Build a sticky top navigation. At scrollY 0 it is fully transparent with white text. Past 24px of scroll, transition over 300ms ease-out to background rgba(255,255,255,0.72), backdrop-filter blur(16px) saturate(160%), a 1px bottom border at rgba(0,0,0,0.08), and dark text. Keep the logo 24px tall and links 14px with 24px gaps. Under prefers-reduced-motion switch states instantly.",
+  },
+  {
+    id: "nova-ai-cinematic-landing",
+    title: "Cinematic scroll-scrubbed landing page",
+    tags: ["landing", "hero", "scroll", "video", "react", "tailwind"],
+    preview:
+      "Dark single-page site with a scroll-scrubbed video background, staggered reveal text, corner nav and pill CTAs. Vite + React + Tailwind, full component spec.",
+    previewMedia:
+      "https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/hero%20sections/animated%20(20).webp",
+    priceUsd: "0.20",
+    priceHbar: "2",
+    registryId: 5,
+    body: catalog("nova-ai-cinematic-landing.md"),
   },
   {
     id: "marquee-logos",

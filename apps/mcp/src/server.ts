@@ -9,6 +9,7 @@ type Listing = {
   title: string;
   tags: string[];
   preview: string;
+  previewMedia?: string;
   priceUsd: string;
 };
 
@@ -37,7 +38,7 @@ export function createServer(api: string, paid: Fetch, plain: Fetch = fetch, acc
     "search_prompts",
     {
       description:
-        "Search the Bajigur catalogue of motion/web design prompts. Free. Returns id, title, tags, a preview and the price in USD. Call get_prompt with an id to buy the full text.",
+        "Search the Bajigur catalogue of motion/web design prompts. Free. Returns id, title, tags, a text preview, an animated previewMedia URL when available, and the price in USD. Call get_prompt with an id to buy the full text.",
       inputSchema: {
         query: z.string().optional().describe("Keywords to match against title, tags and preview"),
       },
