@@ -3,6 +3,7 @@
 import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import ActivateAccount from "@/components/ActivateAccount";
 import CopyField from "@/components/CopyField";
 import Nav from "@/components/Nav";
 import { HbarMark, UsdcMark } from "@/components/TokenMark";
@@ -132,19 +133,8 @@ export default function ProfilePage() {
 
             <section className="space-y-3">
               <h2 className="text-lg font-medium">Balance</h2>
-              {!linked && !onChain && (
-                <div className="space-y-2 rounded-2xl border border-gray-200 p-6 text-sm text-gray-600">
-                  <p>Nothing has reached this wallet yet, so Hedera has not created its account.</p>
-                  <p>
-                    <Link href="/connect" className="underline hover:text-black">
-                      Set up payments
-                    </Link>{" "}
-                    and Bajigur funds it for you. Or send HBAR or USDC to the wallet address above
-                    from anywhere: the account is created on arrival, and no account has to exist
-                    first.
-                  </p>
-                </div>
-              )}
+              {!account && <ActivateAccount address={wallet.address} />}
+
               {linked && balances.phase === "loading" && (
                 <div aria-hidden className="h-24 animate-pulse rounded-2xl bg-gray-100" />
               )}
