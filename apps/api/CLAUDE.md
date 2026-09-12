@@ -96,6 +96,12 @@
   `x-bajigur-admin: ADMIN_KEY` lets `/agent/link` take a raw
   `{walletId, address}` for app-owned wallets (tests, demos). Privy policies
   cannot gate `secp256k1_sign`, so caps live here, not in Privy.
+- `GET /prompts/:id/buyers` is creator-gated (agent token whose account equals the
+  prompt's `payTo`) and reads `LicenseIssued` from the mirror node's contract log,
+  because the ERC-1155 balance is what grants access, so the list can never disagree
+  with who can open the prompt. A buyer's ENS name comes from `BajigurRegistrar.labelOf`,
+  so only names claimed through `/ens/claim` show one; the seed names from
+  `scripts/ens-setup.sh` predate that mapping and render as plain accounts.
 - Still to come: creator publishing from the web app.
 
 ## Layout

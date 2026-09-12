@@ -5,7 +5,7 @@ import { createApp } from "../src/app";
 process.env.X402_PAY_TO_ADDRESS = "0.0.4242";
 process.env.ENS_NAME = "bajigur.eth";
 
-import { prompts, tinybars } from "../src/prompts";
+import { payToOf, prompts, tinybars } from "../src/prompts";
 
 const usdc = (usd: string) => String(Math.round(Number(usd) * 1_000_000));
 
@@ -21,6 +21,7 @@ const facilitator: FacilitatorClient = {
   settle: async () => ({ success: true, transaction: "0.0.1234@1.0", network, payer: "0.0.1234" }),
 };
 
+import { agentTokens } from "../src/agent";
 import type { Settlement } from "../src/hcs";
 
 const settled: Settlement[] = [];
@@ -31,6 +32,14 @@ const registry = {
     issued.push([id, payer, tx]);
   },
   hasLicence: async (account: string, id: number) => holders.has(`${account}:${id}`),
+  buyers: async () => [
+    {
+      address: "0xa8f70558b1235769f99add8fe665752ca18d1f8a",
+      transactionId: "0.0.7@1.0",
+      at: "2026-09-12T08:55:18.000Z",
+    },
+  ],
+  accountOf: async () => "0.0.5555",
 };
 const identity = async (headers: Headers) => headers.get("x-hedera-account") ?? undefined;
 const records: Record<string, string> = {
@@ -222,5 +231,64 @@ describe("tinybars", () => {
     expect(tinybars("0.2")).toBe("20000000");
     expect(tinybars("0.00000001")).toBe("1");
     expect(tinybars("12.5")).toBe("1250000000");
+  });
+});
+
+describe("buyers", () => {
+  const paid = prompts.find((p) => p.registryId)!;
+
+  it("needs an agent token, and a prompt that exists", async () => {
+    expect((await app.request(`/prompts/${paid.id}/buyers`)).status).toBe(401);
+    expect((await app.request("/prompts/nope/buyers")).status).toBe(404);
+  });
+
+  it("answers the creator with the buyer's account and name", async () => {
+    const named = createApp({
+      facilitator,
+      registry,
+      ens,
+      registrar: {
+        parent: "bajigur.eth",
+        available: async () => true,
+        labelOf: async () => "buyer",
+        claim: async () => "0x0",
+      },
+      agent: {
+        secret: "s",
+        signer: { signHash: async () => new Uint8Array(65) },
+        adminKey: "admin",
+      },
+    });
+    const token = await agentTokens("s").issue({
+      sub: "u",
+      wid: "w",
+      acct: await payToOf(paid, ens),
+      pk: "02",
+      cap: "1",
+    });
+    const res = await named.request(`/prompts/${paid.id}/buyers`, {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    expect(await res.json()).toEqual([
+      {
+        address: "0xa8f70558b1235769f99add8fe665752ca18d1f8a",
+        transactionId: "0.0.7@1.0",
+        at: "2026-09-12T08:55:18.000Z",
+        account: "0.0.5555",
+        name: "buyer.bajigur.eth",
+      },
+    ]);
+
+    const other = await agentTokens("s").issue({
+      sub: "u",
+      wid: "w",
+      acct: "0.0.9999",
+      pk: "02",
+      cap: "1",
+    });
+    const denied = await named.request(`/prompts/${paid.id}/buyers`, {
+      headers: { authorization: `Bearer ${other}` },
+    });
+    expect(denied.status).toBe(403);
   });
 });

@@ -95,6 +95,39 @@ export function createApp({ agent, registrar, ...options }: AppOptions = {}) {
     return c.json({ name: `${label}.${registrar.parent}`, hedera: claims.acct, transaction });
   });
 
+  // Who bought a prompt, for its creator only: a public buyer list is a public list of
+  // who bought what. The ERC-1155 log is the source, because the balance is what actually
+  // grants access, so this can never disagree with who can open the prompt.
+  app.get("/prompts/:id/buyers", async (c) => {
+    const { registry } = options;
+    const prompt = findPrompt(c.req.param("id"));
+    if (!prompt) return c.notFound();
+    if (!registry) return c.json({ error: "licences disabled" }, 503);
+    const claims = await claimsOf?.(c.req.raw.headers);
+    if (!claims) return c.json({ error: "invalid agent token" }, 401);
+    if (claims.acct !== (await payToOf(prompt, options.ens))) {
+      return c.json({ error: "not your prompt" }, 403);
+    }
+    if (!prompt.registryId) return c.json([]);
+
+    const name = nameOf(registrar);
+    return c.json(
+      await Promise.all(
+        (await registry.buyers(prompt.registryId)).map(async (buyer) => {
+          const [account, ensName] = await Promise.all([
+            registry.accountOf(buyer.address),
+            name?.(buyer.address).catch(() => null) ?? null,
+          ]);
+          return {
+            ...buyer,
+            ...(account ? { account } : {}),
+            ...(ensName ? { name: ensName } : {}),
+          };
+        }),
+      ),
+    );
+  });
+
   app.get("/licenses/:account", async (c) => {
     const { registry } = options;
     if (!registry) return c.json({ error: "licences disabled" }, 503);

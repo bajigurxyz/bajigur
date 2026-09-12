@@ -7,10 +7,15 @@ import {
   PrivateKey,
   PublicKey,
 } from "@hiero-ledger/sdk";
+import { decodeAbiParameters, keccak256, toBytes } from "viem";
+
+export type Buyer = { address: string; transactionId: string; at: string };
 
 export type Registry = {
   issue(registryId: number, payerAccount: string, transactionId: string): Promise<void>;
   hasLicence(account: string, registryId: number): Promise<boolean>;
+  buyers(registryId: number): Promise<Buyer[]>;
+  accountOf(address: string): Promise<string | undefined>;
 };
 
 export type Identity = (headers: Headers) => Promise<string | undefined>;
@@ -18,6 +23,9 @@ export type Identity = (headers: Headers) => Promise<string | undefined>;
 const network = () => process.env.HEDERA_NETWORK ?? "testnet";
 const mirror = () => `https://${network()}.mirrornode.hedera.com/api/v1`;
 const BALANCE_OF = "0x00fdd58e";
+const LICENSE_ISSUED = keccak256(toBytes("LicenseIssued(uint256,address,string)"));
+// Consensus timestamps are `seconds.nanos`.
+const isoOf = (timestamp: string) => new Date(Number(timestamp.split(".")[0]) * 1000).toISOString();
 const pad = (hex: string) => hex.replace(/^0x/, "").padStart(64, "0");
 
 async function account(id: string) {
@@ -43,6 +51,34 @@ export function contractRegistry(): Registry | undefined {
   );
 
   return {
+    // ponytail: the mirror node only filters by topic inside a 7-day window, so read this
+    // contract's log and filter here. Revisit past a few hundred licences.
+    async buyers(registryId) {
+      const res = await fetch(`${mirror()}/contracts/${address}/results/logs?order=asc&limit=100`);
+      if (!res.ok) return [];
+      const { logs = [] } = (await res.json()) as {
+        logs?: { topics: string[]; data: string; timestamp: string }[];
+      };
+      return logs
+        .filter(
+          (log) =>
+            log.topics[0]?.toLowerCase() === LICENSE_ISSUED &&
+            log.topics[1] !== undefined &&
+            BigInt(log.topics[1]) === BigInt(registryId),
+        )
+        .map((log) => ({
+          address: `0x${(log.topics[2] ?? "").slice(-40)}`,
+          transactionId: decodeAbiParameters([{ type: "string" }], log.data as `0x${string}`)[0],
+          at: isoOf(log.timestamp),
+        }));
+    },
+
+    async accountOf(evmAddress) {
+      const res = await fetch(`${mirror()}/accounts/${evmAddress}`);
+      if (!res.ok) return undefined;
+      return ((await res.json()) as { account?: string }).account;
+    },
+
     async issue(registryId, payerAccount, transactionId) {
       const { evm_address } = await account(payerAccount);
       await new ContractExecuteTransaction()

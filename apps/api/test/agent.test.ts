@@ -49,7 +49,12 @@ const holders = new Set<string>();
 const associated: string[] = [];
 const app = createApp({
   facilitator,
-  registry: { issue: async () => {}, hasLicence: async (a, id) => holders.has(`${a}:${id}`) },
+  registry: {
+    issue: async () => {},
+    hasLicence: async (a, id) => holders.has(`${a}:${id}`),
+    buyers: async () => [],
+    accountOf: async () => undefined,
+  },
   identity: async () => undefined,
   agent: {
     secret: "test-secret",
