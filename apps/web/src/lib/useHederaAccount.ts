@@ -25,7 +25,7 @@ export function useHederaAccount(address?: string) {
   useEffect(() => {
     if (!address) return;
     let cancelled = false;
-    fetch(`/api/hedera/account?address=${encodeURIComponent(address)}`)
+    fetch(`/api/hedera/account?address=${encodeURIComponent(address)}`, { cache: "no-store" })
       .then((res) => res.json())
       .then((account: HederaAccount) => {
         if (!cancelled) setState({ phase: "ready", account });

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import Nav from "@/components/Nav";
 import PromptPreview from "@/components/PromptPreview";
+import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
 import UnlockButton from "@/components/UnlockButton";
 import { ApiError, fetchPrompt, formatHbar, formatUsd, type Prompt } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
@@ -55,11 +56,11 @@ export default function PromptDetailPage({ params }: PageProps<"/prompts/[id]">)
         </Link>
 
         {load.phase === "pending" && (
-          <div role="status" className="mt-8 space-y-4">
-            <div aria-hidden className="h-8 w-2/3 animate-pulse rounded bg-gray-100" />
-            <div aria-hidden className="h-24 animate-pulse rounded-2xl bg-gray-100" />
-            <span className="sr-only">Loading the prompt…</span>
-          </div>
+          <SkeletonRegion label="Loading the prompt…" className="mt-8 space-y-4">
+            <Skeleton className="h-8 w-2/3" />
+            <Skeleton className="h-56 w-full rounded-2xl" />
+            <Skeleton className="h-24 rounded-2xl" />
+          </SkeletonRegion>
         )}
 
         {load.phase === "missing" && (

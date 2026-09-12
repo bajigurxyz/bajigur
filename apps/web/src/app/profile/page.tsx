@@ -7,6 +7,7 @@ import ClaimEnsName from "@/components/ClaimEnsName";
 import CopyField from "@/components/CopyField";
 import Faucets from "@/components/Faucets";
 import Nav from "@/components/Nav";
+import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
 import { HbarMark, UsdcMark } from "@/components/TokenMark";
 import WalletButton from "@/components/WalletButton";
 import { useAgent } from "@/lib/useAgent";
@@ -36,6 +37,11 @@ export default function ProfilePage() {
   const onChain = chain.phase === "ready" && chain.account.exists ? chain.account : undefined;
   const me = linked ? agent.agent : undefined;
   const account = (me?.exists === false ? undefined : me?.account) ?? onChain?.account;
+  // Both sources have to have answered before the absence of an account means
+  // anything. Deciding earlier is what made this page offer to activate an
+  // account that already existed.
+  const settling =
+    agent.phase === "loading" || (wallet.address !== undefined && chain.phase === "loading");
   // The API reports balances alongside identity; the mirror lookup covers a
   // wallet that has an account but has not set up payments.
   const hbar = me?.hbar ?? onChain?.hbar;
@@ -52,6 +58,17 @@ export default function ProfilePage() {
             <p className="text-base text-gray-600">{user.email.address}</p>
           )}
         </header>
+
+        {!ready && (
+          <SkeletonRegion label="Loading your profile…" className="space-y-8">
+            {["wallet", "balance", "name"].map((key) => (
+              <div key={key} className="space-y-3">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-28 w-full rounded-2xl" />
+              </div>
+            ))}
+          </SkeletonRegion>
+        )}
 
         {ready && !authenticated && (
           <div className="space-y-4 rounded-2xl border border-gray-200 p-8 text-center">
@@ -76,15 +93,26 @@ export default function ProfilePage() {
                       : "Created for you by Privy. Send anything here and Hedera creates the account below on arrival."
                   }
                 />
-                <CopyField
-                  label="Hedera account"
-                  value={account}
-                  hint={
-                    account
-                      ? "Where payments come from. The same wallet, under its Hedera name."
-                      : "The same wallet under its Hedera name. It is created the first time something is sent to the address, which is what setting up payments does."
-                  }
-                />
+                {settling ? (
+                  <SkeletonRegion
+                    label="Looking up your Hedera account…"
+                    className="space-y-2 rounded-2xl border border-gray-200 p-5"
+                  >
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-5 w-36" />
+                    <Skeleton className="h-3 w-full" />
+                  </SkeletonRegion>
+                ) : (
+                  <CopyField
+                    label="Hedera account"
+                    value={account}
+                    hint={
+                      account
+                        ? "Where payments come from. The same wallet, under its Hedera name."
+                        : "The same wallet under its Hedera name. It is created the first time something is sent to the address, which is what setting up payments does."
+                    }
+                  />
+                )}
               </div>
               {!wallet.address && (
                 <div className="space-y-2 rounded-2xl border border-gray-200 p-5">
@@ -121,7 +149,19 @@ export default function ProfilePage() {
 
             <section className="space-y-3">
               <h2 className="text-lg font-medium">Balance</h2>
-              {!account && <ActivateAccount />}
+              {settling && (
+                <SkeletonRegion label="Reading your balance from Hedera…">
+                  <div className="grid gap-4 rounded-2xl border border-gray-200 p-5 sm:grid-cols-3">
+                    {["usdc", "hbar", "cap"].map((key) => (
+                      <div key={key} className="space-y-2">
+                        <Skeleton className="h-3 w-16" />
+                        <Skeleton className="h-6 w-24" />
+                      </div>
+                    ))}
+                  </div>
+                </SkeletonRegion>
+              )}
+              {!settling && !account && <ActivateAccount />}
 
               {account && needsUsdc && <AssociateUsdc onDone={refreshAgent} />}
 
@@ -153,7 +193,18 @@ export default function ProfilePage() {
 
             <section className="space-y-3">
               <h2 className="text-lg font-medium">Your name</h2>
-              <ClaimEnsName current={me?.ensName} account={account} onClaimed={refreshAgent} />
+              {settling ? (
+                <SkeletonRegion
+                  label="Checking whether you already have a name…"
+                  className="space-y-3 rounded-2xl border border-gray-200 p-5"
+                >
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-9 w-48" />
+                </SkeletonRegion>
+              ) : (
+                <ClaimEnsName current={me?.ensName} account={account} onClaimed={refreshAgent} />
+              )}
             </section>
 
             <section className="space-y-3">

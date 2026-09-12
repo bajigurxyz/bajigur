@@ -10,7 +10,10 @@ export type AgentState =
 
 /** One read of /api/agent/me, as a promise so callers decide what to do with it. */
 function readAgent(): Promise<AgentState> {
-  return fetch("/api/agent/me")
+  // no-store: a linked wallet and its balances change under the same URL, and
+  // a cached answer is how the profile ends up offering to activate an account
+  // that already exists.
+  return fetch("/api/agent/me", { cache: "no-store" })
     .then((res) =>
       res.ok
         ? res.json().then((agent: AgentIdentity) => ({ phase: "linked", agent }) as AgentState)

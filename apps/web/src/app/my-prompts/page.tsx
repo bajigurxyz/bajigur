@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
 import PromptCard from "@/components/PromptCard";
+import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
 import { fetchLicenses, fetchPrompts, type Prompt } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
 import { useEmbeddedWallet } from "@/lib/useEmbeddedWallet";
@@ -111,12 +112,14 @@ export default function MyPromptsPage() {
         )}
 
         {load.phase === "pending" && (
-          <div role="status" className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <SkeletonRegion
+            label="Loading your prompts…"
+            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          >
             {["a", "b", "c"].map((key) => (
-              <div key={key} aria-hidden className="h-48 animate-pulse rounded-2xl bg-gray-100" />
+              <Skeleton key={key} className="h-48 rounded-2xl" />
             ))}
-            <span className="sr-only">Loading your prompts…</span>
-          </div>
+          </SkeletonRegion>
         )}
 
         {load.phase === "error" && (

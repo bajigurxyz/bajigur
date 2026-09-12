@@ -4,6 +4,7 @@ import { RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import Nav from "@/components/Nav";
 import PromptCard from "@/components/PromptCard";
+import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
 import TagFilter from "@/components/TagFilter";
 import { fetchPrompts, type Prompt, tagsOf } from "@/lib/api";
 
@@ -52,16 +53,14 @@ export default function PromptsPage() {
         )}
 
         {load.phase === "pending" && (
-          <div
-            role="status"
-            aria-label="Loading the marketplace"
+          <SkeletonRegion
+            label="Loading the catalogue…"
             className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
           >
             {["a", "b", "c", "d", "e", "f"].map((key) => (
-              <div key={key} aria-hidden className="h-56 animate-pulse rounded-2xl bg-gray-100" />
+              <Skeleton key={key} className="h-56 rounded-2xl" />
             ))}
-            <span className="sr-only">Loading the catalogue…</span>
-          </div>
+          </SkeletonRegion>
         )}
 
         {load.phase === "error" && (

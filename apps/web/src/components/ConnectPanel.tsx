@@ -2,29 +2,24 @@
 
 import { usePrivy } from "@privy-io/react-auth";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CopyButton from "@/components/CopyButton";
+import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
 import WalletButton from "@/components/WalletButton";
-import { API_BASE } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
 import { useWalletAccess } from "@/lib/useWalletAccess";
 
 type Step = "idle" | "granting" | "linking" | "error";
 
-function claudeConfig(token: string) {
-  return `{
-  "mcpServers": {
-    "bajigur": {
-      "command": "bun",
-      "args": ["/absolute/path/to/bajigur/apps/mcp/src/index.ts"],
-      "env": {
-        "BAJIGUR_API_URL": "${API_BASE}",
-        "BAJIGUR_AGENT_TOKEN": "${token}"
-      }
-    }
-  }
-}`;
-}
+const MCP_URL = `${(process.env.NEXT_PUBLIC_MCP_URL ?? "http://localhost:3004").replace(/\/+$/, "")}/mcp`;
+
+/**
+ * One line, because that is the whole setup. The server is hosted, so there is
+ * nothing to clone, no runtime to install, and no absolute path to correct:
+ * the URL is the server and the token is the wallet.
+ */
+const addCommand = (token: string) =>
+  `claude mcp add --transport http bajigur ${MCP_URL} --header "Authorization: Bearer ${token}"`;
 
 /**
  * The three states between signing in and an agent that can spend: signed out,
@@ -65,13 +60,30 @@ export default function ConnectPanel() {
     }
   };
 
-  const revealToken = async () => {
-    const res = await fetch("/api/agent/token");
-    if (!res.ok) return;
-    setToken(((await res.json()) as { token: string }).token);
-  };
+  // Fetched as soon as the wallet is linked. The command is useless without it,
+  // so a reveal step would only put a click between the user and their copy.
+  useEffect(() => {
+    if (state.phase !== "linked") return;
+    let cancelled = false;
+    fetch("/api/agent/token")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { token: string } | null) => {
+        if (!cancelled && data) setToken(data.token);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [state.phase]);
 
-  if (!ready) return <p className="text-sm text-gray-500">Loading…</p>;
+  if (!ready) {
+    return (
+      <SkeletonRegion label="Loading your wallet…" className="space-y-6">
+        <Skeleton className="h-24 w-full rounded-2xl" />
+        <Skeleton className="h-40 w-full rounded-2xl" />
+      </SkeletonRegion>
+    );
+  }
 
   if (!authenticated) {
     return (
@@ -106,34 +118,27 @@ export default function ConnectPanel() {
         </dl>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-medium">Use it from Claude Desktop</h2>
+          <h2 className="text-lg font-medium">Use it from Claude</h2>
           <p className="text-sm text-gray-600">
-            Paste this into <code className="font-mono text-xs">claude_desktop_config.json</code>,
-            restart Claude, and ask it to find and buy a prompt. Your agent pays from this wallet,
-            never above the cap, and you hold no key.
+            Run this once, then ask Claude to find and buy a prompt. Your agent pays from this
+            wallet, never above the cap, and you hold no key.
           </p>
           {token ? (
             <div className="overflow-hidden rounded-2xl bg-gray-950">
               <div className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-2.5">
-                <span className="text-xs text-gray-400">claude_desktop_config.json</span>
+                <span className="text-xs text-gray-400">Terminal</span>
                 <CopyButton
-                  text={claudeConfig(token)}
-                  label="the Claude Desktop config"
+                  text={addCommand(token)}
+                  label="the Claude setup command"
                   className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:border-white focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                 />
               </div>
-              <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed text-gray-100">
-                <code>{claudeConfig(token)}</code>
+              <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed break-all whitespace-pre-wrap text-gray-100">
+                <code>{addCommand(token)}</code>
               </pre>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={revealToken}
-              className="rounded-full border border-gray-300 px-4 py-2 text-xs font-medium text-black transition-colors hover:border-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
-            >
-              Show my agent token
-            </button>
+            <p className="text-sm text-gray-500">Loading your setup command…</p>
           )}
           <p className="text-xs text-gray-500">
             The token lets an agent spend from your wallet up to ${state.agent.cap} per payment.

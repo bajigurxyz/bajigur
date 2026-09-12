@@ -6,10 +6,10 @@ import { NextResponse } from "next/server";
 import { AGENT_COOKIE, type AgentIdentity } from "@/lib/agent";
 import { API_BASE, fetchPrompt, unlockUrl } from "@/lib/api";
 import { externalHederaSigner, transactionIdOf } from "@/lib/hedera";
+import { HBAR, spendPolicy } from "@/lib/spend";
 
 const NETWORK = process.env.HEDERA_NETWORK ?? "testnet";
 const MIRROR = `https://${NETWORK}.mirrornode.hedera.com/api/v1`;
-const HBAR = "0.0.0";
 
 /** What this account can actually spend, in each asset's atomic units. */
 async function balances(account: string) {
@@ -78,23 +78,7 @@ export async function POST(_request: Request, ctx: RouteContext<"/api/unlock/[id
 
   const client = x402Client.fromConfig({
     schemes: [{ network: "hedera:*", client: new ExactHederaScheme(signer) }],
-    // Cap at the price the catalogue advertised, so a 402 asking for more than
-    // the user was shown is refused before anything is signed.
-    spendControls: { maxAmountPerPayment: `$${prompt.priceUsd}` },
-    // Pay with something the wallet actually holds. USDC first because the
-    // price is quoted in dollars, but a wallet funded only with HBAR must not
-    // be told it cannot afford a prompt it can.
-    paymentRequirementsSelector: (_version, accepts) => {
-      const affordable = accepts.filter((a) => (held.get(a.asset) ?? 0n) >= BigInt(a.amount));
-      const pick = affordable.find((a) => a.asset !== HBAR) ?? affordable[0];
-      if (!pick) {
-        const options = accepts
-          .map((a) => `${a.amount} of ${a.asset === HBAR ? "HBAR" : a.asset}`)
-          .join(" or ");
-        throw new Error(`Not enough balance. This prompt costs ${options}.`);
-      }
-      return pick;
-    },
+    ...spendPolicy(prompt, held),
   });
 
   try {
