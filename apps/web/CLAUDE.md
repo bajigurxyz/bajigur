@@ -47,7 +47,30 @@ buyers pay us instead of the creator.
 is one request rather than one per key and a slow reply about `ax` cannot land
 after a fast reply about `axel`.
 
+A claimed name is read from the chain through `useClaimedName`, not only from
+`/agent/me`. The agent token is a cookie scoped to one origin, so reading the
+name only from there made a wallet that already owned one look like it had never
+claimed anything as soon as it was used from another host, and the app offered
+its owner a second name. Owning one is also enough to finish onboarding: a name
+cannot exist without the two steps before it.
+
 Still absent: an earnings dashboard.
+
+## Licences on a card
+
+`useLicences` reads what the wallet owns once per page, not once per card: the
+answer is the same for every card on screen, and asking per card turns a
+catalogue of twenty into twenty round trips. An owned card offers **Copy prompt**
+instead of Unlock, because the licence is onchain and permanent and offering to
+unlock it again reads as a second charge. The text is fetched on click rather
+than held in the page, so nothing paid for sits in the markup of a page anyone
+can open.
+
+`CreatorRating` shows the creator's standing from the ERC-8004 reputation
+registry as a signed total and a headcount, never as stars. `getSummary` adds
+signed feedback up, so two buyers leaving +1 and -1 land on zero and one buyer
+leaving +5 outranks five leaving +1. It is absent until somebody rates rather
+than drawn as zero, because a creator nobody has rated has not been rated badly.
 
 ## How a purchase works
 

@@ -56,6 +56,32 @@ down.**
 The section is deliberately free of entrance stagger — it sits below the fold,
 where time-based delays have already elapsed by the time anyone scrolls to it.
 
+## Below the fold
+
+`ChatDemo` types a real exchange out once, on scroll, then stops: an agent asks
+for a landing page, Bajigur quotes the creator's own price in both assets, and
+the reply carries the recording from that actual listing. Every number in it is
+what the live catalogue quotes. Bubbles are laid out from the start and only
+faded in, so the section's height never changes while it types and the page
+cannot jump under the reader. Reduced motion gets the finished transcript rather
+than a cancelled animation, which would leave it blank.
+
+`SponsorMarquee` loops the marks Bajigur is built on. Each half carries
+`min-w-full`: four marks and their gaps are narrower than a desktop screen, so
+without it the second half has not arrived by the time the first walks off and
+the right of the row sits empty. The duplicate half is `aria-hidden`, so a screen
+reader hears each sponsor once. Square marks are cropped to circles, which is
+what removes a white plate without touching anyone's brand colour; a wide
+wordmark needs a transparent source instead.
+
+`Footer` is the strip pinned to the bottom of the hero, absolutely positioned
+against the page. `SiteFooter` is the real footer. They are not interchangeable:
+rendering `Footer` on a long page floats the sponsor row over the content, which
+is exactly what happened on `/mcp`.
+
+Neither section carries entrance stagger. They sit below the fold, where
+time-based delays have already elapsed by the time anyone scrolls to them.
+
 ## MCP documentation
 
 `src/app/mcp/page.tsx` is the page people are sent to when they hear Bajigur
