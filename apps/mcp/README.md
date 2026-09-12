@@ -56,7 +56,4 @@ bun run buy nova-ai-cinematic-landing
 X402_PAY_WITH=hbar bun run buy nova-ai-cinematic-landing
 ```
 
-The Claude Agent Skills in `../../skills/` sit on top of this server. Bazantic
-Gateway and Recipes point at the same API, not at this server.
-
 Owner: Kiel.

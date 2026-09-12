@@ -171,17 +171,7 @@ curl -s -o/dev/null -w '%{http_code}\n' -X POST \
 - `BajigurRegistrar` on [Etherscan](https://sepolia.etherscan.io/address/0x418b68e12e29901362174d36b6fda230e3250976#code), verified, exact match.
 - Source in [`contracts/src`](../contracts/src), tests in [`contracts/test`](../contracts/test), including a fork test that claims a name against the real subregistry.
 
-## 10. The Bazantic gateway is a second door to the same service
-
-```bash
-curl -s https://tuguge4rzbcsvgrevhkkjf43em.bazgateway.com/prompts | jq '.[].id'
-```
-
-Same catalogue, reached through Bazantic, which charges agents on Base while we
-settle on Hedera. Its MCP endpoint is `/mcp` on the same host, and the published
-Recipe is `design-prompt-finder`.
-
-## 11. An agent can use it with no human in the loop
+## 10. An agent can use it with no human in the loop
 
 Paste `https://mcp.bajigur.xyz/mcp` into an MCP client and ask for a prompt. Or,
 from a checkout of this repository with a Hedera testnet key in `.env`:

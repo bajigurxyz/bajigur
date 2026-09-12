@@ -123,11 +123,6 @@ export function x402({ facilitator, onSettled, registry, identity, ens }: X402Op
 
   const http = new x402HTTPResourceServer(server, routes).onProtectedRequest(
     async ({ adapter, path }) => {
-      // ponytail: a shared gateway key lets Bazantic (which charges the agent on Base) unlock on the agent's behalf
-      const gatewayKey = process.env.GATEWAY_KEY;
-      if (gatewayKey && adapter.getHeader("x-bajigur-gateway-key") === gatewayKey) {
-        return { grantAccess: true };
-      }
       const prompt = promptFromPath(path);
       if (!registry || !identity || !prompt?.registryId) return;
       const headers = new Headers();

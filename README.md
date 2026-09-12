@@ -10,7 +10,7 @@ any client afterwards. Creators are **ENSv2 names** under `bajigur.eth`, and
 buyers rate them through **ERC-8004** on Hedera.
 
 Built for [ETHGlobal ETHOnline 2026](https://ethglobal.com/events/ethonline2026),
-for the **Hedera**, **Privy** and **ENS** tracks, plus a **Bazantic** gateway.
+for the **Hedera**, **Privy** and **ENS** tracks.
 
 ## Try it in two minutes
 
@@ -53,7 +53,6 @@ Every claim in this README can be checked against the chains yourself:
 | Discovery, x402 bazaar shape | https://api.bajigur.xyz/discovery/resources |
 | OpenAPI | https://api.bajigur.xyz/openapi.json |
 | Creator profile with onchain reputation | https://api.bajigur.xyz/creators/kiel.bajigur.eth |
-| Bazantic gateway | https://tuguge4rzbcsvgrevhkkjf43em.bazgateway.com/prompts, MCP at `/mcp`, Recipe `design-prompt-finder` |
 
 Onchain, all on public testnets:
 
@@ -116,12 +115,6 @@ name is then their identity as a publisher, as a buyer, and as a reputation:
 `erc8004` on the name points at their agent, and the agent's onchain metadata
 points back at the name.
 
-**Bazantic — Recipes.** A gateway over this API's OpenAPI, so an agent that pays
-on Base can reach a service that settles on Hedera. The catalogue stays free and
-unlocking is charged at $0.10. The published Recipe is `design-prompt-finder`
-([source](docs/bazantic/recipe.json)); when Bazantic calls with its gateway key
-the API grants access instead of asking for a second payment.
-
 ## How a purchase works
 
 1. An agent calls `GET /prompts/nova-ai-cinematic-landing/unlock`.
@@ -141,7 +134,6 @@ the API grants access instead of asking for a second payment.
 
 ```
   any MCP client ──▶ apps/mcp ──HTTP + x402──▶ apps/api ──▶ prompt body
-  Bazantic gateway ──────────────────────────▶   │
   apps/web (Privy) ──────────────────────────▶   │
                                                  ├─ verify / settle ─▶ Blocky402 ─▶ Hedera (HTS transfer to the creator)
                                                  ├─ after settle ────▶ HCS topic 0.0.10462113
@@ -205,7 +197,7 @@ apps/api                     Bun + Hono: x402 gateway, licences, ENS, reputation
 apps/mcp                     MCP server, x402 client, Privy signer
 packages/core, packages/tsconfig
 contracts/                   Foundry: PromptRegistry, BajigurRegistrar
-docs/                        verify.md, design spec, deployment notes, Bazantic recipe
+docs/                        verify.md, design spec, deployment notes
 ```
 
 Every directory with real work carries its own `CLAUDE.md` explaining how that

@@ -21,7 +21,7 @@ designed for.
 | Role | Who | What they get |
 | --- | --- | --- |
 | Creator | Motion/web designers, anyone | Publish a prompt, set a price, get paid straight to their own Hedera account on every sale. The platform never holds their money. |
-| Agent | Claude Desktop via our MCP server, any agent via Bazantic | Search the catalogue, pay cents in USDC or HBAR, use the prompt. No API key, no subscription. |
+| Agent | Claude Desktop, or any MCP client, through our MCP server | Search the catalogue, pay cents in USDC or HBAR, use the prompt. No API key, no subscription. |
 | Human | Developers in the web app | Browse, buy, and see the licences they hold in their Privy wallet. |
 
 ## How it works
@@ -30,8 +30,8 @@ designed for.
    price, and a Hedera payout account. The full prompt body is stored by the
    API and is never public.
 2. **Discover, free.** The catalogue (title, tags, preview, price) is exposed
-   through a plain endpoint, the x402 discovery extension, the MCP tool
-   `search_prompts`, and a Bazantic Recipe. Agents evaluate before paying.
+   through a plain endpoint, the x402 discovery extension and the MCP tool
+   `search_prompts`. Agents evaluate before paying.
 3. **Buy.** Agent requests the full prompt. API answers `402` with
    `accepts` = [USDC, HBAR], `payTo` = the creator's Hedera account. Agent
    signs with its Privy wallet, Blocky402 settles on Hedera, API returns the
@@ -73,7 +73,6 @@ designed for.
 | Track | What ships | Owner |
 | --- | --- | --- |
 | Hedera — AI & Agentic Payments ($6k) | x402-gated prompt endpoints on Hedera testnet via Blocky402; MCP client completes a real paid request; extras: HCS audit trail, discovery directory, per-prompt pricing, USDC (HTS) + HBAR in `accepts`, ERC-8004 registration if time allows | Kiel |
-| Bazantic — Recipes ($3k) | x402 Gateway on bazantic.com pointing at the API; Recipe describing when and how an agent uses it; before/after recording | Kiel + Axel |
 | Privy — Financial Flow ($2.5k) | Fund a Privy wallet, pay for a prompt, licence lands in the wallet | Axel (web) + Kiel (api) |
 | Privy — B2B Financial Product ($2.5k) | Organisation wallet with a spending policy so a team's agents can only buy prompts up to a limit | Axel + Kiel |
 
@@ -86,10 +85,10 @@ Status 2026-09-11: steps 1 to 4 shipped and verified on testnet (HCS trail,
 discovery, HBAR, verified `PromptRegistry`
 `0x59de4C018968E0357EeF77042dD2Fc2ff33e1418`, licence minting, free
 re-access). API live at https://api.bajigur.xyz. Privy
-server wallet paid over x402. ERC-8004 agent 111 registered. Bazantic
-gateway `tuguge4rzbcsvgrevhkkjf43em` active and Recipe `design-prompt-finder`
-published (track dropped in favour of ENS). ENS: `bajigur.eth` on ENSv2 Sepolia
-with our own subregistry and `BajigurRegistrar` (0x1eb7…9756, one free name per
+server wallet paid over x402. ERC-8004 agent 111 registered, and creator
+reputation runs on the ERC-8004 registries deployed on Hedera testnet. ENS:
+`bajigur.eth` on ENSv2 Sepolia
+with our own subregistry and `BajigurRegistrar` (0x418b…0976, one free name per
 wallet); `kiel.`, `axel.` (self-claimed) and `agent.` subnames; the 402 payTo is
 read from the creator's `bajigur.hedera` record. Agent wallets: Privy delegated signing
 through the API (`/agent/link`, `/agent/sign`, HS256 agent token, per-token
@@ -103,7 +102,7 @@ the agent token.
 4. `contracts/`: `PromptRegistry` (ERC-1155 licence + creator registry), tests,
    deploy script.
 5. Privy: web sign-in, wallet funding, spending policy.
-6. Bazantic gateway + Recipe. ERC-8004 registration if time allows.
+6. ERC-8004 registration, then creator reputation on top of it.
 
 ## Contracts (`contracts/`)
 
@@ -124,7 +123,7 @@ can come later), escrow, bounties, HTS-native licence NFTs.
 
 A2A/ACP negotiation, Scheduled Transactions, streaming payments, a second
 chain (Arc), Ledger integration, becoming a general x402 gateway for third
-parties (that is Bazantic's job).
+parties.
 
 ## Open questions
 

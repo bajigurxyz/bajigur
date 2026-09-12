@@ -38,7 +38,7 @@
 - Discovery: the paid route declares the x402 bazaar extension
   (`@x402/extensions/bazaar`) so facilitators can index it, and
   `GET /discovery/resources` serves the same catalogue in the bazaar
-  `DiscoveryResourcesResponse` shape for agents and Bazantic. Prices come from
+  `DiscoveryResourcesResponse` shape for agents. Prices come from
   `requirementsFor(prompt)`, which reuses the Hedera scheme's `parsePrice`.
 - Every prompt is priced twice: `priceUsd` (settled in USDC via the scheme's
   default asset) and a fixed `priceHbar` set by the creator (asset `0.0.0`,
@@ -56,15 +56,10 @@
   SIWx extension once it supports Hedera.
 - Seed prompts carry `registryId`; `bun run hedera:register` registers any
   seed without one (creator = platform account, contentHash = sha256(body)).
-- `GET /openapi.json` (for the Bazantic gateway) and
+- `GET /openapi.json` and
   `GET /.well-known/agent.json` (ERC-8004 registration file, agent 111 on
   Hedera testnet via `ERC8004_AGENT_ID`) come from `src/meta.ts`.
-- Bazantic: gateway `tuguge4rzbcsvgrevhkkjf43em` (api-key upstream auth,
-  configured in the dashboard). Bazantic
-  charges agents on Base; when it calls us with the `x-bajigur-gateway-key`
-  header (`GATEWAY_KEY`), `onProtectedRequest` grants access instead of asking
-  for a Hedera payment. `bazantic.yaml` documents the listing; the published Recipe is
-  `design-prompt-finder` (source `docs/bazantic/recipe.json`).
+
 - ENS (ENSv2 beta, Sepolia): `src/ens.ts` resolves text records through
   `UniversalResolverV2` (viem, 60s cache). Creators are ENS names under
   `bajigur.eth` (our own subregistry); the 402 `payTo` comes from the

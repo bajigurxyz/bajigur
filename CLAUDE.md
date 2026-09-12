@@ -10,7 +10,7 @@ Bajigur is a pay-per-use marketplace of motion/web design prompts, built so an
 AI agent can discover, pay for, and use a prompt on its own. Payment is
 **x402 v2** on **Hedera** settled through the **Blocky402** facilitator, with
 each prompt's `payTo` set to its creator's own Hedera account. Agents reach it
-through an **MCP server** (Claude Desktop) and through **Bazantic**. Buyers
+through an **MCP server** (Claude Desktop). Buyers
 hold an ERC-1155 licence in their **Privy** wallet, so a prompt is paid once
 and re-used from any client.
 
@@ -23,7 +23,6 @@ Built for **ETHGlobal ETHOnline 2026**. Targeted prize tracks:
 | Track | What has to ship |
 | --- | --- |
 | **Hedera** — AI & Agentic Payments ($6,000) | A live x402-gated service on Hedera testnet settled through Blocky402, plus an MCP client that completes at least one real paid request end to end. Extras: HCS audit trail, discovery directory, per-prompt pricing, USDC + HBAR. |
-| **Bazantic** — Recipes ($3,000) | An x402 Gateway on bazantic.com for our API, plus a Recipe describing when, why, and how an agent should use it. |
 | **Privy** ($5,000, two tracks) | Privy wallets fund and pay for prompts (Financial Flow); an organisation wallet with a spending policy (B2B Financial Product). |
 
 Every track needs a public repo, a README, and a demo video (five minutes or

@@ -15,6 +15,6 @@ skills/
 ```
 
 Skills pair with the MCP server in `../apps/mcp`, and with the Recipes published
-on bazantic.com for the Bazantic track.
+for agents that reach the service over MCP.
 
 Owner: unassigned.
