@@ -87,7 +87,12 @@ export default function PromptDetailPage({ params }: PageProps<"/prompts/[id]">)
                 {load.prompt.title}
               </h1>
               <p className="text-base leading-relaxed text-gray-600">{load.prompt.preview}</p>
-              <PromptPreview id={load.prompt.id} className="h-40" />
+              <PromptPreview
+                id={load.prompt.id}
+                media={load.prompt.previewMedia}
+                title={load.prompt.title}
+                className="h-40"
+              />
               <ul className="flex flex-wrap gap-1.5">
                 {load.prompt.tags.map((tag) => (
                   <li

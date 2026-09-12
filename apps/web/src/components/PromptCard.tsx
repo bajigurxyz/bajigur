@@ -23,7 +23,12 @@ export default function PromptCard({ prompt }: { prompt: Prompt }) {
       aria-label={`${prompt.title} by ${prompt.creator ?? "an unknown creator"}`}
       className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5 transition-shadow focus-within:shadow-md hover:shadow-md"
     >
-      <PromptPreview id={prompt.id} className="h-28" />
+      <PromptPreview
+        id={prompt.id}
+        media={prompt.previewMedia}
+        title={prompt.title}
+        className="h-28"
+      />
 
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-sm font-semibold text-black">

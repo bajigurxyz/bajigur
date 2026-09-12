@@ -42,6 +42,8 @@ export interface Prompt {
   creator?: string;
   /** Hedera account the 402 pays, resolved from the creator's ENS record. */
   payTo?: string;
+  /** Absolute URL of a recording of this prompt's output, when the creator supplied one. */
+  previewMedia?: string;
 }
 
 /** Thrown for non-OK responses so callers can branch on status (404 → not-found). */
