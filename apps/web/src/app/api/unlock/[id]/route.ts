@@ -7,6 +7,22 @@ import { AGENT_COOKIE, type AgentIdentity } from "@/lib/agent";
 import { API_BASE, fetchPrompt, unlockUrl } from "@/lib/api";
 import { externalHederaSigner, transactionIdOf } from "@/lib/hedera";
 
+const NETWORK = process.env.HEDERA_NETWORK ?? "testnet";
+const MIRROR = `https://${NETWORK}.mirrornode.hedera.com/api/v1`;
+const HBAR = "0.0.0";
+
+/** What this account can actually spend, in each asset's atomic units. */
+async function balances(account: string) {
+  const res = await fetch(`${MIRROR}/accounts/${account}`, { cache: "no-store" });
+  if (!res.ok) return new Map<string, bigint>();
+  const mirror = (await res.json()) as {
+    balance?: { balance?: number; tokens?: { token_id: string; balance: number }[] };
+  };
+  const held = new Map<string, bigint>([[HBAR, BigInt(mirror.balance?.balance ?? 0)]]);
+  for (const token of mirror.balance?.tokens ?? []) held.set(token.token_id, BigInt(token.balance));
+  return held;
+}
+
 /**
  * Buys one prompt over x402 on Hedera, server side.
  *
@@ -47,6 +63,8 @@ export async function POST(_request: Request, ctx: RouteContext<"/api/unlock/[id
   }
   const me = (await meRes.json()) as AgentIdentity;
 
+  const held = await balances(me.account);
+
   const signer = externalHederaSigner(me.account, me.publicKey, async (bodyBytes) => {
     const res = await fetch(`${API_BASE}/agent/sign`, {
       method: "POST",
@@ -63,11 +81,18 @@ export async function POST(_request: Request, ctx: RouteContext<"/api/unlock/[id
     // Cap at the price the catalogue advertised, so a 402 asking for more than
     // the user was shown is refused before anything is signed.
     spendControls: { maxAmountPerPayment: `$${prompt.priceUsd}` },
-    // USDC is the default; the HBAR entry is the fallback when it is the only
-    // option offered.
+    // Pay with something the wallet actually holds. USDC first because the
+    // price is quoted in dollars, but a wallet funded only with HBAR must not
+    // be told it cannot afford a prompt it can.
     paymentRequirementsSelector: (_version, accepts) => {
-      const pick = accepts.find((a) => a.asset !== "0.0.0") ?? accepts[0];
-      if (!pick) throw new Error("no payment option offered");
+      const affordable = accepts.filter((a) => (held.get(a.asset) ?? 0n) >= BigInt(a.amount));
+      const pick = affordable.find((a) => a.asset !== HBAR) ?? affordable[0];
+      if (!pick) {
+        const options = accepts
+          .map((a) => `${a.amount} of ${a.asset === HBAR ? "HBAR" : a.asset}`)
+          .join(" or ");
+        throw new Error(`Not enough balance. This prompt costs ${options}.`);
+      }
       return pick;
     },
   });
