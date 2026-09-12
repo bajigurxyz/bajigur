@@ -17,11 +17,11 @@ const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").rep
 
 const NAV_LINKS: { label: string; href: string }[] = [
   { label: "Gallery", href: `${APP_URL}/prompts` },
-  { label: "For Creators", href: `${APP_URL}/list` },
-  { label: "Earnings", href: `${APP_URL}/earnings` },
+  { label: "My licences", href: `${APP_URL}/licenses` },
+  { label: "Connect", href: `${APP_URL}/connect` },
 ];
 
-const SELL_URL = `${APP_URL}/list`;
+const CTA_URL = `${APP_URL}/connect`;
 
 export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -57,10 +57,10 @@ export default function Nav() {
 
         <div className="hidden items-center gap-4 sm:flex">
           <Link
-            href={SELL_URL}
+            href={CTA_URL}
             className="rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-800"
           >
-            Start selling
+            Connect your agent
           </Link>
         </div>
 
@@ -90,11 +90,11 @@ export default function Nav() {
             ))}
             <div className="flex flex-col gap-4 border-t border-gray-200 pt-4">
               <Link
-                href={SELL_URL}
+                href={CTA_URL}
                 onClick={() => setMenuOpen(false)}
                 className="w-full rounded-full bg-black px-5 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800"
               >
-                Start selling
+                Connect your agent
               </Link>
             </div>
           </div>

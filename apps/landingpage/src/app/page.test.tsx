@@ -25,11 +25,18 @@ describe("landing page branding", () => {
     expect(headline.textContent).toContain("Pay per prompt");
   });
 
-  it("sends Start selling to the app origin and carries no leftover SaaS chrome", () => {
+  it("sends every nav destination to a page that exists in apps/web", () => {
     render(<Home />);
-    const sell = screen.getByRole("link", { name: "Start selling" });
-    // /list lives in apps/web, a separate origin — a bare "/list" would 404 here.
-    expect(sell.getAttribute("href")).toBe(`${APP_URL}/list`);
+    const cta = screen.getByRole("link", { name: "Connect your agent" });
+    // apps/web is a separate origin, so a bare "/connect" would 404 here.
+    expect(cta.getAttribute("href")).toBe(`${APP_URL}/connect`);
+
+    // apps/web has no creator listing or earnings surface, and the API has no
+    // endpoint behind either. A nav item for one would be a dead promise.
+    for (const dead of ["/list", "/earnings"]) {
+      const links = screen.getAllByRole("link").map((a) => a.getAttribute("href") ?? "");
+      expect(links.some((href) => href.endsWith(dead))).toBe(false);
+    }
     // Tidak ada login (identitas = wallet) dan tidak ada tombol nav mati.
     expect(screen.queryByText("Log in")).toBeNull();
     expect(screen.queryByText("For Agents")).toBeNull();
