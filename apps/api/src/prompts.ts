@@ -67,6 +67,18 @@ export const prompts: Prompt[] = [
     body: catalog("nova-ai-cinematic-landing.md"),
   },
   {
+    id: "core-features-tabs",
+    title: "Core features tabbed showcase",
+    tags: ["features", "tabs", "spotlight", "dashboard", "framer-motion", "react", "tailwind"],
+    preview:
+      "Auto-rotating four-tab feature showcase with mouse-tracked spotlight borders, cross-fading screenshots and a scaled dashboard mock overlay. Full component and asset spec.",
+    previewMedia: "https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/animated%20(30).webp",
+    priceUsd: "1.00",
+    priceHbar: "10",
+    registryId: 6,
+    body: catalog("core-features-tabs.md"),
+  },
+  {
     id: "marquee-logos",
     title: "Infinite logo marquee",
     tags: ["marquee", "logos", "css"],
