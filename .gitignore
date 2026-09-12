@@ -54,3 +54,9 @@ desktop.ini
 tmp/
 *.tgz
 .vercel
+
+# ---------- video ----------
+# Screen recordings and renders are too big for git; they live on disk and on YouTube.
+*.mp4
+!apps/landingpage/public/media/*.mp4
+video/out/
