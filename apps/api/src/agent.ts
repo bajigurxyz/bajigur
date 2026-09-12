@@ -30,11 +30,13 @@ export type AgentClaims = {
 
 export type Signer = { signHash(walletId: string, hash: Uint8Array): Promise<Uint8Array> };
 export type Onboard = (evm: string, publicKey: PublicKey, walletId: string) => Promise<string>;
+export type Associate = (account: string, publicKey: PublicKey, walletId: string) => Promise<void>;
 
 export type AgentOptions = {
   secret: string;
   signer?: Signer;
   onboard?: Onboard;
+  associate?: Associate;
   allowedPayTo: () => Promise<Set<string>>;
   capUsd?: string;
   capHbar?: string;
@@ -138,12 +140,44 @@ export function privyLinkWallet(): AgentOptions["linkWallet"] {
   };
 }
 
-/// Creates the Hedera account for a Privy wallet (HBAR to its alias), associates USDC with a Privy-signed
-/// transaction (which also completes the hollow account), and tops it up with a little USDC on testnet.
-export function platformOnboard(signer: Signer): Onboard | undefined {
+/// Associates USDC with a Privy-signed transaction; on a hollow account this also sets its key.
+export function platformAssociate(signer: Signer): Associate | undefined {
   const operator = process.env.X402_PAY_TO_ADDRESS;
   const key = process.env.X402_PAY_TO_KEY;
   if (!operator || !key) return undefined;
+  return async (account, publicKey, walletId) => {
+    const client = Client.forName(network()).setOperator(
+      AccountId.fromString(operator),
+      PrivateKey.fromStringECDSA(key),
+    );
+    try {
+      const id = AccountId.fromString(account);
+      const tx = new TokenAssociateTransaction()
+        .setAccountId(id)
+        .setTokenIds([TokenId.fromString(USDC)])
+        .setTransactionId(TransactionId.generate(id))
+        .freezeWith(client);
+      await tx.signWith(publicKey, async (body) =>
+        (await signer.signHash(walletId, keccak_256(body))).subarray(0, 64),
+      );
+      await tx
+        .execute(client)
+        .then((r) => r.getReceipt(client))
+        .catch((err) => {
+          if (!String(err).includes("TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT")) throw err;
+        });
+    } finally {
+      client.close();
+    }
+  };
+}
+
+/// Creates the Hedera account for a Privy wallet (HBAR to its alias), associates USDC, and tops it up on testnet.
+export function platformOnboard(signer: Signer): Onboard | undefined {
+  const operator = process.env.X402_PAY_TO_ADDRESS;
+  const key = process.env.X402_PAY_TO_KEY;
+  const associate = platformAssociate(signer);
+  if (!operator || !key || !associate) return undefined;
   const fundHbar = process.env.AGENT_FUND_HBAR ?? "5";
   const fundUsdc = Number(process.env.AGENT_FUND_USDC ?? "1") * 1_000_000;
   return async (evm, publicKey, walletId) => {
@@ -152,12 +186,11 @@ export function platformOnboard(signer: Signer): Onboard | undefined {
       PrivateKey.fromStringECDSA(key),
     );
     try {
-      const alias = AccountId.fromEvmAddress(0, 0, evm);
       let account = await accountOf(evm);
       if (!account) {
         await new TransferTransaction()
           .addHbarTransfer(AccountId.fromString(operator), Hbar.fromString(fundHbar).negated())
-          .addHbarTransfer(alias, Hbar.fromString(fundHbar))
+          .addHbarTransfer(AccountId.fromEvmAddress(0, 0, evm), Hbar.fromString(fundHbar))
           .execute(client)
           .then((r) => r.getReceipt(client));
         for (let i = 0; i < 15 && !account; i++) {
@@ -166,26 +199,12 @@ export function platformOnboard(signer: Signer): Onboard | undefined {
         }
         if (!account) throw new Error("Hedera account did not appear on the mirror node");
       }
-      const id = AccountId.fromString(account);
-      const associate = new TokenAssociateTransaction()
-        .setAccountId(id)
-        .setTokenIds([TokenId.fromString(USDC)])
-        .setTransactionId(TransactionId.generate(id))
-        .freezeWith(client);
-      await associate.signWith(publicKey, async (body) =>
-        (await signer.signHash(walletId, keccak_256(body))).subarray(0, 64),
-      );
-      await associate
-        .execute(client)
-        .then((r) => r.getReceipt(client))
-        .catch((err) => {
-          if (!String(err).includes("TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT")) throw err;
-        });
+      if (!(await isAssociated(account))) await associate(account, publicKey, walletId);
       // ponytail: testnet top-up is a courtesy; never fail onboarding over it
       if (fundUsdc > 0 && (await usdcBalance(account)) < fundUsdc) {
         await new TransferTransaction()
           .addTokenTransfer(TokenId.fromString(USDC), AccountId.fromString(operator), -fundUsdc)
-          .addTokenTransfer(TokenId.fromString(USDC), id, fundUsdc)
+          .addTokenTransfer(TokenId.fromString(USDC), AccountId.fromString(account), fundUsdc)
           .execute(client)
           .then((r) => r.getReceipt(client))
           .catch((err) => console.warn("usdc top-up skipped:", String(err).slice(0, 120)));
@@ -196,6 +215,23 @@ export function platformOnboard(signer: Signer): Onboard | undefined {
     }
   };
 }
+
+export async function accountStatus(account: string) {
+  const res = await fetch(`${mirror()}/accounts/${account}`);
+  if (!res.ok) return { exists: false, associated: false, hbar: "0", usdc: "0.00" };
+  const m = (await res.json()) as {
+    balance?: { balance?: number; tokens?: { token_id: string; balance: number }[] };
+  };
+  const token = m.balance?.tokens?.find((t) => t.token_id === USDC);
+  return {
+    exists: true,
+    associated: Boolean(token),
+    hbar: ((m.balance?.balance ?? 0) / 1e8).toString(),
+    usdc: ((token?.balance ?? 0) / 1e6).toFixed(2),
+  };
+}
+
+const isAssociated = async (account: string) => (await accountStatus(account)).associated;
 
 async function usdcBalance(account: string) {
   const res = await fetch(`${mirror()}/accounts/${account}/tokens?token.id=${USDC}`);
@@ -310,12 +346,29 @@ export function agentRoutes(o: AgentOptions) {
   app.get("/me", async (c) => {
     const claims = await authed(c.req.raw.headers);
     if (!claims) return c.json({ error: "invalid agent token" }, 401);
+    const status = await accountStatus(claims.acct);
     return c.json({
       account: claims.acct,
       publicKey: claims.pk,
       cap: claims.cap,
       walletId: claims.wid,
+      ...status,
     });
+  });
+
+  // Idempotent: a button the web app can show whenever `associated` is false.
+  app.post("/associate", async (c) => {
+    const claims = await authed(c.req.raw.headers);
+    if (!claims) return c.json({ error: "invalid agent token" }, 401);
+    if (!o.associate) return c.json({ error: "agent wallets disabled" }, 503);
+    const before = await accountStatus(claims.acct);
+    if (!before.exists) {
+      return c.json({ error: "Hedera account does not exist yet; send it some HBAR first" }, 409);
+    }
+    if (!before.associated) {
+      await o.associate(claims.acct, PublicKey.fromStringECDSA(claims.pk), claims.wid);
+    }
+    return c.json({ account: claims.acct, associated: true, alreadyAssociated: before.associated });
   });
 
   app.post("/sign", async (c) => {

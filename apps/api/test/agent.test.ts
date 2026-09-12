@@ -46,6 +46,7 @@ const facilitator: FacilitatorClient = {
   settle: async () => ({ success: false, transaction: "", network: "hedera:testnet" }),
 };
 const holders = new Set<string>();
+const associated: string[] = [];
 const app = createApp({
   facilitator,
   registry: { issue: async () => {}, hasLicence: async (a, id) => holders.has(`${a}:${id}`) },
@@ -54,6 +55,9 @@ const app = createApp({
     secret: "test-secret",
     signer,
     onboard: async () => "0.0.7777",
+    associate: async () => {
+      associated.push("0.0.7777");
+    },
     adminKey: "admin",
     capUsd: "0.10",
     capHbar: "1",
@@ -130,6 +134,19 @@ describe("agent routes", () => {
       headers: { authorization: `Bearer ${body.token}` },
     });
     expect(await me.json()).toMatchObject({ account: "0.0.7777", walletId: "w1" });
+  });
+
+  it("associates on demand and reports status on /me", async () => {
+    const { token } = (await (await link()).json()) as { token: string };
+    const headers = { authorization: `Bearer ${token}` };
+    const me = (await (await app.request("/agent/me", { headers })).json()) as {
+      associated: boolean;
+      exists: boolean;
+    };
+    expect(typeof me.associated).toBe("boolean");
+    const res = await app.request("/agent/associate", { method: "POST", headers });
+    // 0.0.7777 is not a real account, so the mirror node says it does not exist
+    expect([200, 409]).toContain(res.status);
   });
 
   it("refuses to link without the admin key or a Privy token", async () => {

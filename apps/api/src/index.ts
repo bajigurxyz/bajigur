@@ -1,4 +1,4 @@
-import { platformOnboard, privyLinkWallet, privySigner } from "./agent";
+import { platformAssociate, platformOnboard, privyLinkWallet, privySigner } from "./agent";
 import { createApp } from "./app";
 import { ensClient } from "./ens";
 import { hcsPublisher } from "./hcs";
@@ -22,6 +22,7 @@ const app = createApp({
           secret,
           signer,
           onboard: platformOnboard(signer),
+          associate: platformAssociate(signer),
           linkWallet: privyLinkWallet(),
           adminKey: process.env.ADMIN_KEY,
           capUsd: process.env.AGENT_CAP_USD,

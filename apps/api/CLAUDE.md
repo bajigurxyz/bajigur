@@ -85,7 +85,10 @@
   signs it through Privy only if it debits the agent's own account, credits a
   known creator payTo, and stays under the caps (`AGENT_CAP_USD`,
   `AGENT_CAP_HBAR`). A bearer agent token also serves as identity for licence
-  holders. `x-bajigur-admin: ADMIN_KEY` lets `/agent/link` take a raw
+  holders. `GET /agent/me` adds live account status from the mirror node
+  (`exists`, `associated`, `hbar`, `usdc`); `POST /agent/associate` is the
+  idempotent USDC association (Privy-signed, also completes a hollow account)
+  for a web button to call whenever `associated` is false. `x-bajigur-admin: ADMIN_KEY` lets `/agent/link` take a raw
   `{walletId, address}` for app-owned wallets (tests, demos). Privy policies
   cannot gate `secp256k1_sign`, so caps live here, not in Privy.
 - Still to come: creator publishing from the web app.
