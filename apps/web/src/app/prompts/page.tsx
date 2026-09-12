@@ -7,10 +7,22 @@ import PromptCard from "@/components/PromptCard";
 import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
 import TagFilter from "@/components/TagFilter";
 import { fetchPrompts, type Prompt, tagsOf } from "@/lib/api";
+import { useAgent } from "@/lib/useAgent";
+import { useEmbeddedWallet } from "@/lib/useEmbeddedWallet";
+import { useHederaAccount } from "@/lib/useHederaAccount";
+import { useLicences } from "@/lib/useLicences";
 
 type LoadState = { phase: "pending" } | { phase: "error" } | { phase: "ready"; prompts: Prompt[] };
 
 export default function PromptsPage() {
+  const wallet = useEmbeddedWallet();
+  const { state: agent } = useAgent();
+  const chain = useHederaAccount(wallet.address);
+  const account =
+    (agent.phase === "linked" ? agent.agent.account : undefined) ??
+    (chain.phase === "ready" && chain.account.exists ? chain.account.account : undefined);
+  const owned = useLicences(account);
+
   const [load, setLoad] = useState<LoadState>({ phase: "pending" });
   const [tag, setTag] = useState<string | null>(null);
   // Bumped by the retry control; the effect refetches on every bump.
@@ -92,7 +104,7 @@ export default function PromptsPage() {
         {shown.length > 0 && (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {shown.map((prompt) => (
-              <PromptCard key={prompt.id} prompt={prompt} />
+              <PromptCard key={prompt.id} prompt={prompt} owned={owned.has(prompt.id)} />
             ))}
           </div>
         )}

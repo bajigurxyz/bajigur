@@ -1,5 +1,6 @@
 import { Unlock } from "lucide-react";
 import Link from "next/link";
+import CopyPromptButton from "@/components/CopyPromptButton";
 import PromptPreview from "@/components/PromptPreview";
 import { HbarMark, UsdcMark } from "@/components/TokenMark";
 import { formatHbar, formatUsd, type Prompt } from "@/lib/api";
@@ -18,8 +19,12 @@ import { formatHbar, formatUsd, type Prompt } from "@/lib/api";
  *
  * A prompt whose creator supplied no recording falls back to text only, and the
  * card still works, so the catalogue never has a hole where an image failed.
+ *
+ * A prompt the wallet already owns offers to copy itself rather than to sell
+ * itself again. The licence is onchain and permanent, so "Unlock" on something
+ * already paid for reads as a second charge.
  */
-export default function PromptCard({ prompt }: { prompt: Prompt }) {
+export default function PromptCard({ prompt, owned = false }: { prompt: Prompt; owned?: boolean }) {
   const price = formatUsd(prompt.priceUsd);
 
   return (
@@ -78,14 +83,18 @@ export default function PromptCard({ prompt }: { prompt: Prompt }) {
               {formatHbar(prompt.priceHbar)}
             </span>
           </span>
-          <Link
-            href={`/prompts/${prompt.id}`}
-            aria-label={`Unlock ${prompt.title} for ${price}`}
-            className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 px-4 py-2 text-xs font-medium text-black transition-colors hover:border-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
-          >
-            <Unlock aria-hidden className="h-3.5 w-3.5" />
-            Unlock
-          </Link>
+          {owned ? (
+            <CopyPromptButton id={prompt.id} title={prompt.title} />
+          ) : (
+            <Link
+              href={`/prompts/${prompt.id}`}
+              aria-label={`Unlock ${prompt.title} for ${price}`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 px-4 py-2 text-xs font-medium text-black transition-colors hover:border-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              <Unlock aria-hidden className="h-3.5 w-3.5" />
+              Unlock
+            </Link>
+          )}
         </div>
       </div>
     </article>

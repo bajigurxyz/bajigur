@@ -26,11 +26,14 @@ function Section({
   empty,
   action,
   footer,
+  owned = false,
 }: {
   title: string;
   blurb: string;
   prompts: Prompt[];
   empty: React.ReactNode;
+  /** Every prompt in this section is already licensed to the wallet. */
+  owned?: boolean;
   action?: React.ReactNode;
   /** Rendered under each card. Published uses it for the buyer list. */
   footer?: (prompt: Prompt) => React.ReactNode;
@@ -53,7 +56,7 @@ function Section({
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {prompts.map((prompt) => (
             <div key={prompt.id} className="space-y-3">
-              <PromptCard prompt={prompt} />
+              <PromptCard prompt={prompt} owned={owned} />
               {footer?.(prompt)}
             </div>
           ))}
@@ -150,6 +153,9 @@ export default function MyPromptsPage() {
                 title="Bought"
                 blurb="Paid for once. The licence is onchain, so these open free from any client, forever."
                 prompts={load.bought}
+                // Everything here is licensed by definition: this list is the
+                // licences. No card in it should offer to sell itself again.
+                owned
                 empty={
                   <>
                     Nothing bought yet.{" "}

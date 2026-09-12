@@ -4,8 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 /** The marketplace listing this exchange actually ends in. */
-const PROMPT_PREVIEW =
-  "https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/hero%20sections/animated%20(20).webp";
+const PROMPT_PREVIEW = "https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/animated%20(30).webp";
 
 type Entry = { speaker: "agent" | "bajigur"; text: string; showsWork?: boolean };
 
