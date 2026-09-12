@@ -2,6 +2,7 @@
 
 import Onboarding from "@/components/Onboarding";
 import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
+import WalletButton from "@/components/WalletButton";
 import { useOnboarding } from "@/lib/useOnboarding";
 
 /**
@@ -13,15 +14,20 @@ import { useOnboarding } from "@/lib/useOnboarding";
  * explaining afterwards.
  *
  * The marketplace is deliberately not behind this. Browsing is public, and a
- * visitor who has not signed in has nothing to finish.
+ * visitor who has not signed in has nothing to finish here: they are asked to
+ * sign in rather than shown a page whose every section is empty, which is what
+ * this used to do.
  */
 export default function RequireOnboarding({
   title,
   blurb,
+  signedOutBlurb = "Sign in to see this.",
   children,
 }: {
   title: string;
   blurb: string;
+  /** What a visitor who has not signed in is told they are missing. */
+  signedOutBlurb?: string;
   children: React.ReactNode;
 }) {
   const onboarding = useOnboarding();
@@ -34,7 +40,18 @@ export default function RequireOnboarding({
     );
   }
 
-  if (onboarding.phase === "complete" || onboarding.phase === "signedOut") return <>{children}</>;
+  if (onboarding.phase === "signedOut") {
+    return (
+      <div className="space-y-4 rounded-2xl border border-gray-200 p-8 text-center">
+        <p className="text-sm text-gray-600">{signedOutBlurb}</p>
+        <div className="flex justify-center">
+          <WalletButton />
+        </div>
+      </div>
+    );
+  }
+
+  if (onboarding.phase === "complete") return <>{children}</>;
 
   return (
     <div className="space-y-5">

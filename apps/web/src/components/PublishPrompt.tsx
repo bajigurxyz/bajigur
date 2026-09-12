@@ -115,7 +115,13 @@ export default function PublishPrompt({ onPublished }: { onPublished: () => void
   }
 
   return (
-    <form onSubmit={publish} className="space-y-5 rounded-2xl border border-gray-200 p-5">
+    <form
+      onSubmit={publish}
+      // Centred and narrow. A form is read one field at a time, and stretched
+      // across the marketplace's three-column width its labels drift far from
+      // their inputs.
+      className="mx-auto w-full max-w-2xl space-y-5 rounded-2xl border border-gray-200 p-5 sm:p-6"
+    >
       <label className="block space-y-1.5">
         <Label hint={`${form.title.length}/${LIMITS.title[1]}`}>Title</Label>
         <input

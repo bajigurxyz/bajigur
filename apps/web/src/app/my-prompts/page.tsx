@@ -122,6 +122,7 @@ export default function MyPromptsPage() {
         <RequireOnboarding
           title="Finish setting up first"
           blurb="Buying and publishing both need a wallet Bajigur can sign for, and a name buyers can pay."
+          signedOutBlurb="Sign in to see the prompts you have bought and the ones you have published."
         >
           {load.phase === "pending" && (
             <SkeletonRegion
