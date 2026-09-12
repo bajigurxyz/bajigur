@@ -1,4 +1,5 @@
 import { PublicKey } from "@hiero-ledger/sdk";
+import type { SelectPaymentRequirements } from "@x402/core/client";
 import { x402Client } from "@x402/core/client";
 import { wrapFetchWithPayment } from "@x402/fetch";
 import { createClientHederaSigner, PrivateKey } from "@x402/hedera";
@@ -25,28 +26,47 @@ export function identityHeaders({ accountId, key }: ReturnType<typeof wallet>) {
   };
 }
 
-export function paidFetch() {
-  const { accountId, key } = wallet();
-  const signer = createClientHederaSigner(accountId, key, {
-    network: `hedera:${process.env.HEDERA_NETWORK ?? "testnet"}`,
-  });
+/**
+ * Which of the offered assets to pay with, and the caps that go with it.
+ *
+ * Both wallets need this, so it lives in one place: they offer the same
+ * catalogue at the same prices, and paying HBAR from one client and USDC from
+ * the other for the same prompt is a difference nobody asked for.
+ *
+ * The API offers USDC and HBAR for every prompt. x402 picks the first accept it
+ * is left with, and its default spend controls allow stablecoins only, so
+ * without both halves below HBAR is never reachable: `allowedAssets` is what
+ * lets it through the filter, and the selector is what prefers it.
+ *
+ * Set `X402_PAY_WITH=hbar` to pay in HBAR. Anything else keeps USDC.
+ */
+export function spendPolicy() {
   const network = `hedera:${process.env.HEDERA_NETWORK ?? "testnet"}` as const;
   const hbar = process.env.X402_PAY_WITH === "hbar";
-  const asset = hbar ? "0.0.0" : undefined;
   const maxTinybars = `${BigInt(process.env.X402_MAX_SPEND_HBAR ?? "5") * 100_000_000n}`;
-  const client = x402Client.fromConfig({
-    schemes: [{ network: "hedera:*", client: new ExactHederaScheme(signer) }],
+  return {
     spendControls: {
       maxAmountPerPayment: `$${process.env.X402_MAX_SPEND_USD ?? "1"}`,
       allowedAssets: hbar
         ? [{ network, asset: "0.0.0", maxAmountPerPayment: maxTinybars }]
         : undefined,
     },
-    paymentRequirementsSelector: (_version, accepts) => {
-      const pick = accepts.find((a) => a.asset === asset) ?? accepts[0];
+    paymentRequirementsSelector: ((_version, accepts) => {
+      const pick = hbar ? (accepts.find((a) => a.asset === "0.0.0") ?? accepts[0]) : accepts[0];
       if (!pick) throw new Error("no payment option offered");
       return pick;
-    },
+    }) satisfies SelectPaymentRequirements,
+  };
+}
+
+export function paidFetch() {
+  const { accountId, key } = wallet();
+  const signer = createClientHederaSigner(accountId, key, {
+    network: `hedera:${process.env.HEDERA_NETWORK ?? "testnet"}`,
+  });
+  const client = x402Client.fromConfig({
+    schemes: [{ network: "hedera:*", client: new ExactHederaScheme(signer) }],
+    ...spendPolicy(),
   });
   const paying = wrapFetchWithPayment(fetch, client);
   return (input: string | URL, init?: RequestInit) =>
@@ -78,7 +98,7 @@ export async function agentWallet(api: string, token: string) {
   );
   const client = x402Client.fromConfig({
     schemes: [{ network: "hedera:*", client: new ExactHederaScheme(signer) }],
-    spendControls: { maxAmountPerPayment: `$${process.env.X402_MAX_SPEND_USD ?? "1"}` },
+    ...spendPolicy(),
   });
   const paying = wrapFetchWithPayment(fetch, client);
   const paid = (input: string | URL, init?: RequestInit) =>
