@@ -10,7 +10,6 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "pub-86dc5b5484314368ac5436a674b0d919.r2.dev" },
       // Sponsor marks, served by the event rather than copied into the repo.
       { protocol: "https", hostname: "cdn.ethglobal.com" },
-      { protocol: "https", hostname: "encrypted-tbn0.gstatic.com" },
     ],
   },
 };

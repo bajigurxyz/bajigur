@@ -55,7 +55,7 @@ const CATALOGUE_BUCKET = "https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/";
  * Sponsor marks, served by the event. Other people's trademarks are better
  * fetched than copied: a copy in our repo goes stale the day a brand changes.
  */
-const SPONSOR_HOSTS = ["https://cdn.ethglobal.com/", "https://encrypted-tbn0.gstatic.com/"];
+const SPONSOR_HOSTS = ["https://cdn.ethglobal.com/"];
 
 describe("landing page media", () => {
   it("loads no media from a host we do not control", () => {
