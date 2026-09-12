@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import Buyers from "@/components/Buyers";
 import Nav from "@/components/Nav";
 import PromptCard from "@/components/PromptCard";
+import PublishPrompt from "@/components/PublishPrompt";
 import Skeleton, { SkeletonRegion } from "@/components/Skeleton";
 import { fetchLicenses, fetchPrompts, type Prompt } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
@@ -21,27 +23,38 @@ function Section({
   blurb,
   prompts,
   empty,
+  action,
+  footer,
 }: {
   title: string;
   blurb: string;
   prompts: Prompt[];
   empty: React.ReactNode;
+  action?: React.ReactNode;
+  /** Rendered under each card. Published uses it for the buyer list. */
+  footer?: (prompt: Prompt) => React.ReactNode;
 }) {
   return (
     <section className="space-y-3">
-      <div>
-        <h2 className="text-lg font-medium">
-          {title}
-          <span className="ml-2 text-sm font-normal text-gray-500">{prompts.length}</span>
-        </h2>
-        <p className="text-sm text-gray-600">{blurb}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-medium">
+            {title}
+            <span className="ml-2 text-sm font-normal text-gray-500">{prompts.length}</span>
+          </h2>
+          <p className="text-sm text-gray-600">{blurb}</p>
+        </div>
+        {action}
       </div>
       {prompts.length === 0 ? (
         <p className="rounded-2xl border border-gray-200 p-6 text-sm text-gray-600">{empty}</p>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {prompts.map((prompt) => (
-            <PromptCard key={prompt.id} prompt={prompt} />
+            <div key={prompt.id} className="space-y-3">
+              <PromptCard prompt={prompt} />
+              {footer?.(prompt)}
+            </div>
           ))}
         </div>
       )}
@@ -67,6 +80,9 @@ export default function MyPromptsPage() {
   const account = (agent.phase === "linked" ? agent.agent.account : undefined) ?? onChain?.account;
 
   const [load, setLoad] = useState<LoadState>({ phase: "idle" });
+  // Bumped after publishing, so the new prompt appears without a reload.
+  const [attempt, setAttempt] = useState(0);
+  const reload = useCallback(() => setAttempt((n) => n + 1), []);
   const [loadedFor, setLoadedFor] = useState(account);
   if (loadedFor !== account) {
     setLoadedFor(account);
@@ -88,7 +104,7 @@ export default function MyPromptsPage() {
     return () => {
       cancelled = true;
     };
-  }, [account]);
+  }, [account, attempt]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -152,6 +168,8 @@ export default function MyPromptsPage() {
               blurb="Prompts you sell. Every purchase pays this wallet directly, with nothing held in between."
               prompts={load.made}
               empty="You haven't published a prompt yet."
+              action={account ? <PublishPrompt onPublished={reload} /> : undefined}
+              footer={(prompt) => <Buyers promptId={prompt.id} />}
             />
           </div>
         )}

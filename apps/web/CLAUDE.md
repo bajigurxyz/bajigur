@@ -24,11 +24,15 @@ matching from Promit, stop and read the API instead.
 | `/my-prompts` | Bought (licences held) and Published (prompts whose `payTo` is this wallet). |
 | `/profile` | Wallet, Hedera account, balances, and activation when there is no account yet. |
 
-Deliberately absent: a publishing form and an earnings dashboard. `apps/api` has
-no write route at all: the catalogue is a hardcoded array whose bodies are read
-from `src/catalog/*.md` in the deployed bundle, so publishing today means
-committing a file and redeploying. See `docs/plans/publishing-a-prompt.md`
-before building a button for it.
+`/my-prompts` is also where a creator publishes. `PublishPrompt` posts to
+`/api/prompts`, which forwards to `apps/api` with the agent token; `payTo` is
+taken from that token and ignored in the body, so a form cannot publish a prompt
+that pays somebody else. Every Published card carries `Buyers`, read from the
+ERC-1155 `LicenseIssued` log rather than our own bookkeeping, so it cannot
+disagree with who can open the prompt. A buyer who has claimed a name under
+bajigur.eth shows as that name; everyone else shows as their Hedera account.
+
+Still absent: an earnings dashboard.
 
 ## How a purchase works
 
