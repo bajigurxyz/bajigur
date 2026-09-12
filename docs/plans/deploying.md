@@ -13,8 +13,17 @@ authorization server and why OAuth cannot work for anyone but us.
 
 ## Vercel, one project per app
 
-This is a bun workspace, so each project points at its own directory and Vercel
-installs from the repository root. In the project settings:
+Connect each project to the GitHub repository and let pushes drive the builds.
+**Do not deploy these with `vercel deploy` from the command line.** The CLI
+uploads the directory it is run from, so the workspace root never arrives: npm
+then meets `workspace:*` and fails with `EUNSUPPORTEDPROTOCOL`, or Vercel
+reports that the configured Root Directory does not exist. Both were seen
+before this was written down.
+
+A push, by contrast, gives Vercel the whole repository. It finds `bun.lock` at
+the root, installs there, and builds inside the Root Directory below.
+
+In the project settings:
 
 | Setting | `apps/landingpage` | `apps/web` |
 | --- | --- | --- |
