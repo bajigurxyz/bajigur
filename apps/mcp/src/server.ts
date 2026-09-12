@@ -11,6 +11,8 @@ type Listing = {
   preview: string;
   previewMedia?: string;
   priceUsd: string;
+  creator?: string;
+  rating?: { count: number; score: number };
 };
 
 const text = (value: string) => ({ content: [{ type: "text" as const, text: value }] });
@@ -38,7 +40,7 @@ export function createServer(api: string, paid: Fetch, plain: Fetch = fetch, acc
     "search_prompts",
     {
       description:
-        "Search the Bajigur catalogue of motion/web design prompts. Free. Returns id, title, tags, a text preview, an animated previewMedia URL when available, and the price in USD. Call get_prompt with an id to buy the full text.",
+        "Search the Bajigur catalogue of motion/web design prompts. Free. Returns id, title, tags, a text preview, an animated previewMedia URL when available, the price in USD, the creator's ENS name, and their rating when buyers have left one (count and net score from the ERC-8004 reputation registry on Hedera). Prefer a well-rated creator when two prompts fit equally. Call get_prompt with an id to buy the full text.",
       inputSchema: {
         query: z.string().optional().describe("Keywords to match against title, tags and preview"),
       },

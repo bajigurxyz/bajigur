@@ -29,7 +29,21 @@ export const openapi = (origin: string) => ({
                   tags: { type: "array", items: { type: "string" } },
                   priceUsd: { type: "string", description: 'Decimal string, e.g. "0.20"' },
                   priceHbar: { type: "string", description: 'Decimal string, e.g. "2"' },
-                  previewMedia: { type: "string", description: "https URL on an allowed host" },
+                  rating: {
+                    type: "object",
+                    description:
+                      "What buyers said about this prompt's creator, from the ERC-8004 ReputationRegistry on Hedera. Absent until someone has rated them.",
+                    properties: {
+                      count: { type: "integer" },
+                      score: { type: "integer", description: "Net of likes and dislikes" },
+                      agent: { type: "string", description: "CAIP-style ERC-8004 agent reference" },
+                    },
+                  },
+                  previewMedia: {
+                    type: "string",
+                    description:
+                      "https URL on an allowed host, ending .webp .gif .png .jpg .mp4 or .webm",
+                  },
                 },
                 required: ["title", "preview", "body", "priceUsd", "priceHbar"],
               },

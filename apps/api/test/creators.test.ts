@@ -54,6 +54,7 @@ const app = createApp({
   },
   reputation: {
     registerCreator: async () => 7,
+    describeAgent: async () => {},
     summary: async () => ({ count: 1, value: 1 }),
     giveFeedback: async ({ agentId, value, account }) => {
       given.push({ agentId, value, account });

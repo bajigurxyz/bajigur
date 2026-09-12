@@ -45,6 +45,7 @@ export type Feedback = {
 
 export type Reputation = {
   registerCreator(name: string, ownerEvm: string, agentURI: string): Promise<number>;
+  describeAgent(agentId: number, name: string, agentURI: string): Promise<void>;
   giveFeedback(input: Feedback): Promise<string>;
   summary(agentId: number): Promise<{ count: number; value: number }>;
 };
@@ -126,6 +127,32 @@ export function reputation(signer?: Signer): Reputation | undefined {
           .execute(c)
           .then((r) => r.getReceipt(c));
         return agentId;
+      } finally {
+        c.close();
+      }
+    },
+
+    /// Points an agent we already own at its card and its ENS name. Owner only.
+    async describeAgent(agentId, name, agentURI) {
+      const c = client();
+      try {
+        for (const [fn, params] of [
+          ["setAgentURI", new ContractFunctionParameters().addUint256(agentId).addString(agentURI)],
+          [
+            "setMetadata",
+            new ContractFunctionParameters()
+              .addUint256(agentId)
+              .addString("ens")
+              .addBytes(new TextEncoder().encode(name)),
+          ],
+        ] as const) {
+          await new ContractExecuteTransaction()
+            .setContractId(identity)
+            .setGas(500_000)
+            .setFunction(fn, params)
+            .execute(c)
+            .then((r) => r.getReceipt(c));
+        }
       } finally {
         c.close();
       }

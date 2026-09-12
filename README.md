@@ -60,7 +60,7 @@ Onchain, all on public testnets:
 | --- | --- |
 | `PromptRegistry`, listings and ERC-1155 licences | Hedera testnet [`0x59de4C018968E0357EeF77042dD2Fc2ff33e1418`](https://hashscan.io/testnet/contract/0x59de4C018968E0357EeF77042dD2Fc2ff33e1418), verified |
 | `BajigurRegistrar`, one free `.bajigur.eth` per wallet | Sepolia [`0x418b68e12e29901362174d36b6fda230e3250976`](https://sepolia.etherscan.io/address/0x418b68e12e29901362174d36b6fda230e3250976), verified |
-| ERC-8004 `IdentityRegistry` | Hedera testnet [`0x8004A818BFB912233c491871b3d84c89A494BD9e`](https://hashscan.io/testnet/contract/0.0.7919997), service agent **111**, creator agent **115** |
+| ERC-8004 `IdentityRegistry` | Hedera testnet [`0x8004A818BFB912233c491871b3d84c89A494BD9e`](https://hashscan.io/testnet/contract/0.0.7919997), service agent **111** (`agent.bajigur.eth`), creator agent **115** (`kiel.bajigur.eth`) |
 | ERC-8004 `ReputationRegistry` | Hedera testnet [`0x8004B663056A597Dffe9eCcC1965A193B7388713`](https://hashscan.io/testnet/contract/0.0.7919998) |
 | HCS audit topic | [`0.0.10462113`](https://hashscan.io/testnet/topic/0.0.10462113) |
 | ENSv2 `bajigur.eth` | Sepolia, resolver [`0x7f38…87f6`](https://sepolia.etherscan.io/address/0x7f381419050525025bBB6811CF5821E0615487f6), subregistry [`0x9673…461c`](https://sepolia.etherscan.io/address/0x9673702a3C850fa1c41d94C908083Fc85F59461c) |

@@ -42,7 +42,11 @@ export const atomic = (value: string, decimals: number) => {
   );
 };
 
-/// Rendered in an `<img>` in every visitor's browser, so the host is allowlisted.
+/// What a browser can actually show. Without this a creator can point the field at
+/// anything on an allowed host and the card renders an empty box.
+const PREVIEW_TYPES = /\.(webp|gif|png|jpe?g|mp4|webm)$/i;
+
+/// Rendered in every visitor's browser, so the host is allowlisted.
 export const previewHostAllowed = (url: URL) => {
   const extra = (process.env.PREVIEW_MEDIA_HOSTS ?? "")
     .split(",")
@@ -81,6 +85,9 @@ export function validate(input: PublishInput): { error: string } | { prompt: Pub
     if (url.protocol !== "https:") return { error: "previewMedia must be an absolute https URL" };
     if (!previewHostAllowed(url))
       return { error: `previewMedia host ${url.hostname} is not allowed` };
+    if (!PREVIEW_TYPES.test(decodeURIComponent(url.pathname))) {
+      return { error: "previewMedia must be a .webp, .gif, .png, .jpg, .mp4 or .webm file" };
+    }
     previewMedia = url.toString();
   }
 

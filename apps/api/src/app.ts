@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { type AgentClaims, type AgentOptions, agentRoutes, evmOf } from "./agent";
-import { creatorRoutes } from "./creators";
+import { creatorRatings, creatorRoutes } from "./creators";
 import { hederaAccountOf, isValidLabel, type Registrar } from "./ens";
 import type { Publish } from "./hcs";
 import { agentCard, openapi } from "./meta";
@@ -98,12 +98,19 @@ export function createApp({
     }),
   );
 
-  app.get("/prompts", async (c) =>
-    c.json(await Promise.all(prompts.map((p) => publicPrompt(p, options.ens)))),
-  );
+  // A listing carries its creator's rating, so an agent choosing between two prompts
+  // can weigh what buyers said without a second round trip per prompt.
+  const ratingOf = creatorRatings({ ens: options.ens, reputation });
+  const listing = async (prompt: Parameters<typeof publicPrompt>[0]) => {
+    const item = await publicPrompt(prompt, options.ens);
+    const rating = await ratingOf(item.creator);
+    return rating ? { ...item, rating } : item;
+  };
+
+  app.get("/prompts", async (c) => c.json(await Promise.all(prompts.map(listing))));
   app.get("/prompts/:id", async (c) => {
     const prompt = findPrompt(c.req.param("id"));
-    return prompt ? c.json(await publicPrompt(prompt, options.ens)) : c.notFound();
+    return prompt ? c.json(await listing(prompt)) : c.notFound();
   });
 
   app.get("/discovery/resources", async (c) => {

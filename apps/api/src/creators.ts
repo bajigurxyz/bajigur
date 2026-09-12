@@ -22,6 +22,31 @@ export type CreatorOptions = {
 const ENS_KEY = "erc8004";
 const byCreator = (name: string) => prompts.filter((p) => creatorOf(p) === name);
 
+export type Rating = { count: number; score: number; agent: string };
+
+/// What the registry says about a creator, for the catalogue rather than the profile.
+/// Cached, because a listing page would otherwise hit the chain once per prompt.
+export function creatorRatings(o: Pick<CreatorOptions, "ens" | "reputation">) {
+  const cache = new Map<string, { rating?: Rating; at: number }>();
+  return async (name?: string) => {
+    if (!name || !o.ens || !o.reputation) return undefined;
+    const hit = cache.get(name);
+    if (hit && Date.now() - hit.at < 60_000) return hit.rating;
+    let rating: Rating | undefined;
+    try {
+      const agentId = agentIdFrom(await o.ens.text(name, ENS_KEY));
+      if (agentId) {
+        const { count, value } = await o.reputation.summary(agentId);
+        if (count > 0) rating = { count, score: value, agent: agentRef(agentId) };
+      }
+    } catch (err) {
+      console.warn(`rating for ${name} unavailable:`, String(err).slice(0, 120));
+    }
+    cache.set(name, { rating, at: Date.now() });
+    return rating;
+  };
+}
+
 /// A creator is an ENS name, and that name is the reputation. The ERC-8004 agent behind it
 /// is minted once, carries the name onchain, and belongs to the creator's own wallet.
 export function creatorRoutes(o: CreatorOptions) {

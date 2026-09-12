@@ -109,6 +109,12 @@
   `GET /creators/:name` is the public profile (prompts, likes, onchain summary, comments),
   `GET /creators/:name/agent.json` is that creator's ERC-8004 registration file, and
   `GET /creators/:name/feedback/:id` is what `feedbackURI` points at.
+- `GET /prompts` and `GET /prompts/:id` carry the creator's `rating` when buyers have
+  left one, read from the ReputationRegistry and cached 60s per creator
+  (`creatorRatings` in `src/creators.ts`), so a listing page never hits the chain once
+  per prompt and an agent can weigh reputation without a second round trip.
+- `bun run ens:agent` points the service's own agent (`ERC8004_AGENT_ID`) and its ENS
+  name at each other, the way a creator's are linked after their first rating.
 - `payToOf` falls back to a prompt's recorded `payTo` when the creator's ENS record cannot
   be read, so one broken name cannot 500 the catalogue. A seed without a `payTo` still
   fails loudly rather than quietly paying the platform.

@@ -342,6 +342,7 @@ describe("publishing", () => {
       { ...valid, priceHbar: "1.123456789" },
       { ...valid, previewMedia: "http://pub-x.r2.dev/a.webp" },
       { ...valid, previewMedia: "https://evil.example/a.webp" },
+      { ...valid, previewMedia: "https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/a.pdf" },
       { ...valid, body: "too short" },
       { ...valid, title: "ab" },
     ];
