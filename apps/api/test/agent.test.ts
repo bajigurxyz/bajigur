@@ -216,3 +216,83 @@ describe("agent routes", () => {
     expect(other.status).toBe(402);
   });
 });
+
+describe("claiming a name", () => {
+  const claims: { label: string; owner: string; hedera: string }[] = [];
+  const registrar = {
+    parent: "bajigur.eth",
+    available: async (label: string) => label !== "kiel",
+    labelOf: async (owner: string) =>
+      claims.find((c) => c.owner.toLowerCase() === owner.toLowerCase())?.label ?? null,
+    claim: async (label: string, owner: string, hedera: string) => {
+      claims.push({ label, owner, hedera });
+      return "0xabc";
+    },
+  };
+  const named = createApp({
+    facilitator,
+    registrar,
+    agent: { secret: "test-secret", signer, onboard: async () => "0.0.7777", adminKey: "admin" },
+  });
+  const token = async () => {
+    const res = await named.request("/agent/link", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-bajigur-admin": "admin" },
+      body: JSON.stringify({ walletId: "w1", address: evm }),
+    });
+    return ((await res.json()) as { token: string }).token;
+  };
+
+  it("refuses labels the contract would reject", async () => {
+    expect((await named.request("/ens/available?label=ab")).status).toBe(400);
+    expect((await named.request("/ens/available?label=-kiel")).status).toBe(400);
+    expect((await named.request("/ens/available?label=Kiel")).status).toBe(400);
+    const free = await named.request("/ens/available?label=axel");
+    expect(await free.json()).toEqual({ available: true });
+    const taken = await named.request("/ens/available?label=kiel");
+    expect(await taken.json()).toEqual({ available: false });
+  });
+
+  it("claims for the token's wallet and writes its Hedera account", async () => {
+    const headers = {
+      authorization: `Bearer ${await token()}`,
+      "content-type": "application/json",
+    };
+    const res = await named.request("/ens/claim", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ label: "axel" }),
+    });
+    expect(await res.json()).toEqual({
+      name: "axel.bajigur.eth",
+      hedera: "0.0.7777",
+      transaction: "0xabc",
+    });
+    expect(claims[0]).toMatchObject({ owner: evm.toLowerCase(), hedera: "0.0.7777" });
+
+    const me = await named.request("/agent/me", { headers });
+    expect(await me.json()).toMatchObject({ ensName: "axel.bajigur.eth" });
+  });
+
+  it("allows one name per wallet and refuses taken labels", async () => {
+    const headers = {
+      authorization: `Bearer ${await token()}`,
+      "content-type": "application/json",
+    };
+    const again = await named.request("/ens/claim", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ label: "axel2" }),
+    });
+    expect(again.status).toBe(409);
+  });
+
+  it("needs an agent token", async () => {
+    const res = await named.request("/ens/claim", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ label: "someone" }),
+    });
+    expect(res.status).toBe(401);
+  });
+});

@@ -47,7 +47,7 @@ forge verify-contract <address> src/PromptRegistry.sol:PromptRegistry \
 
 | Network | Contract | Address | Admin / minter | Source |
 | --- | --- | --- | --- | --- |
-| Sepolia (ENSv2) | `BajigurRegistrar` | [`0x1eb7D3769a12CBD08C28FEEF7c4c8ebdAa989756`](https://sepolia.etherscan.io/address/0x1eb7D3769a12CBD08C28FEEF7c4c8ebdAa989756) | subregistry `0x9673…461c`, role granted by `0xE610…2bAa` | verified, exact match |
+| Sepolia (ENSv2) | `BajigurRegistrar` | [`0x418b68e12e29901362174d36b6fda230e3250976`](https://sepolia.etherscan.io/address/0x418b68e12e29901362174d36b6fda230e3250976) | subregistry `0x9673…461c`, role granted by `0xE610…2bAa` | verified, exact match |
 | Hedera testnet | `PromptRegistry` | [`0x59de4C018968E0357EeF77042dD2Fc2ff33e1418`](https://hashscan.io/testnet/contract/0x59de4C018968E0357EeF77042dD2Fc2ff33e1418) (`0.0.10462346`) | `0xE610b819dd190Fc8154d0190BB3F3e9758d42bAa` | verified, exact match |
 
 ## ERC-8004
@@ -72,7 +72,7 @@ its own resolver. Deploy (grants `ROLE_REGISTRAR` on the subregistry) and claim:
 ENS_SUBREGISTRY=0x9673702a3C850fa1c41d94C908083Fc85F59461c \
   forge script script/DeployRegistrar.s.sol --rpc-url https://ethereum-sepolia-rpc.publicnode.com --broadcast
 
-CLAIM_PRIVATE_KEY=<wallet> BAJIGUR_REGISTRAR=0x1eb7D3769a12CBD08C28FEEF7c4c8ebdAa989756 \
+CLAIM_PRIVATE_KEY=<wallet> BAJIGUR_REGISTRAR=0x418b68e12e29901362174d36b6fda230e3250976 \
   CLAIM_LABEL=axel CLAIM_RESOLVER=<resolver from "ens resolver deploy"> \
   forge script script/ClaimName.s.sol --rpc-url https://ethereum-sepolia-rpc.publicnode.com --broadcast
 ```

@@ -1,6 +1,6 @@
 import { platformAssociate, platformOnboard, privyLinkWallet, privySigner } from "./agent";
 import { createApp } from "./app";
-import { ensClient } from "./ens";
+import { ensClient, registrarClient } from "./ens";
 import { hcsPublisher } from "./hcs";
 import { contractRegistry, signedIdentity } from "./registry";
 
@@ -16,6 +16,7 @@ const app = createApp({
   registry: contractRegistry(),
   identity: signedIdentity,
   ens: process.env.ENS_NAME ? ensClient() : undefined,
+  registrar: registrarClient(),
   agent:
     signer && secret
       ? {

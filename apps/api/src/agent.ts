@@ -42,6 +42,7 @@ export type AgentOptions = {
   capHbar?: string;
   linkWallet?: (token: string) => Promise<{ sub: string; walletId: string; address: string }>;
   adminKey?: string;
+  nameOf?: (address: string) => Promise<string | null>;
 };
 
 const USDC = process.env.HEDERA_USDC_TOKEN_ID ?? "0.0.429274";
@@ -54,6 +55,10 @@ export const agentTokens = (secret: string) => ({
     sign({ ...claims, iat: Math.floor(Date.now() / 1000) }, secret),
   verify: async (token: string) => (await verify(token, secret, "HS256")) as unknown as AgentClaims,
 });
+
+/// The wallet's EVM address, which is what the agent token carries indirectly as its public key.
+export const evmOf = (publicKey: string) =>
+  `0x${PublicKey.fromStringECDSA(publicKey).toEvmAddress()}`;
 
 export const bearer = (headers: Headers) =>
   headers.get("authorization")?.match(/^Bearer (.+)$/i)?.[1];
@@ -351,13 +356,17 @@ export function agentRoutes(o: AgentOptions) {
   app.get("/me", async (c) => {
     const claims = await authed(c.req.raw.headers);
     if (!claims) return c.json({ error: "invalid agent token" }, 401);
-    const status = await accountStatus(claims.acct);
+    const [status, ensName] = await Promise.all([
+      accountStatus(claims.acct),
+      o.nameOf?.(evmOf(claims.pk)).catch(() => null) ?? null,
+    ]);
     return c.json({
       account: claims.acct,
       publicKey: claims.pk,
       cap: claims.cap,
       walletId: claims.wid,
       ...status,
+      ...(ensName ? { ensName } : {}),
     });
   });
 
@@ -391,5 +400,9 @@ export function agentRoutes(o: AgentOptions) {
     return c.json({ signature: hex(sig.subarray(0, 64)) });
   });
 
-  return { app, identity: async (headers: Headers) => (await authed(headers))?.acct };
+  return {
+    app,
+    claims: authed,
+    identity: async (headers: Headers) => (await authed(headers))?.acct,
+  };
 }

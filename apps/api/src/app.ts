@@ -2,24 +2,29 @@ import { APP_NAME } from "@bajigur/core";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { type AgentOptions, agentRoutes } from "./agent";
-import { hederaAccountOf } from "./ens";
+import { type AgentClaims, type AgentOptions, agentRoutes, evmOf } from "./agent";
+import { hederaAccountOf, isValidLabel, type Registrar } from "./ens";
 import { agentCard, openapi } from "./meta";
 import { findPrompt, payToOf, platformAccount, prompts, publicPrompt } from "./prompts";
 import { requirementsFor, service, type X402Options, x402 } from "./x402";
 
-export type AppOptions = X402Options & { agent?: Omit<AgentOptions, "allowedPayTo"> };
+export type AppOptions = X402Options & {
+  agent?: Omit<AgentOptions, "allowedPayTo">;
+  registrar?: Registrar;
+};
 
-export function createApp({ agent, ...options }: AppOptions = {}) {
+export function createApp({ agent, registrar, ...options }: AppOptions = {}) {
   platformAccount();
   const app = new Hono();
 
   let identity = options.identity;
+  let claimsOf: ((headers: Headers) => Promise<AgentClaims | undefined>) | undefined;
   if (agent) {
     const allowedPayTo = async () =>
       new Set(await Promise.all(prompts.map((p) => payToOf(p, options.ens))));
-    const routes = agentRoutes({ ...agent, allowedPayTo });
+    const routes = agentRoutes({ ...agent, allowedPayTo, nameOf: nameOf(registrar) });
     app.route("/agent", routes.app);
+    claimsOf = routes.claims;
     const fallback = options.identity;
     identity = async (headers) =>
       (await routes.identity(headers)) ?? (fallback ? fallback(headers) : undefined);
@@ -63,6 +68,33 @@ export function createApp({ agent, ...options }: AppOptions = {}) {
     });
   });
 
+  // A name under the parent is how a creator gets paid: the platform sends the Sepolia
+  // transaction, the user owns the name, and its bajigur.hedera record is written in the
+  // same transaction so a claimed name can never point payments at the platform.
+  app.get("/ens/available", async (c) => {
+    const label = c.req.query("label") ?? "";
+    if (!registrar) return c.json({ error: "name claiming disabled" }, 503);
+    if (!isValidLabel(label)) return c.json({ available: false, error: "invalid label" }, 400);
+    return c.json({ available: await registrar.available(label) });
+  });
+
+  app.post("/ens/claim", async (c) => {
+    if (!registrar) return c.json({ error: "name claiming disabled" }, 503);
+    const claims = await claimsOf?.(c.req.raw.headers);
+    if (!claims) return c.json({ error: "invalid agent token" }, 401);
+    const { label } = (await c.req.json().catch(() => ({}))) as { label?: string };
+    if (!label || !isValidLabel(label)) return c.json({ error: "invalid label" }, 400);
+
+    const owner = evmOf(claims.pk);
+    const taken = await registrar.labelOf(owner);
+    if (taken)
+      return c.json({ error: `this wallet already owns ${taken}.${registrar.parent}` }, 409);
+    if (!(await registrar.available(label))) return c.json({ error: "label is taken" }, 409);
+
+    const transaction = await registrar.claim(label, owner, claims.acct);
+    return c.json({ name: `${label}.${registrar.parent}`, hedera: claims.acct, transaction });
+  });
+
   app.get("/licenses/:account", async (c) => {
     const { registry } = options;
     if (!registry) return c.json({ error: "licences disabled" }, 503);
@@ -91,3 +123,10 @@ export function createApp({ agent, ...options }: AppOptions = {}) {
 
   return app;
 }
+
+const nameOf = (registrar?: Registrar) =>
+  registrar &&
+  (async (address: string) => {
+    const label = await registrar.labelOf(address);
+    return label && `${label}.${registrar.parent}`;
+  });

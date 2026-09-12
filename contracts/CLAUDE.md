@@ -23,11 +23,18 @@ The Foundry project. Owned by Kiel.
   (the API) calls `issue` after an x402 settlement to mint one licence per
   buyer, with the Hedera transaction id in the event. Keep comments minimal.
 - `BajigurRegistrar` sits in front of bajigur.eth's ENSv2 subregistry
-  (`ENS_SUBREGISTRY`) and holds `ROLE_REGISTRAR` on its root resource. Anyone
+  (`ENS_SUBREGISTRY`) and holds `ROLE_REGISTRAR` on its root resource plus
+  `ROLE_SET_TEXT` on the shared resolver (`ENS_RESOLVER`). Anyone
   claims one free `<label>.bajigur.eth` (3-32 chars `[a-z0-9-]`, 10 years) with
   a resolver they control; the owner gets the tutorial's registration roles,
-  not registrar roles. `script/DeployRegistrar.s.sol` deploys and grants the
-  role; `script/ClaimName.s.sol` claims from `CLAIM_PRIVATE_KEY`. The fork test
+  not registrar roles. `claim` is the wallet claiming for itself;
+  `claimFor(label, owner, hederaAccount)` is `OPERATOR` (the API) claiming on a
+  user's behalf, which registers to `owner` and writes that account into
+  `bajigur.hedera` in the same transaction so the name can never resolve to a
+  payout the user did not choose. One name per wallet either way (`labelOf`).
+  `script/DeployRegistrar.s.sol` deploys, grants both roles and revokes the
+  registry role from `BAJIGUR_REGISTRAR_OLD`; `script/ClaimName.s.sol` claims
+  from `CLAIM_PRIVATE_KEY`. The fork test
   in `test/BajigurRegistrar.t.sol` runs only with `SEPOLIA_RPC_URL`; never use
   `makeAddr` accounts as token receivers on Sepolia, their public keys carry
   EIP-7702 code.

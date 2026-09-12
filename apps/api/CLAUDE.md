@@ -88,7 +88,12 @@
   holders. `GET /agent/me` adds live account status from the mirror node
   (`exists`, `associated`, `hbar`, `usdc`); `POST /agent/associate` is the
   idempotent USDC association (Privy-signed, also completes a hollow account)
-  for a web button to call whenever `associated` is false. `x-bajigur-admin: ADMIN_KEY` lets `/agent/link` take a raw
+  for a web button to call whenever `associated` is false.
+  Caps are `AGENT_CAP_USD` / `AGENT_CAP_HBAR`, currently 1000 each so
+  hackathon judges never hit a limit mid-demo. **Real money wants a real cap**:
+  lower both before mainnet. A token bakes its cap at link time, so raising the
+  variable only affects tokens issued afterwards; existing users must re-link.
+  `x-bajigur-admin: ADMIN_KEY` lets `/agent/link` take a raw
   `{walletId, address}` for app-owned wallets (tests, demos). Privy policies
   cannot gate `secp256k1_sign`, so caps live here, not in Privy.
 - Still to come: creator publishing from the web app.

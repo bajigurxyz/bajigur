@@ -35,7 +35,7 @@ gateway). Design notes:
 | HCS settlement audit topic | [0.0.10462113](https://hashscan.io/testnet/topic/0.0.10462113) |
 | ENSv2 name (Sepolia) | `bajigur.eth`, owner `0xE610…2bAa`, resolver [`0x7f38…87f6`](https://sepolia.etherscan.io/address/0x7f381419050525025bBB6811CF5821E0615487f6), subregistry [`0x9673…461c`](https://sepolia.etherscan.io/address/0x9673702a3C850fa1c41d94C908083Fc85F59461c) |
 | ENS subnames | `kiel.bajigur.eth` (creator, `bajigur.hedera=0.0.7275085`), `axel.bajigur.eth` (creator, self-claimed by `0xE5d8…e950`, `bajigur.hedera=0.0.8291460`), `agent.bajigur.eth` (agent) |
-| `BajigurRegistrar` (Sepolia, verified) | [0x1eb7D3769a12CBD08C28FEEF7c4c8ebdAa989756](https://sepolia.etherscan.io/address/0x1eb7D3769a12CBD08C28FEEF7c4c8ebdAa989756): anyone claims one free `<name>.bajigur.eth` |
+| `BajigurRegistrar` (Sepolia, verified) | [0x418b68e12e29901362174d36b6fda230e3250976](https://sepolia.etherscan.io/address/0x418b68e12e29901362174d36b6fda230e3250976): anyone claims one free `<name>.bajigur.eth` |
 
 Proof transactions on Hedera testnet:
 
