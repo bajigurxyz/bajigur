@@ -106,7 +106,15 @@ async function handleMcp(request: Request) {
   }
 }
 
-export async function handle(request: Request) {
+// Behind Railway's proxy the request URL is http://; the metadata echoes it, so restore the public scheme.
+function withForwardedProto(request: Request) {
+  const proto = request.headers.get("x-forwarded-proto");
+  if (!proto || request.url.startsWith(`${proto}:`)) return request;
+  return new Request(request.url.replace(/^https?:/, `${proto}:`), request);
+}
+
+export async function handle(incoming: Request) {
+  const request = withForwardedProto(incoming);
   const { pathname } = new URL(request.url);
 
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
