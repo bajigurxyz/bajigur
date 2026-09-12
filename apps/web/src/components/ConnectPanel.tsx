@@ -1,12 +1,13 @@
 "use client";
 
-import { useDelegatedActions, usePrivy, useSigners, useWallets } from "@privy-io/react-auth";
+import { useDelegatedActions, usePrivy, useSigners } from "@privy-io/react-auth";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import CopyButton from "@/components/CopyButton";
 import WalletButton from "@/components/WalletButton";
 import { API_BASE } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
+import { useEmbeddedWallet } from "@/lib/useEmbeddedWallet";
 
 /**
  * Optional: when set, the wallet is also granted to Bajigur's Privy key quorum
@@ -42,7 +43,7 @@ function claudeConfig(token: string) {
  */
 export default function ConnectPanel() {
   const { ready, authenticated, getAccessToken, user } = usePrivy();
-  const { wallets } = useWallets();
+  const wallet = useEmbeddedWallet();
   const { delegateWallet } = useDelegatedActions();
   const { addSigners } = useSigners();
   const { state, refresh } = useAgent();
@@ -50,16 +51,21 @@ export default function ConnectPanel() {
   const [message, setMessage] = useState("");
   const [token, setToken] = useState<string | null>(null);
 
-  const wallet = wallets.find((w) => w.walletClientType === "privy") ?? wallets[0];
   const delegated = user?.linkedAccounts.some(
     (a) => a.type === "wallet" && "delegated" in a && a.delegated,
   );
 
   const connect = async () => {
-    if (!wallet) {
-      setStep("error");
-      setMessage("No embedded wallet yet. Sign out and back in to have one created.");
-      return;
+    if (!wallet.address) {
+      // createOnLogin only fires on a fresh login, so anyone who signed in
+      // before it was configured has no wallet. Make one rather than telling
+      // them to sign out and back in.
+      await wallet.create();
+      if (!wallet.address) {
+        setStep("error");
+        setMessage("Could not create a wallet. Try again, or sign out and back in.");
+        return;
+      }
     }
     try {
       if (!delegated) {

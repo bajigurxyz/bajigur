@@ -1,6 +1,7 @@
 import { Unlock } from "lucide-react";
 import Link from "next/link";
 import PromptPreview from "@/components/previews";
+import { HbarMark, UsdcMark } from "@/components/TokenMark";
 import { formatHbar, formatUsd, type Prompt } from "@/lib/api";
 
 /**
@@ -60,8 +61,12 @@ export default function PromptCard({ prompt }: { prompt: Prompt }) {
           aria-label={`Price: ${price} in USDC, or ${formatHbar(prompt.priceHbar)}`}
           className="inline-flex items-baseline gap-1.5 rounded-full bg-black px-2.5 py-1 text-xs font-semibold text-white"
         >
+          <UsdcMark className="h-3.5 w-3.5 self-center" />
           {price} USDC
-          <span className="font-normal text-gray-400">or {formatHbar(prompt.priceHbar)}</span>
+          <span className="inline-flex items-center gap-1 font-normal text-gray-400">
+            or <HbarMark className="h-3.5 w-3.5" />
+            {formatHbar(prompt.priceHbar)}
+          </span>
         </span>
         <Link
           href={`/prompts/${prompt.id}`}

@@ -1,14 +1,16 @@
 "use client";
 
-import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import CopyField from "@/components/CopyField";
 import Nav from "@/components/Nav";
+import { HbarMark, UsdcMark } from "@/components/TokenMark";
 import WalletButton from "@/components/WalletButton";
 import { fetchLicenses, type Prompt } from "@/lib/api";
 import { useAgent } from "@/lib/useAgent";
 import { useBalances } from "@/lib/useBalances";
+import { useEmbeddedWallet } from "@/lib/useEmbeddedWallet";
 
 const HASHSCAN = "https://hashscan.io/testnet/account";
 
@@ -22,14 +24,13 @@ const HASHSCAN = "https://hashscan.io/testnet/account";
  */
 export default function ProfilePage() {
   const { ready, authenticated, user } = usePrivy();
-  const { wallets } = useWallets();
+  const wallet = useEmbeddedWallet();
   const { state: agent } = useAgent();
   const linked = agent.phase === "linked";
   const balances = useBalances(linked);
   const [licences, setLicences] = useState<Prompt[] | null>(null);
 
   const account = linked ? agent.agent.account : undefined;
-  const wallet = wallets.find((w) => w.walletClientType === "privy") ?? wallets[0];
 
   useEffect(() => {
     if (!account) return;
@@ -73,7 +74,7 @@ export default function ProfilePage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <CopyField
                   label="Wallet address"
-                  value={wallet?.address}
+                  value={wallet.address}
                   hint="Created for you by Privy. No seed phrase to keep."
                 />
                 <CopyField
@@ -82,6 +83,27 @@ export default function ProfilePage() {
                   hint="Where payments come from, derived from the wallet above."
                 />
               </div>
+              {!wallet.address && (
+                <div className="space-y-2 rounded-2xl border border-gray-200 p-5">
+                  <p className="text-sm text-gray-600">
+                    You don&apos;t have a wallet yet. Creating one takes a second and costs nothing.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={wallet.create}
+                    disabled={wallet.creating}
+                    className="rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60"
+                  >
+                    {wallet.creating ? "Creating…" : "Create my wallet"}
+                  </button>
+                  {wallet.error && (
+                    <p role="alert" className="text-xs text-red-700">
+                      {wallet.error}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {account && (
                 <a
                   href={`${HASHSCAN}/${account}`}
@@ -115,13 +137,19 @@ export default function ProfilePage() {
               {linked && balances.phase === "ready" && (
                 <dl className="grid gap-4 rounded-2xl border border-gray-200 p-5 text-sm sm:grid-cols-3">
                   <div>
-                    <dt className="text-xs text-gray-500">USDC</dt>
+                    <dt className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <UsdcMark className="h-4 w-4" />
+                      USDC
+                    </dt>
                     <dd className="text-lg font-semibold text-black">
                       ${balances.balances.usdc ?? "0.00"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-gray-500">HBAR</dt>
+                    <dt className="flex items-center gap-1.5 text-xs text-gray-500">
+                      <HbarMark className="h-4 w-4" />
+                      HBAR
+                    </dt>
                     <dd className="text-lg font-semibold text-black">
                       {balances.balances.hbar ?? "0"}
                     </dd>
@@ -131,6 +159,20 @@ export default function ProfilePage() {
                     <dd className="text-lg font-semibold text-black">${balances.balances.cap}</dd>
                   </div>
                 </dl>
+              )}
+              {linked && balances.phase === "ready" && (
+                <p className="text-xs text-gray-500">
+                  Running low? Circle&apos;s faucet gives 20 testnet USDC every two hours at{" "}
+                  <a
+                    href="https://faucet.circle.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline hover:text-black"
+                  >
+                    faucet.circle.com
+                  </a>
+                  . Paste the Hedera account above, not the wallet address.
+                </p>
               )}
             </section>
 
