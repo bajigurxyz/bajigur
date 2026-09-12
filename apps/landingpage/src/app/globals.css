@@ -45,6 +45,22 @@ body {
   animation: fadeInOverlay 0.4s ease-out forwards;
 }
 
+/* A marquee that never stops, so the row of sponsors reads as a loop rather
+   than as a list that happens to be cut off. Two identical halves slide by
+   exactly one half's width, which is why the seam is invisible. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+
 /* Staggered entrances start from opacity:0; honour users who opt out of motion.
    Keep the animation running (near-zero duration + forwards fill) instead of
    `animation: none`, or the inline opacity:0 would win and the page stays blank. */
@@ -53,5 +69,11 @@ body {
   .animate-fade-in-overlay {
     animation-duration: 0.01ms;
     animation-delay: 0ms !important;
+  }
+
+  /* This one really does stop: it carries no opacity to restore, and endless
+     sideways motion is the kind this setting exists to switch off. */
+  .animate-marquee {
+    animation: none;
   }
 }

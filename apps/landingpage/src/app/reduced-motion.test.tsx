@@ -42,18 +42,26 @@ describe("prefers-reduced-motion guard", () => {
     }
   });
 
-  it("covers both animation classes inside the reduced-motion media query", () => {
+  it("shortens the entrance animations instead of cancelling them", () => {
     const guard = atRuleBody(css, "@media (prefers-reduced-motion: reduce)");
-    expect(guard).toContain(".animate-fade-in-up");
-    expect(guard).toContain(".animate-fade-in-overlay");
-    // The guard must shorten the animation, never cancel it: with
-    // `animation: none` the inline opacity:0 would win and nothing renders.
-    expect(guard).not.toContain("animation: none");
-    expect(guard).toContain("animation-duration");
+    // The rule the entrances share, up to but not including any later rule.
+    const entrances = guard.slice(0, guard.indexOf("}") + 1);
+
+    expect(entrances).toContain(".animate-fade-in-up");
+    expect(entrances).toContain(".animate-fade-in-overlay");
+    // These must be shortened, never cancelled: they start from an inline
+    // opacity:0, so `animation: none` would leave the page blank. Animations
+    // that carry no opacity, like the sponsor marquee, may be cancelled
+    // outright, which is what this setting is actually for.
+    expect(entrances).not.toContain("animation: none");
+    expect(entrances).toContain("animation-duration");
   });
 
-  it("ends every keyframe at opacity 1 and retains it with forwards fill", () => {
+  it("ends every entrance keyframe at opacity 1 and retains it with forwards fill", () => {
+    // Only the animations that fade something in. A keyframe that never touches
+    // opacity has none to restore.
     for (const match of css.matchAll(/to\s*\{([^}]*)\}/g)) {
+      if (!/opacity/.test(match[1])) continue;
       expect(match[1]).toMatch(/opacity:\s*1/);
     }
     expect(atRuleBody(css, ".animate-fade-in-up")).toContain("forwards");

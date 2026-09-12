@@ -57,6 +57,43 @@ const FAQ = [
   },
 ];
 
+const CLAUDE_STEPS: { title: string; detail: string }[] = [
+  {
+    title: "Open Settings, then Connectors",
+    detail:
+      "In Claude, go to Settings and pick Connectors from the sidebar. Claude Desktop and claude.ai both have it.",
+  },
+  {
+    title: "Choose Add custom connector",
+    detail:
+      "The Add button sits at the top right of the connector list. It opens a dialog asking for a name and a URL.",
+  },
+  {
+    title: "Name it Bajigur",
+    detail:
+      "This is only the label in your connector list, so call it whatever you will recognise.",
+  },
+  {
+    title: "Paste the server URL",
+    detail: `The MCP server URL field takes ${MCP_URL} exactly, with the /mcp on the end.`,
+  },
+  {
+    title: "Continue, and let it connect",
+    detail:
+      "Claude reads the server and lists its three tools. Nothing is pasted anywhere else and no key is involved.",
+  },
+  {
+    title: "Ask for a prompt",
+    detail:
+      "Try: search bajigur for a landing page prompt. Searching is free and needs no wallet, so this works straight away.",
+  },
+  {
+    title: "Sign in when it asks to buy",
+    detail:
+      "The first time your agent tries to buy, the server answers with an authorization challenge and Claude opens a browser. Sign in with the same email you use on Bajigur and the purchase carries on.",
+  },
+];
+
 function Section({
   id,
   title,
@@ -145,8 +182,34 @@ export default function McpDocsPage() {
 
           <Section
             id="connect"
-            title="Connect it"
-            blurb="The server is hosted, so there is nothing to clone and no runtime to install. Pick your client."
+            title="Add it to Claude"
+            blurb="Seven steps, none of which involve a terminal. Claude Desktop and claude.ai are the same flow."
+          >
+            <ol className="max-w-2xl space-y-5">
+              {CLAUDE_STEPS.map((step, index) => (
+                <li key={step.title} className="flex gap-4">
+                  <span
+                    aria-hidden
+                    className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-gray-300 text-xs font-semibold text-gray-500"
+                  >
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 space-y-1">
+                    <h3 className="text-sm font-semibold text-black">{step.title}</h3>
+                    <p className="text-sm leading-relaxed break-words text-gray-600">
+                      {step.detail}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <CodeBlock label="The URL that dialog asks for" code={MCP_URL} />
+          </Section>
+
+          <Section
+            id="other-clients"
+            title="Other clients"
+            blurb="The server is hosted, so there is nothing to clone and no runtime to install. Pick yours."
           >
             <AgentOnboarding />
           </Section>

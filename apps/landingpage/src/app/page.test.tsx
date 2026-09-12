@@ -51,6 +51,12 @@ describe("landing page branding", () => {
  */
 const CATALOGUE_BUCKET = "https://pub-86dc5b5484314368ac5436a674b0d919.r2.dev/";
 
+/**
+ * Sponsor marks, served by the event. Other people's trademarks are better
+ * fetched than copied: a copy in our repo goes stale the day a brand changes.
+ */
+const SPONSOR_CDN = "https://cdn.ethglobal.com/";
+
 describe("landing page media", () => {
   it("loads no media from a host we do not control", () => {
     const { container } = render(<Home />);
@@ -59,9 +65,12 @@ describe("landing page media", () => {
       .filter((url): url is string => Boolean(url));
     expect(urls.length).toBeGreaterThan(0);
     for (const url of urls) {
-      // Root-relative, or the catalogue bucket. Rejects every other absolute
-      // host and any protocol-relative //host.
-      if (url.startsWith(CATALOGUE_BUCKET)) continue;
+      // Root-relative, our own origin, or the catalogue bucket. Rejects every
+      // other absolute host and any protocol-relative //host. next/image
+      // resolves a local src to an absolute same-origin URL under jsdom, which
+      // is still ours.
+      if (url.startsWith(CATALOGUE_BUCKET) || url.startsWith(SPONSOR_CDN)) continue;
+      if (url.startsWith(`${window.location.origin}/`)) continue;
       expect(url).toMatch(/^\/(?!\/)/);
     }
   });
