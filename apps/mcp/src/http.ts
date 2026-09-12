@@ -20,6 +20,8 @@ import { createServer } from "./server";
  */
 
 const API = process.env.BAJIGUR_API_URL ?? "https://api-production-fe21.up.railway.app";
+/** The web app, which is also this resource server's OAuth authorization server. */
+const APP = (process.env.BAJIGUR_APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
 const PORT = Number(process.env.MCP_PORT ?? process.env.PORT ?? 3004);
 
 const CORS = {
@@ -32,6 +34,26 @@ const CORS = {
 
 const bearer = (request: Request) =>
   request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
+
+/**
+ * RFC 9728 metadata, which is how an MCP client discovers where to log in.
+ *
+ * The client hits /mcp, gets a 401 naming this document, reads it, finds the
+ * authorization server, registers itself and opens a browser. That chain is
+ * what turns "paste this token into a config file" into one click.
+ */
+const protectedResourceMetadata = (origin: string) => ({
+  resource: `${origin}/mcp`,
+  authorization_servers: [APP],
+  bearer_methods_supported: ["header"],
+  scopes_supported: ["bajigur:buy"],
+  resource_documentation: origin,
+});
+
+/** Tells the client which document explains how to authenticate here. */
+const challenge = (origin: string) => ({
+  "www-authenticate": `Bearer resource_metadata="${origin}/.well-known/oauth-protected-resource"`,
+});
 
 /** A paid fetch for this request's wallet, or undefined when no usable token came with it. */
 async function walletFor(request: Request) {
@@ -53,7 +75,18 @@ const NO_WALLET = async () => {
 };
 
 async function handleMcp(request: Request) {
+  const origin = new URL(request.url).origin;
+  const token = bearer(request);
   const connected = await walletFor(request);
+
+  // A token that does not work is not the same as no token: the first means
+  // the client should authorize again, the second means someone is browsing.
+  if (token && !connected) {
+    return Response.json(
+      { error: "invalid_token" },
+      { status: 401, headers: { ...CORS, ...challenge(origin) } },
+    );
+  }
   const server = createServer(API, connected?.paid ?? NO_WALLET, fetch, connected?.account);
   // Stateless: no session id, JSON responses, and everything is torn down with
   // the request. Nothing about one caller can leak into another's.
@@ -79,6 +112,15 @@ export async function handle(request: Request) {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
 
   if (pathname === "/mcp") return handleMcp(request);
+
+  if (
+    pathname === "/.well-known/oauth-protected-resource" ||
+    pathname.startsWith("/.well-known/oauth-protected-resource/")
+  ) {
+    return Response.json(protectedResourceMetadata(new URL(request.url).origin), {
+      headers: CORS,
+    });
+  }
 
   if (pathname === "/health") {
     return Response.json({ ok: true, service: "bajigur-mcp", api: API }, { headers: CORS });
