@@ -7,49 +7,66 @@ import { stubClipboard } from "./helpers";
 afterEach(cleanup);
 
 /**
- * The one command (or config fragment) that proves the right block is on
- * screen for each target — taken from the repo, not invented:
- * plugin/README.md, the root .mcp.json, and the CLI entry point.
+ * The one fragment that proves the right block is on screen for each target —
+ * taken from the repo and the live deployment, not invented: the MCP entry
+ * point is apps/mcp/src/index.ts and the env names are the ones apps/mcp reads.
  */
 const MARKERS: Record<string, string> = {
-  "claude-plugin": "claude --plugin-dir ./plugin",
-  "claude-mcp": "claude mcp add promit",
+  "claude-delegated": "BAJIGUR_AGENT_TOKEN",
+  "claude-key": "HEDERA_OPERATOR_KEY",
   "mcp-json": '"mcpServers"',
-  cli: "bun cli/src/cli.ts",
+  cli: "bun run buy",
 };
+
+/** The only hosts allowed to appear: the repo, the live API, and the two faucets. */
+const ALLOWED_HOSTS = [
+  "https://github.com/bajigurxyz/bajigur.git",
+  "https://api-production-fe21.up.railway.app",
+  "https://portal.hedera.com",
+  "https://faucet.circle.com",
+  "http://localhost:3000",
+];
 
 describe("target honesty", () => {
   it("covers every marker and keeps ids in sync", () => {
     expect(ONBOARDING_TARGETS.map((t) => t.id).sort()).toEqual(Object.keys(MARKERS).sort());
   });
 
-  it("never presents npx promit as a runnable command — it is not on npm", () => {
+  it("never presents an npm package as runnable — nothing here is published", () => {
     for (const target of ONBOARDING_TARGETS) {
-      expect(target.snippet).not.toContain("npx promit");
+      expect(target.snippet).not.toMatch(/npx bajigur|npm i(nstall)? -g bajigur/);
     }
   });
 
-  it("tells every target the wallet needs Base Sepolia USDC and no ETH", () => {
+  it("points every setup at the live API, never at a local one", () => {
     for (const target of ONBOARDING_TARGETS) {
-      expect(target.snippet).toContain("Base Sepolia USDC");
-      expect(target.snippet).toMatch(/no ETH/i);
+      const block = `${target.snippet}\n${target.note}`;
+      if (!block.includes("BAJIGUR_API_URL")) continue;
+      expect(block).toContain("https://api-production-fe21.up.railway.app");
+      expect(block).not.toMatch(/BAJIGUR_API_URL[^\n]*localhost/);
     }
   });
 
-  it("points at no invented host — only the deployed API, github, and the faucet", () => {
+  it("names a funding source wherever it asks for a key of the user's own", () => {
+    for (const target of ONBOARDING_TARGETS) {
+      if (!target.snippet.includes("HEDERA_OPERATOR_KEY")) continue;
+      expect(target.snippet).toContain("https://portal.hedera.com");
+      expect(target.snippet).toContain("https://faucet.circle.com");
+    }
+  });
+
+  it("points at no invented host", () => {
     for (const target of ONBOARDING_TARGETS) {
       const hosts = `${target.snippet}\n${target.note}`.match(/https?:\/\/[^\s"'`]+/g) ?? [];
       for (const host of hosts) {
-        expect(host).toMatch(
-          /^(https:\/\/github\.com\/Lexirieru\/promit\.git|https:\/\/promitbackend-production\.up\.railway\.app|https:\/\/faucet\.circle\.com)/,
-        );
+        expect(ALLOWED_HOSTS.some((allowed) => host.startsWith(allowed))).toBe(true);
       }
     }
   });
 });
 
 describe("tabs", () => {
-  it("renders an accessible tablist and shows the plugin path first", () => {
+  it("renders an accessible tablist and shows the keyless path first", () => {
     render(<AgentOnboarding />);
     const tablist = screen.getByRole("tablist", { name: "Choose your agent" });
     const tabs = screen.getAllByRole("tab");
@@ -66,7 +83,7 @@ describe("tabs", () => {
     const panel = screen.getByRole("tabpanel");
     expect(panel.getAttribute("aria-labelledby")).toBe(tabs[0].id);
     expect(tabs[0].getAttribute("aria-controls")).toBe(panel.id);
-    expect(panel.textContent).toContain(MARKERS["claude-plugin"]);
+    expect(panel.textContent).toContain(MARKERS["claude-delegated"]);
     expect(tablist).toBeTruthy();
   });
 
@@ -148,6 +165,6 @@ describe("landing integration", () => {
   it("mounts the onboarding section and the why-buy sentence on the home page", () => {
     render(<Home />);
     expect(screen.getByRole("tablist", { name: "Choose your agent" })).toBeTruthy();
-    expect(screen.getByText(/running that exact prompt/i)).toBeTruthy();
+    expect(screen.getByText(/written against that exact prompt/i)).toBeTruthy();
   });
 });

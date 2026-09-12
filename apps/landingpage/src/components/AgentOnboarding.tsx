@@ -4,22 +4,26 @@ import { Check, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Agent onboarding: the landing section where a visitor with an agent
- * copies ONE block and is wired into the marketplace. Every command here
- * is taken from the repo and was run before being written down — the
- * plugin path from plugin/README.md, the MCP shape from the root
- * .mcp.json, the CLI entry straight off the checkout. Nothing invented:
- * the backend is not deployed, so every surface points at
- * https://promitbackend-production.up.railway.app, and `npx promit` is only ever mentioned as
- * not-yet-published (the test suite enforces both).
+ * Agent onboarding: the landing section where a visitor with an agent copies
+ * ONE block and is wired into the marketplace.
  *
- * Tabs follow the WAI-ARIA tabs pattern: roving tabindex, arrow-key
- * navigation with selection following focus, labelled panels. The copy
- * control mirrors CopyPromptButton's named states + aria-live region so
- * confirmation behaves the same everywhere on the site.
+ * Every command here comes from the repo and the live deployment, not from
+ * imagination: the MCP entry point is apps/mcp/src/index.ts, the env names are
+ * the ones apps/mcp reads, and the API is the deployed one. The test suite
+ * enforces that no other host appears.
+ *
+ * The first tab is the one that needs no key at all — a Privy wallet delegated
+ * on the web app pays, and apps/api signs. That is the whole point of the
+ * product, so it leads.
+ *
+ * Tabs follow the WAI-ARIA tabs pattern: roving tabindex, arrow-key navigation
+ * with selection following focus, labelled panels. The copy control keeps its
+ * named states and aria-live region.
  */
 
-const REPO = "https://github.com/Lexirieru/promit.git";
+const REPO = "https://github.com/bajigurxyz/bajigur.git";
+const API = "https://api-production-fe21.up.railway.app";
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/+$/, "");
 
 export type OnboardingTarget = {
   id: string;
@@ -31,77 +35,98 @@ export type OnboardingTarget = {
 
 export const ONBOARDING_TARGETS: OnboardingTarget[] = [
   {
-    id: "claude-plugin",
-    label: "Claude Code · Plugin",
+    id: "claude-delegated",
+    label: "Claude Desktop · no key",
     intro:
-      "The smoothest path: one install wires the MCP server and the skill that knows when buying beats improvising.",
-    snippet: `# Clone once — the plugin runs from the repo checkout
-git clone ${REPO} && cd promit
+      "The recommended path. Sign in on the web app, delegate your wallet, and paste the token it gives you — you never hold a private key.",
+    snippet: `# 1. Clone, so Claude can run the MCP server from your checkout
+git clone ${REPO} && cd bajigur
 bun install
 
-# Agent wallet key: fund it with Base Sepolia USDC (faucet.circle.com).
-# No ETH needed — the buyer signs, the facilitator pays gas.
-export PROMIT_PRIVATE_KEY=0x...
+# 2. Sign in at ${APP_URL}/connect, delegate your wallet,
+#    and copy the agent token it shows you.
 
-# The hosted API isn't deployed yet — serve it locally on :3001
-bun backend/src/index.ts &
-
-# Launch Claude Code with the skill + MCP server in one install
-claude --plugin-dir ./plugin`,
-    note: "Inside the session the agent gets promit_search, promit_preview, promit_buy — plus the skill that reads a preview before paying.",
-  },
-  {
-    id: "claude-mcp",
-    label: "Claude Code · MCP",
-    intro: "No plugin, just the tools: register the stdio server with claude mcp add.",
-    snippet: `# The server needs the repo's workspace deps, so clone first
-git clone ${REPO} && cd promit
-bun install
-
-# The hosted API isn't deployed yet — serve it locally on :3001
-bun backend/src/index.ts &
-
-# Key = a wallet holding Base Sepolia USDC — no ETH needed
-claude mcp add promit --env PROMIT_PRIVATE_KEY=0x... -- bun "$(pwd)/mcp/src/server.ts"`,
-    note: "The absolute path from $(pwd) lets the server start no matter where Claude Code runs later.",
-  },
-  {
-    id: "mcp-json",
-    label: "Cursor · Windsurf · Cline",
-    intro:
-      "Any MCP-speaking agent — Cursor, Windsurf, Cline, OpenClaw/Hermes — takes the same stdio server. Paste this into its MCP config.",
-    snippet: `{
+# 3. claude_desktop_config.json — no Hedera key anywhere:
+{
   "mcpServers": {
-    "promit": {
+    "bajigur": {
       "command": "bun",
-      "args": ["/absolute/path/to/promit/mcp/src/server.ts"],
+      "args": ["$(pwd)/apps/mcp/src/index.ts"],
       "env": {
-        "PROMIT_PRIVATE_KEY": "0x<wallet holding Base Sepolia USDC, no ETH needed>",
-        "PROMIT_API_URL": "https://promitbackend-production.up.railway.app"
+        "BAJIGUR_API_URL": "${API}",
+        "BAJIGUR_AGENT_TOKEN": "<paste the token from the web app>"
       }
     }
   }
 }`,
-    note: "Clone the repo and run bun install first, then point args at your checkout. Config file names and locations differ per editor — check your editor's MCP documentation; most accept this mcpServers shape.",
+    note: "Bajigur signs each payment with your delegated Privy wallet, never above the cap the token carries. Revoke the delegation in Privy and the token dies with it.",
+  },
+  {
+    id: "claude-key",
+    label: "Claude Desktop · own wallet",
+    intro:
+      "Already have a Hedera testnet account? Pay from it directly and skip the web app entirely.",
+    snippet: `git clone ${REPO} && cd bajigur
+bun install
+
+# An ECDSA testnet account from https://portal.hedera.com, holding
+# testnet USDC from https://faucet.circle.com. No HBAR for gas needed —
+# the facilitator pays the Hedera fee.
+bun run hedera:associate
+
+# claude_desktop_config.json
+{
+  "mcpServers": {
+    "bajigur": {
+      "command": "bun",
+      "args": ["$(pwd)/apps/mcp/src/index.ts"],
+      "env": {
+        "BAJIGUR_API_URL": "${API}",
+        "HEDERA_NETWORK": "testnet",
+        "HEDERA_OPERATOR_ID": "0.0.xxxxxxx",
+        "HEDERA_OPERATOR_KEY": "<hex ecdsa private key>",
+        "X402_PAY_WITH": "usdc",
+        "X402_MAX_SPEND_USD": "1"
+      }
+    }
+  }
+}`,
+    note: "X402_PAY_WITH=hbar buys with HBAR instead; every prompt is priced in both.",
+  },
+  {
+    id: "mcp-json",
+    label: "Cursor · Windsurf · Cline",
+    intro: "Any MCP-speaking agent takes the same stdio server. Paste this into its MCP config.",
+    snippet: `{
+  "mcpServers": {
+    "bajigur": {
+      "command": "bun",
+      "args": ["/absolute/path/to/bajigur/apps/mcp/src/index.ts"],
+      "env": {
+        "BAJIGUR_API_URL": "${API}",
+        "BAJIGUR_AGENT_TOKEN": "<token from the web app>"
+      }
+    }
+  }
+}`,
+    note: "Clone the repo and run bun install first, then point args at your checkout. Config file names differ per editor — most accept this mcpServers shape.",
   },
   {
     id: "cli",
-    label: "CLI",
-    intro: "The terminal surface: search, preview, buy, and verify against the on-chain registry.",
-    snippet: `git clone ${REPO} && cd promit
+    label: "Terminal",
+    intro: "No agent at all: buy a prompt straight from the command line.",
+    snippet: `git clone ${REPO} && cd bajigur
 bun install
 
-# Agent wallet key: Base Sepolia USDC only — no ETH needed
-export PROMIT_PRIVATE_KEY=0x...
+# HEDERA_OPERATOR_ID / HEDERA_OPERATOR_KEY: an ECDSA testnet account from
+# https://portal.hedera.com, funded with testnet USDC from
+# https://faucet.circle.com. No HBAR for gas — the facilitator pays the fee.
+cp .env.example .env
 
-# The hosted API isn't deployed yet — serve it locally on :3001
-bun backend/src/index.ts &
-
-# Run straight from the checkout
-bun cli/src/cli.ts search "landing page"
-bun cli/src/cli.ts preview email-landing-page
-bun cli/src/cli.ts buy email-landing-page --yes`,
-    note: "Not published to npm yet — npx promit arrives once it is. Today the checkout is the install.",
+bun run hedera:associate
+bun run buy marquee-logos
+X402_PAY_WITH=hbar bun run buy hero-scroll-reveal`,
+    note: "Reads the repo's root .env. Not published to npm — today the checkout is the install.",
   },
 ];
 
@@ -205,14 +230,13 @@ export default function AgentOnboarding() {
         Wire your agent in one paste
       </h2>
       <p className="mb-3 max-w-2xl text-base text-gray-600 sm:text-lg">
-        Why buy instead of improvising? A paid listing carries a preview generated by running that
-        exact prompt — the buyer pays for proven output, not for text a model could invent in a
-        second.
+        Why buy instead of improvising? A listing carries a preview written against that exact
+        prompt — the buyer pays for proven output, not for text a model could invent in a second.
       </p>
       <p className="mb-8 max-w-2xl text-sm text-gray-500">
-        The hosted backend is not deployed yet, so every setup below talks to a local API at
-        https://promitbackend-production.up.railway.app. The wallet only needs Base Sepolia USDC —
-        never ETH.
+        Every setup below talks to the live API on Hedera testnet. Prompts are priced in USDC or
+        HBAR and paid straight to their creator; the facilitator covers the Hedera fee, so your
+        wallet never needs gas.
       </p>
 
       <div
