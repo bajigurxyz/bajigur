@@ -16,6 +16,7 @@ import { sha256 } from "@noble/hashes/sha256";
 import { PrivyClient, verifyAccessToken } from "@privy-io/node";
 import { Hono } from "hono";
 import { sign, verify } from "hono/jwt";
+import { createRemoteJWKSet } from "jose";
 
 /// Agent tokens let an MCP client pay from a Privy wallet the user delegated to Bajigur, without holding any key.
 export type AgentClaims = {
@@ -90,17 +91,27 @@ export async function recoverPublicKey(signer: Signer, walletId: string, address
   return publicKey;
 }
 
+/// Accepts either the PEM from the dashboard or its JWKS URL.
+/// The JWKS form is what survives a signing-key rotation: an app that has rotated
+/// publishes both keys, and only the one matching the token's `kid` verifies it.
+/// A static PEM silently becomes the wrong key and every login fails with
+/// "Failed to verify authentication token".
+function privyVerificationKey(value: string) {
+  return value.startsWith("http") ? createRemoteJWKSet(new URL(value)) : value;
+}
+
 /// Verifies a Privy access token and returns the user's delegated ethereum wallet.
 export function privyLinkWallet(): AgentOptions["linkWallet"] {
   const appId = process.env.PRIVY_APP_ID ?? process.env.NEXT_PUBLIC_PRIVY_APP_ID;
   const appSecret = process.env.PRIVY_APP_SECRET;
   const verificationKey = process.env.PRIVY_VERIFICATION_KEY?.replace(/\\n/g, "\n");
   if (!appId || !appSecret || !verificationKey) return undefined;
+  const key = privyVerificationKey(verificationKey);
   return async (token) => {
     const { user_id } = await verifyAccessToken({
       access_token: token,
       app_id: appId,
-      verification_key: verificationKey,
+      verification_key: key,
     });
     const res = await fetch(`https://auth.privy.io/api/v1/users/${user_id}`, {
       headers: {
