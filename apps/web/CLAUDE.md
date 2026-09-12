@@ -77,6 +77,13 @@ Hedera SDK out of the client bundle.
   signs with. Without the app id `Providers` mounts no `PrivyProvider` and the
   app degrades to a public catalogue rather than crashing; without the signer
   id both connect screens say so before the user clicks.
+- `OAUTH_SECRET` seals the OAuth authorization server's registered clients and
+  authorization codes. Both are stateless strings that carry their own contents,
+  because each request can land on a different serverless instance: the Maps
+  this file used to keep meant a client registered seconds earlier came back
+  `invalid_client` in production while working perfectly in `next dev`. Unset,
+  it falls back to a per-process key, which is sound only in dev. Keep it stable:
+  rotating it invalidates registered clients and codes in flight.
 - A Hedera account is not created with the wallet. It exists once something is
   sent to the address, so `/profile` reads the mirror node directly and shows
   activation steps until then.
