@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import Home from "./page";
 
@@ -25,16 +25,16 @@ describe("landing page branding", () => {
     expect(headline.textContent).toContain("Pay per prompt");
   });
 
-  it("sends every nav destination to a page that exists in apps/web", () => {
+  it("sends people into the app through the hero, and nowhere that 404s", () => {
     render(<Home />);
-    const cta = screen.getByRole("link", { name: "Connect your agent" });
-    // apps/web is a separate origin, so a bare "/connect" would 404 here.
-    expect(cta.getAttribute("href")).toBe(`${APP_URL}/connect`);
+    const cta = screen.getByRole("link", { name: "Explore the gallery" });
+    // apps/web is a separate origin, so a bare "/prompts" would 404 here.
+    expect(cta.getAttribute("href")).toBe(`${APP_URL}/prompts`);
 
     // apps/web has no creator listing or earnings surface, and the API has no
-    // endpoint behind either. A nav item for one would be a dead promise.
+    // endpoint behind either. A link to one would be a dead promise.
+    const links = screen.getAllByRole("link").map((a) => a.getAttribute("href") ?? "");
     for (const dead of ["/list", "/earnings"]) {
-      const links = screen.getAllByRole("link").map((a) => a.getAttribute("href") ?? "");
       expect(links.some((href) => href.endsWith(dead))).toBe(false);
     }
     // Tidak ada login (identitas = wallet) dan tidak ada tombol nav mati.
@@ -58,18 +58,15 @@ describe("landing page media", () => {
   });
 });
 
-describe("mobile menu", () => {
-  it("toggles open and closed", () => {
+describe("header", () => {
+  it("carries the logo and no application navigation", () => {
     render(<Home />);
-    expect(screen.queryByLabelText("Close menu")).toBeNull();
-    expect(screen.getAllByText("Gallery")).toHaveLength(1);
-
-    fireEvent.click(screen.getByLabelText("Open menu"));
-    expect(screen.getByLabelText("Close menu")).toBeTruthy();
-    expect(screen.getAllByText("Gallery")).toHaveLength(2);
-
-    fireEvent.click(screen.getByLabelText("Close menu"));
-    expect(screen.queryByLabelText("Close menu")).toBeNull();
-    expect(screen.getAllByText("Gallery")).toHaveLength(1);
+    expect(screen.getByRole("img", { name: "Bajigur" })).toBeTruthy();
+    // These belong to apps/web. On the landing page they would be chrome for
+    // an app the visitor has not entered yet.
+    for (const label of ["Gallery", "My licences", "Connect", "Connect your agent"]) {
+      expect(screen.queryByRole("link", { name: label })).toBeNull();
+    }
+    expect(screen.queryByLabelText("Open menu")).toBeNull();
   });
 });
